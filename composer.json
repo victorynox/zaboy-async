@@ -1,0 +1,22 @@
+{
+    "name": "avz-cmf/zaboy-async",
+    "description": "Deffered php",
+    "type": "library",
+    "license": "GPL-3.0",
+    "homepage": "https://github.com/avz-cmf/zaboy-sheduler",
+    "support": {
+    },
+    "require": {
+        "avz-cmf/zaboy-rest": "^3.5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "zaboy\\scheduler\\": "src/",
+            "zaboy\\test\\scheduler\\": "test/src/"
+        }
+    },
+    "suggest": {
+    },
+    "scripts": {
+    }
+}
