@@ -11,7 +11,7 @@ namespace zaboy\async\Queue\Factory;
 
 use Interop\Container\ContainerInterface;
 use zaboy\rest\AbstractFactoryAbstract;
-use zaboy\rest\RestException;
+use zaboy\async\Queue\QueueException;
 use zaboy\async\Queue\Adapter;
 
 /**
@@ -23,7 +23,7 @@ use zaboy\async\Queue\Adapter;
  * <code>
  * 'queues' => [
  *     'MainQueue' => [
- *         'class' => 'zaboy\async\Queue\QueueClient',
+ *         'class' => 'zaboy\async\Queue\Client',
  *         'queuesDataStore' => QueuesDataStoreDbTable,
  *         'messagesDataStore' => MessagesDataStoreMemory,
  * ],
@@ -49,7 +49,7 @@ class QueueClientAbstracFactory extends AbstractFactoryAbstract
     const DEFAULT_QUEUES_DATA_STORE = 'QueuesDataStore';
 
     /**
-     * Create and return an instance of the QueueClient.
+     * Create and return an instance of the Queue Client.
      *
      *
      * @param  Interop\Container\ContainerInterface $container
@@ -65,7 +65,7 @@ class QueueClientAbstracFactory extends AbstractFactoryAbstract
         $queuesDataStore = $container->get($serviceConfig['queuesDataStore']);
         $messagesDataStore = $container->get($serviceConfig['messagesDataStore']);
         if (empty($queuesDataStore) || empty($messagesDataStore)) {
-            throw new RestException('Can not load queuesDataStore or messagesDataStore');
+            throw new QueueException('Can not load queuesDataStore or messagesDataStore');
         }
         $adapter = new Adapter\DataStores($queuesDataStore, $messagesDataStore);
         return new $requestedClassName($adapter);
@@ -83,7 +83,7 @@ class QueueClientAbstracFactory extends AbstractFactoryAbstract
             return false;
         }
         $requestedClassName = $config['queues'][$requestedName]['class'];
-        return is_a($requestedClassName, 'zaboy\async\Queue\DataStoreQueueClient', true);
+        return is_a($requestedClassName, 'zaboy\async\Queue\Client', true);
     }
 
 }

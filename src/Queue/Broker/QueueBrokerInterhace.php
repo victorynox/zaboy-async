@@ -9,8 +9,6 @@
 
 namespace zaboy\async\Queue\Broker;
 
-use ReputationVIP\QueueClient\QueueClientInterface;
-
 /**
  * QueueBrokerInterhace Interface for Queue Client
  *

@@ -5,7 +5,7 @@ namespace zaboy\async\Queue\Adapter;
 use zaboy\async\Queue\Adapter\DataStoresAbstruct;
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 use zaboy\async\Queue\PriorityHandler\PriorityHandler;
-use zaboy\async\RestException;
+use zaboy\async\Queue\QueueException;
 use ReputationVIP\QueueClient\Adapter\AdapterInterface;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator;
 use Xiag\Rql\Parser\Node\Query\LogicOperator;
@@ -20,12 +20,12 @@ class DataStores extends DataStoresAbstruct implements AdapterInterface
      *
      * @param DataStoresInterface $queuesDataStore
      * @param DataStoresInterface $messagesDataStore
-     * @throws RestException
+     * @throws QueueException
      */
     public function __construct(DataStoresInterface $queuesDataStore, DataStoresInterface $messagesDataStore)
     {
         if (is_null($queuesDataStore) || is_null($messagesDataStore)) {
-            throw new RestException('Argument not defined.');
+            throw new QueueException('Argument not defined.');
         }
 
         $this->queuesDataStore = $queuesDataStore;
@@ -40,13 +40,13 @@ class DataStores extends DataStoresAbstruct implements AdapterInterface
     public function addMessage($queueName, $message, $priority = null)
     {
         if (empty($queueName)) {
-            throw new RestException('Parameter queueName empty or not defined.');
+            throw new QueueException('Parameter queueName empty or not defined.');
         }
         if (!in_array($queueName, $this->listQueues())) {
-            throw new RestException('Queue with name ' . $queueName . 'is not exist.');
+            throw new QueueException('Queue with name ' . $queueName . 'is not exist.');
         }
         if (empty($message)) {
-            throw new RestException('Parameter message empty or not defined.');
+            throw new QueueException('Parameter message empty or not defined.');
         }
         $identifier = $this->messagesDataStore->getIdentifier();
         $id = uniqid(
@@ -107,7 +107,7 @@ class DataStores extends DataStoresAbstruct implements AdapterInterface
     {
         $identifier = $this->messagesDataStore->getIdentifier();
         if (!isset($message[$identifier])) {
-            throw new RestException('Message identifier not found in message.');
+            throw new QueueException('Message identifier not found in message.');
         }
         $this->messagesDataStore->delete($message[$identifier]);
         return $this;

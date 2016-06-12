@@ -3,7 +3,7 @@
 return [
     'queues' => [
         'MainQueue' => [
-            'class' => 'zaboy\async\Queue\DataStoreQueueClient',
+            'class' => 'zaboy\async\Queue\Client',
             'queuesDataStore' => 'QueuesDataStoreDbTable',
             'messagesDataStore' => 'MessagesDataStoreMemory',
         ],

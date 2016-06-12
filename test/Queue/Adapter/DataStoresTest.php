@@ -3,7 +3,7 @@
 namespace zaboy\test\rest\Queue\Adapter;
 
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
-use zaboy\rest\RestException;
+use zaboy\async\Queue\QueueException;
 use zaboy\async\Queue\Adapter\DataStores;
 use ReputationVIP\QueueClient\PriorityHandler\PriorityHandlerInterface;
 use ReputationVIP\QueueClient\Adapter\AdapterInterface;

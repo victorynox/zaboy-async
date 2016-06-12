@@ -4,7 +4,7 @@ namespace zaboy\async\Queue\Adapter;
 
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 use zaboy\async\Queue\PriorityHandler\PriorityHandler;
-use zaboy\rest\RestException;
+use zaboy\async\Queue\QueueException;
 use ReputationVIP\QueueClient\Adapter\AdapterInterface;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator;
 use Xiag\Rql\Parser\Node\Query\LogicOperator;
@@ -239,7 +239,7 @@ abstract class DataStoresAbstruct
         $numberInFly = (int) substr($id, 0, 1) + 1;
         $inFlyId = $numberInFly . substr($id, 1, strlen($id) - 1);
         if ($inFlyId === 9) {
-            throw new RestException("message with id - $id, can not be resolved");
+            throw new QueueException("message with id - $id, can not be resolved");
         }
         return $inFlyId;
     }

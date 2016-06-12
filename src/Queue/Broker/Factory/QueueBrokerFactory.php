@@ -11,9 +11,8 @@ namespace zaboy\async\Queue\Broker\Factory;
 
 use Interop\Container\ContainerInterface;
 use zaboy\async\FactoryAbstract;
-use zaboy\rest\RestException;
 use zaboy\async\Queue\Broker;
-use \zaboy\scheduler\Callback\CallbackManager;
+use zaboy\scheduler\Callback\CallbackManager;
 
 /**
  * Create and return an instance of the array in Memory

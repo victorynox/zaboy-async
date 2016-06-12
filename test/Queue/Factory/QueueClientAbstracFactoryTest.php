@@ -36,7 +36,7 @@ class QueueClientAbstracFactoryTest extends \PHPUnit_Framework_TestCase
         $container = include 'config/container.php';
         $this->object = $container->get('MainQueue');
         $this->assertSame(
-                get_class($returnedResponse = $this->object), 'zaboy\async\Queue\DataStoreQueueClient'
+                get_class($returnedResponse = $this->object), 'zaboy\async\Queue\Client'
         );
     }
 
