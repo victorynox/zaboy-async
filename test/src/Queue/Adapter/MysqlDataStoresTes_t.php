@@ -1,6 +1,6 @@
 <?php
 
-namespace zaboy\test\rest\Queue\Adapter;
+namespace zaboy\test\async\Queue\Adapter;
 
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 use zaboy\async\Queue\QueueException;
@@ -10,11 +10,11 @@ use ReputationVIP\QueueClient\Adapter\AdapterInterface;
 use zaboy\rest\DataStore\Memory;
 use Xiag\Rql\Parser\Query;
 
-class DataStoresTest extends \PHPUnit_Framework_TestCase
+class MysqlDataStoresTest extends \PHPUnit_Framework_TestCase
 {
 
     /**
-     * @var DbTable
+     * @var DataStores
      */
     protected $object;
 
@@ -41,9 +41,8 @@ class DataStoresTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $queuesDataStore = new Memory();
-        $messagesDataStore = new Memory();
-        $this->object = new DataStores($queuesDataStore, $messagesDataStore);
+        $container = include 'config/container.php';
+        $this->object = $container->get('defaultQueueAdapter');
 
         $date = new \DateTime('@1419237113');
         $this->_messageList = array(
@@ -61,7 +60,10 @@ class DataStoresTest extends \PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
-
+        $queues = $this->object->listQueues();
+        foreach ($queues as $queue) {
+            $this->object->deleteQueue($queue);
+        }
     }
 
     public function test_getPriorityHandler()
@@ -124,8 +126,8 @@ class DataStoresTest extends \PHPUnit_Framework_TestCase
         }
         $queues = $this->object->listQueues();
         $this->assertEquals(
-                $this->_queuesList
-                , $queues
+                count($this->_queuesList)
+                , count(array_intersect($this->_queuesList, $queues))
         );
 
         $queues = $this->object->listQueues('Next');

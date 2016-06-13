@@ -6,6 +6,8 @@ return [
         'invokables' => [
         ],
         'factories' => [
+            'defaultQueueAdapter' => 'zaboy\async\Queue\Factory\MySqlAdapterFactory',
+            'defaultQueueClient' => 'zaboy\async\Queue\Factory\QueueClientFactory'
         ],
         'abstract_factories' => [
             'zaboy\rest\DataStore\Factory\DbTableAbstractFactory',

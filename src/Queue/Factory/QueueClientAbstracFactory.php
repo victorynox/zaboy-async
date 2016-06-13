@@ -24,6 +24,7 @@ use zaboy\async\Queue\Adapter;
  * 'queues' => [
  *     'MainQueue' => [
  *         'class' => 'zaboy\async\Queue\Client',
+ *         'maxTimeInFlight' => 60,
  *         'queuesDataStore' => QueuesDataStoreDbTable,
  *         'messagesDataStore' => MessagesDataStoreMemory,
  * ],
@@ -47,6 +48,7 @@ class QueueClientAbstracFactory extends AbstractFactoryAbstract
 
     const DEFAULT_MESSAGES_DATA_STORE = 'MessagesDataStore';
     const DEFAULT_QUEUES_DATA_STORE = 'QueuesDataStore';
+    const MAX_TIME_IN_FLIGHT = 'maxTimeInFlight';
 
     /**
      * Create and return an instance of the Queue Client.
@@ -68,6 +70,9 @@ class QueueClientAbstracFactory extends AbstractFactoryAbstract
             throw new QueueException('Can not load queuesDataStore or messagesDataStore');
         }
         $adapter = new Adapter\DataStores($queuesDataStore, $messagesDataStore);
+        if (isset($serviceConfig[self::MAX_TIME_IN_FLIGHT])) {
+            $adapter->setMaxTimeInFlight($serviceConfig[self::MAX_TIME_IN_FLIGHT]);
+        }
         return new $requestedClassName($adapter);
     }
 
