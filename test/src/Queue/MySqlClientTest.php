@@ -3,7 +3,7 @@
 namespace zaboy\test\async\Queue;
 
 use zaboy\test\async\Queue\ClientTestAbstract;
-use zaboy\async\Queue\Client;
+use zaboy\async\Queue;
 
 class MySqlClientTest extends ClientTestAbstract
 {
@@ -15,10 +15,13 @@ class MySqlClientTest extends ClientTestAbstract
     protected function setUp()
     {
         $container = include 'config/container.php';
-        //$defaultQueueAdapter = $container->get('defaultQueueAdapter');
-        //$defaultQueueAdapter->setMaxTimeInFlight();
-        //$this->object = new Client($defaultQueueAdapter);
-        $this->object = $container->get('defaultQueueClient');
+
+        $defaultQueueAdapter = $container->get('defaultQueueAdapter');
+        /* @var $defaultQueueAdapter \zaboy\async\Queue\Adapter\DataStores */
+        $defaultQueueAdapter->setMaxTimeInFlight(2);
+        $this->object = new Queue\Client($defaultQueueAdapter);
+
+        // $this->object = $container->get('defaultQueueClient');
 
         $date = new \DateTime('@1419237113');
         $this->_messageList = array(
