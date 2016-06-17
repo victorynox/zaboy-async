@@ -1,6 +1,6 @@
 <?php
 
-namespace zaboy\async\Queue;
+namespace zaboy\async\Queue\Client;
 
 use ReputationVIP\QueueClient\QueueClient;
 

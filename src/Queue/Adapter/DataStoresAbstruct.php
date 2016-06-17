@@ -20,7 +20,7 @@ abstract class DataStoresAbstruct
      *
      * @see http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/AboutVT.html
      */
-    const DEFAULT_MAX_TIME_IN_FLIGHT = 30;
+    const DEFAULT_MAX_TIME_IN_FLIGHT_VALUE = 30;
     const ID_SEPARATOR = '_';
     const IN_FLY = 'IN_FLY_';
     //
@@ -36,7 +36,7 @@ abstract class DataStoresAbstruct
     const CREATED_ON = 'created_on';
 
     /** @var int $messagesDataStore */
-    protected $maxTimeInFlight;
+    protected $maxTimeInFlight = self::DEFAULT_MAX_TIME_IN_FLIGHT_VALUE;
 
     /** @var DataStoresInterface $queuesDataStore */
     protected $queuesDataStore;
@@ -67,8 +67,10 @@ abstract class DataStoresAbstruct
                 //"0_nextQueue21_HIGH_572ca3202b3bf1.21681861" --> "1_nextQueue21_HIGH_572ca3202b3bf1.21681861"
                 $flyIdMessage = array_merge($message, array($identifier => $idInFly, self::TIME_IN_FLIGHT => time()));
                 try {
+                    var_dump($this->messagesDataStore->read($flyIdMessage['id']));
                     $this->messagesDataStore->create($flyIdMessage);
                 } catch (DataStoreException $exc) {
+                    var_dump('$flyIdMessage $exc $exc $exc $exc ');
                     continue;
                 }
                 $this->messagesDataStore->delete($id); /*
@@ -225,7 +227,7 @@ abstract class DataStoresAbstruct
 
     public function setMaxTimeInFlight($time = null)
     {
-        $this->maxTimeInFlight = !$time ? self::DEFAULT_MAX_TIME_IN_FLIGHT : $time;
+        $this->maxTimeInFlight = !$time ? self::DEFAULT_MAX_TIME_IN_FLIGHT_VALUE : $time;
     }
 
     /**

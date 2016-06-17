@@ -1,6 +1,6 @@
 <?php
 
-namespace zaboy\async\Queue\Factory;
+namespace zaboy\async\Queue\Factory\Adapter;
 
 use Interop\Container\ContainerInterface;
 use zaboy\rest\DataStore\DataStoreException;
@@ -21,8 +21,8 @@ use zaboy\rest\DataStore\DataStoreAbstract as DataStore;
 class MySqlAdapterFactory extends FactoryAbstract
 {
 
-    const QUEUES_TABLE_NAME = 'queues_main';
-    const MESSAGES_TABLE_NAME = 'messages_main';
+    const QUEUES_TABLE_NAME_PREFIX = 'queue_queues_';
+    const MESSAGES_TABLE_NAME_PREFIX = 'queue_messages_';
     const FILD_TYPE = 'fild_type';
     const FILD_PARAMS = 'fild_params';
 
@@ -42,9 +42,10 @@ class MySqlAdapterFactory extends FactoryAbstract
     ];
     protected $messagesTableData = [
         DataStore::DEF_ID => [
-            'fild_type' => 'Integer',
+            'fild_type' => 'Varchar',
             'fild_params' => [
-                'options' => ['autoincrement' => true]
+                'length' => 32,
+                'nullable' => false
             ]
         ],
         QueueDataStores::QUEUE_NAME => [
@@ -86,7 +87,7 @@ class MySqlAdapterFactory extends FactoryAbstract
      *
      * {@inherit}
      */
-    public function __invoke(ContainerInterface $container)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $this->db = $container->has('db') ? $container->get('db') : null;
         if (is_null($this->db)) {
@@ -95,26 +96,29 @@ class MySqlAdapterFactory extends FactoryAbstract
             );
         }
 
-        $tableManager = new TableManagerMysql($this->db, self::QUEUES_TABLE_NAME);
-        $hasTable = $tableManager->hasTable();
-        if (!$hasTable) {
-            $tableManager->rewriteTable($this->queuesTableData);
+        if ($container->has('TableManagerMysql')) {
+            $tableManager = $container->get('TableManagerMysql');
+        } else {
+            $tableManager = new TableManagerMysql($this->db);
         }
-        $tableGateway = new TableGateway(self::QUEUES_TABLE_NAME, $this->db);
-        $queuesDataStore = new DbTable($tableGateway);
 
-
-
-        $tableManager = new TableManagerMysql($this->db, self::MESSAGES_TABLE_NAME);
-        $hasTable = $tableManager->hasTable();
-        if (!$hasTable) {
-            $tableManager->rewriteTable($this->messagesTableData);
+        $tableNameQueues = self::QUEUES_TABLE_NAME_PREFIX . strtolower(str_replace(['-', '_', ' '], '', $requestedName));
+        $hasTableQueues = $tableManager->hasTable($tableNameQueues);
+        if (!$hasTableQueues) {
+            $tableManager->rewriteTable($tableNameQueues, $this->queuesTableData);
         }
-        $tableGateway = new TableGateway(self::MESSAGES_TABLE_NAME, $this->db);
-        $messagesDataStore = new DbTable($tableGateway);
+        $tableGatewayQueues = new TableGateway($tableNameQueues, $this->db);
+        $queuesDataStore = new DbTable($tableGatewayQueues);
 
-        $adapterQueues = new Adapter\DataStores($queuesDataStore, $messagesDataStore);
+        $tableNameMessages = self::MESSAGES_TABLE_NAME_PREFIX . strtolower(str_replace(['-', '_', ' '], '', $requestedName));
+        $hasTableMessages = $tableManager->hasTable($tableNameMessages);
+        if (!$hasTableMessages) {
+            $tableManager->rewriteTable($tableNameMessages, $this->messagesTableData);
+        }
+        $tableGatewayMessages = new TableGateway($tableNameMessages, $this->db);
+        $messagesDataStore = new DbTable($tableGatewayMessages);
 
+        $adapterQueues = new Adapter\MysqlOueueAdapter($queuesDataStore, $messagesDataStore);
         return $adapterQueues;
     }
 

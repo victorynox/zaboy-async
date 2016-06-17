@@ -13,6 +13,7 @@ use Interop\Container\ContainerInterface;
 use zaboy\rest\AbstractFactoryAbstract;
 use zaboy\async\Queue\QueueException;
 use zaboy\async\Queue\Adapter;
+use zaboy\async\Queue\Client\Client;
 
 /**
  * Create and return an instance of the array in Memory
@@ -43,14 +44,15 @@ use zaboy\async\Queue\Adapter;
  * @category   rest
  * @package    zaboy
  */
-class QueueClientAbstracFactory extends AbstractFactoryAbstract
+class QueueClientAbstractFactory extends AbstractFactoryAbstract
 {
 
-    const DEFAULT_MESSAGES_DATA_STORE = 'MessagesDataStore';
-    const DEFAULT_QUEUES_DATA_STORE = 'QueuesDataStore';
     const MAX_TIME_IN_FLIGHT = 'maxTimeInFlight';
+    const KEY_QUEUE_ADAPTER = 'QueueAdapter';
+    const KEY_QUEUE_CLIENT = 'queueClient';
 
     /**
+     *
      * Create and return an instance of the Queue Client.
      *
      *
@@ -62,18 +64,13 @@ class QueueClientAbstracFactory extends AbstractFactoryAbstract
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $config = $container->get('config');
-        $serviceConfig = $config['queues'][$requestedName];
-        $requestedClassName = $serviceConfig['class'];
-        $queuesDataStore = $container->get($serviceConfig['queuesDataStore']);
-        $messagesDataStore = $container->get($serviceConfig['messagesDataStore']);
-        if (empty($queuesDataStore) || empty($messagesDataStore)) {
-            throw new QueueException('Can not load queuesDataStore or messagesDataStore');
-        }
-        $adapter = new Adapter\DataStores($queuesDataStore, $messagesDataStore);
+        $serviceConfig = $config[self::KEY_QUEUE_CLIENT][$requestedName];
+        $adapterSeviceName = $serviceConfig[self::KEY_QUEUE_ADAPTER];
+        $adapter = $container->get($adapterSeviceName);
         if (isset($serviceConfig[self::MAX_TIME_IN_FLIGHT])) {
             $adapter->setMaxTimeInFlight($serviceConfig[self::MAX_TIME_IN_FLIGHT]);
         }
-        return new $requestedClassName($adapter);
+        return new Client($adapter);
     }
 
     /**
@@ -84,11 +81,8 @@ class QueueClientAbstracFactory extends AbstractFactoryAbstract
     public function canCreate(ContainerInterface $container, $requestedName)
     {
         $config = $container->get('config');
-        if (!isset($config['queues'][$requestedName]['class'])) {
-            return false;
-        }
-        $requestedClassName = $config['queues'][$requestedName]['class'];
-        return is_a($requestedClassName, 'zaboy\async\Queue\Client', true);
+
+        return isset($config[self::KEY_QUEUE_CLIENT][$requestedName][self::KEY_QUEUE_ADAPTER]);
     }
 
 }

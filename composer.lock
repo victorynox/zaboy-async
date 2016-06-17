@@ -9,16 +9,16 @@
     "packages": [
         {
             "name": "avz-cmf/zaboy-rest",
-            "version": "3.6.1",
+            "version": "3.6.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/avz-cmf/zaboy-rest.git",
-                "reference": "024008e3d5bf6173e23f2562f1f815f6764490a9"
+                "reference": "219bfe85cce733346d3859202ba63059cb7a50ca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/avz-cmf/zaboy-rest/zipball/024008e3d5bf6173e23f2562f1f815f6764490a9",
-                "reference": "024008e3d5bf6173e23f2562f1f815f6764490a9",
+                "url": "https://api.github.com/repos/avz-cmf/zaboy-rest/zipball/219bfe85cce733346d3859202ba63059cb7a50ca",
+                "reference": "219bfe85cce733346d3859202ba63059cb7a50ca",
                 "shasum": ""
             },
             "require": {
@@ -54,7 +54,7 @@
                 "php",
                 "rest"
             ],
-            "time": "2016-06-12 12:02:44"
+            "time": "2016-06-16 17:31:33"
         },
         {
             "name": "avz-cmf/zaboy-scheduler",
@@ -90,16 +90,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.18.17",
+            "version": "3.18.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "6c7849556f556da8615d22e675710c7a086ed5d0"
+                "reference": "68b9d0b7e007782bc0f2633cdf5a4a6bf08aaafc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/6c7849556f556da8615d22e675710c7a086ed5d0",
-                "reference": "6c7849556f556da8615d22e675710c7a086ed5d0",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/68b9d0b7e007782bc0f2633cdf5a4a6bf08aaafc",
+                "reference": "68b9d0b7e007782bc0f2633cdf5a4a6bf08aaafc",
                 "shasum": ""
             },
             "require": {
@@ -166,7 +166,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2016-06-09 23:39:33"
+            "time": "2016-06-14 20:35:03"
         },
         {
             "name": "container-interop/container-interop",
@@ -511,7 +511,7 @@
         },
         {
             "name": "symfony/filesystem",
-            "version": "v3.1.0",
+            "version": "v3.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
@@ -560,7 +560,7 @@
         },
         {
             "name": "symfony/finder",
-            "version": "v3.1.0",
+            "version": "v3.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/finder.git",

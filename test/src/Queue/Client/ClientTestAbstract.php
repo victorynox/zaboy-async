@@ -1,9 +1,9 @@
 <?php
 
-namespace zaboy\test\async\Queue;
+namespace zaboy\test\async\Queue\Client;
 
 use zaboy\async\Queue\Adapter\DataStores;
-use zaboy\async\Queue\Client;
+use zaboy\async\Queue\Client\Client;
 
 abstract class ClientTestAbstract extends \PHPUnit_Framework_TestCase
 {
@@ -37,6 +37,14 @@ abstract class ClientTestAbstract extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
 
+        $date = new \DateTime('@1419237113');
+        $this->_messageList = array(
+            12,
+            12.12,
+            'string12',
+            [22, 22.22, 'string22'],
+            $date
+        );
     }
 
     protected function tearDown()

@@ -11,9 +11,10 @@ namespace zaboy\async\Queue\Broker;
 
 use ReputationVIP\QueueClient\QueueClientInterface;
 use ReputationVIP\QueueClient\QueueClient;
+use zaboy\scheduler\Callback\CallbackManager;
 
 /**
- * QueueBrokerInterhace Interface for Queue Client
+ * QueueBroker for Queue Client
  *
  * @category   rest
  * @package    zaboy
@@ -52,6 +53,11 @@ class QueueBroker
      * @var array
      */
     var $queuesClientsInstanses;
+
+    /**
+     *
+     * @var CallbackManager
+     */
     var $callbackManager;
 
     public function __construct($callbackManager, $queuesParams, $queuesClientsInstanses)

@@ -31,7 +31,7 @@ class DataStores extends DataStoresAbstruct implements AdapterInterface
         $this->queuesDataStore = $queuesDataStore;
         $this->messagesDataStore = $messagesDataStore;
         $this->priorityHandler = new PriorityHandler();
-        $this->maxTimeInFlight = self::DEFAULT_MAX_TIME_IN_FLIGHT;
+        $this->maxTimeInFlight = self::DEFAULT_MAX_TIME_IN_FLIGHT_VALUE;
     }
 
     /**

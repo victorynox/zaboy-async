@@ -2,13 +2,9 @@
 
 namespace zaboy\test\async\Queue\Adapter;
 
-use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
-use zaboy\async\Queue\QueueException;
 use zaboy\async\Queue\Adapter\DataStores;
-use ReputationVIP\QueueClient\PriorityHandler\PriorityHandlerInterface;
-use ReputationVIP\QueueClient\Adapter\AdapterInterface;
-use zaboy\rest\DataStore\Memory;
-use Xiag\Rql\Parser\Query;
+use zaboy\rest\TableGateway\TableManagerMysql;
+use Xiag\Rql\Parser\query;
 
 class MysqlDataStoresTest extends \PHPUnit_Framework_TestCase
 {
@@ -17,6 +13,7 @@ class MysqlDataStoresTest extends \PHPUnit_Framework_TestCase
      * @var DataStores
      */
     protected $object;
+    protected $adapter;
 
     /**
      *
@@ -42,7 +39,10 @@ class MysqlDataStoresTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $container = include 'config/container.php';
-        $this->object = $container->get('defaultQueueAdapter');
+        $this->adapter = $container->get('db');
+
+        $this->object = $container->get('Test-Mysql_OueueAdapter 2sec');
+
 
         $date = new \DateTime('@1419237113');
         $this->_messageList = array(
@@ -60,10 +60,9 @@ class MysqlDataStoresTest extends \PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
-        $queues = $this->object->listQueues();
-        foreach ($queues as $queue) {
-            $this->object->deleteQueue($queue);
-        }
+        $tableManagerMysql = new TableManagerMysql($this->adapter);
+        $tableManagerMysql->deleteTable('queue_messages_testmysqloueueadapter2sec');
+        $tableManagerMysql->deleteTable('queue_queues_testmysqloueueadapter2sec');
     }
 
     public function test_getPriorityHandler()
@@ -288,7 +287,7 @@ class MysqlDataStoresTest extends \PHPUnit_Framework_TestCase
 
     public function test_returnToQueueAfterTime()
     {
-        $this->object->setMaxTimeInFlight(5);
+        $this->object->setMaxTimeInFlight(2);
         $this->object->createQueue('nextQueue21');
         foreach ($this->_messageList as $value) {
             $this->object->addMessage('nextQueue21', $value);
@@ -300,7 +299,7 @@ class MysqlDataStoresTest extends \PHPUnit_Framework_TestCase
                 , $number2
         );
         $this->object->deleteMessage('nextQueue21', $messages[0]);
-        sleep(6);
+        sleep(3);
         $number4 = $this->object->getNumberMessages('nextQueue21');
         $this->assertEquals(
                 4
