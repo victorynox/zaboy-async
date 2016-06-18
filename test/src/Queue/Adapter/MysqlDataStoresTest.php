@@ -5,6 +5,7 @@ namespace zaboy\test\async\Queue\Adapter;
 use zaboy\async\Queue\Adapter\DataStores;
 use zaboy\rest\TableGateway\TableManagerMysql;
 use Xiag\Rql\Parser\query;
+use zaboy\async\Queue\Client\Client;
 
 class MysqlDataStoresTest extends \PHPUnit_Framework_TestCase
 {
@@ -280,7 +281,7 @@ class MysqlDataStoresTest extends \PHPUnit_Framework_TestCase
             $result = $this->object->getMessages('nextQueue21', 1);
             $this->assertEquals(
                     $value
-                    , $result[0][DataStores::MESSAGE_BODY]
+                    , $result[0][Client::BODY]
             );
         }
     }

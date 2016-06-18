@@ -6,9 +6,21 @@ use ReputationVIP\QueueClient\QueueClient;
 use zaboy\rest\DataStore\Interfaces\ReadInterface;
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 
+/**
+ *
+ * <code>
+ * $message = [
+ *     'id' => '1_ManagedQueue11__576522deb5ad08'
+ *     'Body' => mix
+ *     'priority' => 'HIGH'
+ *     'time-in-flight' => 1466245854
+ * ]
+ *  </code>
+ */
 class Client extends QueueClient //implements DataStoresInterface
 {
 
+    const MESSAGE_ID = ReadInterface::DEF_ID;
     const BODY = 'Body';
     const PRIORITY = 'priority';
     const TIME_IN_FLIGHT = 'time-in-flight';
@@ -34,7 +46,7 @@ class Client extends QueueClient //implements DataStoresInterface
      */
     public function create($itemData, $rewriteIfExist = false)
     {
-        $this->addMessage($itemData[ReadInterface::DEF_ID], $message['Body'], $message['priority']);
+        $this->addMessage($itemData[self::MESSAGE_ID], $message['Body'], $message['priority']);
 
         return $this->items[$id];
     }

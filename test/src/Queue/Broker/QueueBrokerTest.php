@@ -4,6 +4,7 @@ namespace zaboy\test\async\Queue\Broker;
 
 use zaboy\async\Queue\Broker\QueueBroker;
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
+use zaboy\async\Queue\Client\Client;
 
 class QueueBrokerTest extends \PHPUnit_Framework_TestCase
 {
@@ -77,7 +78,7 @@ class QueueBrokerTest extends \PHPUnit_Framework_TestCase
         $messageOut = $this->dataStore->getIterator()->current();
         $this->assertEquals(
                 ['message1' => 'test_getReadMessage']
-                , $messageOut['message_body']
+                , $messageOut[Client::BODY]
         );
     }
 
@@ -88,7 +89,7 @@ class QueueBrokerTest extends \PHPUnit_Framework_TestCase
         }
         $this->object->runAllWorkers();
         foreach ($this->dataStore as $messageOut) {
-            $messagesOut[] = [$messageOut['message_body'], $messageOut['priority']];
+            $messagesOut[] = [$messageOut[Client::BODY], $messageOut['priority']];
         }
         $this->assertEquals(
                 $messagesOut[0][1]

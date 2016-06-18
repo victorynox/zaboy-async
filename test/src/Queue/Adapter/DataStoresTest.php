@@ -9,6 +9,7 @@ use ReputationVIP\QueueClient\PriorityHandler\PriorityHandlerInterface;
 use ReputationVIP\QueueClient\Adapter\AdapterInterface;
 use zaboy\rest\DataStore\Memory;
 use Xiag\Rql\Parser\Query;
+use zaboy\async\Queue\Client\Client;
 
 class DataStoresTest extends \PHPUnit_Framework_TestCase
 {
@@ -279,7 +280,7 @@ class DataStoresTest extends \PHPUnit_Framework_TestCase
             $result = $this->object->getMessages('nextQueue21', 1);
             $this->assertEquals(
                     $value
-                    , $result[0][DataStores::MESSAGE_BODY]
+                    , $result[0][Client::BODY]
             );
         }
     }

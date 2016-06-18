@@ -265,7 +265,7 @@ abstract class ClientTestAbstract extends \PHPUnit_Framework_TestCase
             $result = $this->object->getMessages('nextQueue21', 1);
             $this->assertEquals(
                     $value
-                    , $result[0][DataStores::MESSAGE_BODY]
+                    , $result[0][Client::BODY]
             );
         }
     }

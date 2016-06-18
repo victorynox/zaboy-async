@@ -68,23 +68,32 @@ abstract class DataStoresAbstruct
                 //"0_nextQueue21_HIGH_572ca3202b3bf1.21681861" --> "1_nextQueue21_HIGH_572ca3202b3bf1.21681861"
                 $flyIdMessage = array_merge($message, array($identifier => $idInFly, self::TIME_IN_FLIGHT => time()));
                 try {
+                    // $flyIdMessage = [
+                    //'id' => '1_ManagedQueue11__576522deb5ad08'
+                    //'queue_name' => 'ManagedQueue11'
+                    //'message_body' => serialize($messageBody)
+                    //'priority' => 'HIGH'
+                    //'time_in_flight' => 1466245854
+                    //'created_on' => '1466245854'
+                    //]
                     $this->messagesDataStore->create($flyIdMessage);
                 } catch (DataStoreException $exc) {
                     continue;
                 }
-                $this->messagesDataStore->delete($id); /*
-                  $message = array_merge($flyIdMessage, array($identifier => $id, self::TIME_IN_FLIGHT => time()));
-                  $this->messagesDataStore->create($message, true);
-                  $this->messagesDataStore->delete($idInFly);
+                $this->messagesDataStore->delete($id);
 
-                  $message[self::MESSAGE_BODY] = unserialize($message[self::MESSAGE_BODY]);
-                  $priorityIndex = $message[self::PRIORITY];
-                  $message[self::PRIORITY] = $this->getPriority($priorityIndex);
-                  return $message; */
-                $flyIdMessage[self::MESSAGE_BODY] = unserialize($message[self::MESSAGE_BODY]);
+                $resultMessage[Client::MESSAGE_ID] = $flyIdMessage[$identifier];
+                $resultMessage[Client::BODY] = unserialize($message[self::MESSAGE_BODY]);
                 $priorityIndex = $message[self::PRIORITY];
-                $flyIdMessage[self::PRIORITY] = $this->getPriority($priorityIndex);
-                return $flyIdMessage;
+                $resultMessage[Client::PRIORITY] = $this->getPriority($priorityIndex);
+                $resultMessage[Client::TIME_IN_FLIGHT] = $flyIdMessage[self::TIME_IN_FLIGHT];
+                // $resultMessage = [
+                //'id' => '1_ManagedQueue11__576522deb5ad08'
+                //'Body' => mix
+                //'priority' => 'HIGH'
+                //'time-in-flight' => 1466245854
+                //]
+                return $resultMessage;
             }
         }
         return null;

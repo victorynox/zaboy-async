@@ -113,14 +113,13 @@ class QueueBroker
                 $messages = $queueClient->getMessages($queueName, $numberOfMessages, $priority);
                 foreach ($messages as $message) {
                     /* @var $worker zaboy\scheduler\Callback\Interfaces\CallbackInterface */
-                    $worker->call([$message]); //Params are sent to call() as array
+                    $worker->call([$message]);
+                    ////Params are sent to call() as array
                     // $message = [
                     //'id' => '1_ManagedQueue11__576522deb5ad08'
-                    //'queue_name' => 'ManagedQueue11'
-                    /* !!!! *///'message_body' => Array (...)
+                    //'Body' => Array (...)
                     //'priority' => 'HIGH'
                     //'time_in_flight' => 1466245854
-                    //'created_on' => '1466245854'
                     //]
                 }
             }
