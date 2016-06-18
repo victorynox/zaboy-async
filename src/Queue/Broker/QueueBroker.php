@@ -16,7 +16,7 @@ use zaboy\scheduler\Callback\CallbackManager;
 /**
  * QueueBroker for Queue Client
  *
- * @category   rest
+ * @category   async
  * @package    zaboy
  */
 class QueueBroker

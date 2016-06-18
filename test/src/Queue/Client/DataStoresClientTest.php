@@ -4,7 +4,7 @@ namespace zaboy\test\async\Queue\Client;
 
 use zaboy\test\async\Queue\Client\ClientTestAbstract;
 
-class ClientTest extends ClientTestAbstract
+class DataStoresClientTest extends ClientTestAbstract
 {
 
     /**

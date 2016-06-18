@@ -14,6 +14,11 @@ use Xiag\Rql\Parser\DataType\Glob;
 use zaboy\rest\DataStore\DataStoreException;
 use zaboy\async\Queue\Client\Client;
 
+/**
+ *
+ * @category   async
+ * @package    zaboy
+ */
 abstract class DataStoresAbstruct
 {
 
@@ -23,6 +28,7 @@ abstract class DataStoresAbstruct
      */
     const DEFAULT_MAX_TIME_IN_FLIGHT_VALUE = 30;
     const ID_SEPARATOR = '_';
+    // "1_nextQueue21_HIGH_572ca3202b3bf1.21681861"
     const IN_FLY = 'IN_FLY_';
     //
     //QUEUES_DATA_STORE
@@ -204,12 +210,14 @@ abstract class DataStoresAbstruct
      */
     protected function getPriorityIndex($priority)
     {
-        if (is_null($priority)) {
-            $priorityIndex = $this->getPriorityHandler()->getDefault();
+        if (empty($priority)) {
+            $priority = $this->getPriorityHandler()->getDefault();
         }
         $priorityArray = $this->getPriorityHandler()->getAll();
         $priorityIndex = array_search($priority, $priorityArray);
-
+        if (!is_numeric($priorityIndex)) {
+            throw new QueueException("Unknow priority - $priority");
+        }
         return $priorityIndex;
     }
 

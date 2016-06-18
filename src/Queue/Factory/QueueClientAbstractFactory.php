@@ -41,7 +41,7 @@ use zaboy\async\Queue\Client\Client;
  * </code>
  *
  * @todo config key 'queues'
- * @category   rest
+ * @category   async
  * @package    zaboy
  */
 class QueueClientAbstractFactory extends AbstractFactoryAbstract

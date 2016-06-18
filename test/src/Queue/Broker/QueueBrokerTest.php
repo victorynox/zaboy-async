@@ -45,9 +45,6 @@ class QueueBrokerTest extends \PHPUnit_Framework_TestCase
     {
         $container = include 'config/container.php';
         $this->dataStore = $container->get('test_worker_datastore');
-        foreach ($this->dataStore as $item) {
-            var_dump(print_r($item));
-        }
         $messageOut = $this->dataStore->deleteAll();
 
         $date = new \DateTime('@1419237113');

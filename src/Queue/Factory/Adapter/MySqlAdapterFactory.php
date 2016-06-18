@@ -16,7 +16,9 @@ use zaboy\rest\DataStore\DataStoreAbstract as DataStore;
  * Creates if can and returns an instance of class Queue\Adapter\DataStoresAbstruct - Adapter for Queue
  *
  * Class ScriptAbstractFactory
- * @package zaboy\scheduler\Callback\Factory
+ *
+ * @category   async
+ * @package    zaboy
  */
 class MySqlAdapterFactory extends FactoryAbstract
 {

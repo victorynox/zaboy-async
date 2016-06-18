@@ -12,7 +12,7 @@ namespace zaboy\async\Queue\Broker;
 /**
  * QueueBrokerInterhace Interface for Queue Client
  *
- * @category   rest
+ * @category   async
  * @package    zaboy
  */
 interface QueueBrokerInterhace

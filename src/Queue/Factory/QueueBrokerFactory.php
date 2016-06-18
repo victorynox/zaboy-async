@@ -35,7 +35,7 @@ use zaboy\scheduler\Callback\CallbackManager;
  * ]
  * </code>
  *
- * @category   rest
+ * @category   async
  * @package    zaboy
  */
 class QueueBrokerFactory extends FactoryAbstract

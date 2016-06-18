@@ -13,6 +13,11 @@ use Xiag\Rql\Parser\Query;
 use Xiag\Rql\Parser\Node;
 use Xiag\Rql\Parser\DataType\Glob;
 
+/**
+ *
+ * @category   async
+ * @package    zaboy
+ */
 class DataStores extends DataStoresAbstruct implements AdapterInterface
 {
 
@@ -39,6 +44,7 @@ class DataStores extends DataStoresAbstruct implements AdapterInterface
      */
     public function addMessage($queueName, $message, $priority = null)
     {
+
         if (empty($queueName)) {
             throw new QueueException('Parameter queueName empty or not defined.');
         }
