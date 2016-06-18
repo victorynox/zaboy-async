@@ -1,6 +1,34 @@
 <?php
 
 return [
+    'callback' => [
+        'instance_worker_callback' => [
+            'class' => 'zaboy\scheduler\Callback\Instance',
+            'params' => [
+                'instanceServiceName' => 'test_worker_datastore',
+                'instanceMethodName' => 'create',
+            ],
+        ],
+    ],
+    'queueBroker' => [
+        'testMysqlQueue' => [
+            'ManagedQueue11' => [
+                'workerName' => 'instance_worker_callback',
+                'messagesNumberInQuery' => 10
+            ],
+            'ManagedQueue21' => [
+                'workerName' => 'instance_worker_callback'
+            ]
+        ],
+        'testDataStoresQueue' => [
+            'ManagedQueue21' => [
+                'workerName' => 'instance_worker_callback'
+            ],
+            'ManagedQueue22' => [
+                'workerName' => 'instance_worker_callback'
+            ]
+        ],
+    ],
     'queueAdapter' => [
         'Test-Mysql_OueueAdapter 2sec' => [
             'class' => 'zaboy\async\Queue\Adapter\MysqlOueueAdapter'
@@ -14,13 +42,6 @@ return [
             'QueuesDataStore' => 'QueuesMemoryDataStore',
             'MessagesDataStore' => 'MessagesMemoryDataStore'
         ]
-    /*     * ,
-      'MainQueue' => [
-      'class' => 'zaboy\async\Queue\Client\Client',
-      'maxTimeInFlight' => 2,
-      'queuesDataStore' => 'QueuesDataStoreDbTable',
-      'messagesDataStore' => 'MessagesDataStoreMemory',
-      ], */
     ],
     'queueClient' => [
         'testMysqlQueue' => [
@@ -37,6 +58,9 @@ return [
             'class' => 'zaboy\rest\DataStore\Memory'
         ],
         'MessagesMemoryDataStore' => [
+            'class' => 'zaboy\rest\DataStore\Memory',
+        ],
+        'test_worker_datastore' => [
             'class' => 'zaboy\rest\DataStore\Memory',
         ],
     ]

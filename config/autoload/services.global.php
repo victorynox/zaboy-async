@@ -6,9 +6,8 @@ return [
         'invokables' => [
         ],
         'factories' => [
-            //'defaultQueueAdapter' => 'zaboy\async\Queue\Factory\MySqlAdapterFactory',
-            //'defaultQueueClient' => 'zaboy\async\Queue\Factory\QueueClientFactory',
-            'TableManagerMysql' => 'zaboy\rest\TableGateway\Factory\TableManagerMysqlFactory'
+            'TableManagerMysql' => 'zaboy\rest\TableGateway\Factory\TableManagerMysqlFactory',
+            'QueueBroker' => 'zaboy\async\Queue\Factory\QueueBrokerFactory'
         ],
         'abstract_factories' => [
             'zaboy\rest\DataStore\Factory\DbTableAbstractFactory',
@@ -16,7 +15,8 @@ return [
             'zaboy\rest\DataStore\Factory\MemoryAbstractFactory',
             'Zend\Db\Adapter\AdapterAbstractServiceFactory',
             'zaboy\async\Queue\Factory\QueueClientAbstractFactory',
-            'zaboy\async\Queue\Factory\QueueAdapterAbstractFactory'
+            'zaboy\async\Queue\Factory\QueueAdapterAbstractFactory',
+            'zaboy\scheduler\Callback\Factory\InstanceAbstractFactory',
         ]
     ]
 ];

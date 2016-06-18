@@ -12,6 +12,7 @@ use Xiag\Rql\Parser\Query;
 use Xiag\Rql\Parser\Node;
 use Xiag\Rql\Parser\DataType\Glob;
 use zaboy\rest\DataStore\DataStoreException;
+use zaboy\async\Queue\Client\Client;
 
 abstract class DataStoresAbstruct
 {
@@ -26,7 +27,6 @@ abstract class DataStoresAbstruct
     //
     //QUEUES_DATA_STORE
     //'id' - queue name
-    const TIME_IN_FLIGHT = 'time_in_flight';
     //
     //MESSAGES_DATA_STORE
     //'id' - unic id of message like: QueueName_LOW_jkkljnk;jn5kjh.95kj5ntk4
@@ -34,6 +34,7 @@ abstract class DataStoresAbstruct
     const MESSAGE_BODY = 'message_body';
     const PRIORITY = 'priority';
     const CREATED_ON = 'created_on';
+    const TIME_IN_FLIGHT = 'time_in_flight';
 
     /** @var int $messagesDataStore */
     protected $maxTimeInFlight = self::DEFAULT_MAX_TIME_IN_FLIGHT_VALUE;
@@ -67,10 +68,8 @@ abstract class DataStoresAbstruct
                 //"0_nextQueue21_HIGH_572ca3202b3bf1.21681861" --> "1_nextQueue21_HIGH_572ca3202b3bf1.21681861"
                 $flyIdMessage = array_merge($message, array($identifier => $idInFly, self::TIME_IN_FLIGHT => time()));
                 try {
-                    var_dump($this->messagesDataStore->read($flyIdMessage['id']));
                     $this->messagesDataStore->create($flyIdMessage);
                 } catch (DataStoreException $exc) {
-                    var_dump('$flyIdMessage $exc $exc $exc $exc ');
                     continue;
                 }
                 $this->messagesDataStore->delete($id); /*

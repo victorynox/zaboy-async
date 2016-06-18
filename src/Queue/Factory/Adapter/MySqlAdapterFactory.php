@@ -35,7 +35,7 @@ class MySqlAdapterFactory extends FactoryAbstract
         DataStore::DEF_ID => [
             'fild_type' => 'Varchar',
             'fild_params' => [
-                'length' => 32,
+                'length' => 128,
                 'nullable' => false
             ]
         ]
@@ -44,14 +44,14 @@ class MySqlAdapterFactory extends FactoryAbstract
         DataStore::DEF_ID => [
             'fild_type' => 'Varchar',
             'fild_params' => [
-                'length' => 32,
+                'length' => 128,
                 'nullable' => false
             ]
         ],
         QueueDataStores::QUEUE_NAME => [
             'fild_type' => 'Varchar',
             'fild_params' => [
-                'length' => 32,
+                'length' => 128,
                 'nullable' => false
             ]
         ],

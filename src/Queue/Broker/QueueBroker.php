@@ -22,12 +22,15 @@ use zaboy\scheduler\Callback\CallbackManager;
 class QueueBroker
 {
 
+    const DEFAULT_MSG_IN_QUERY = 100;
+
     /**
      * <code>
      * [
      *      QueueClient => [
      *          Queue1 => [
      *              'workerName' => 'callbackService Name1'
+     *               'messagesNumberInQuery' => 10
      *          ]
      *          Queue2 => [
      *              'workerName' => 'callbackService Name1'
@@ -45,8 +48,8 @@ class QueueBroker
     /**
      * <code>
      * [
-     *      QueueClient => object,
-     *      nextQueueClient => object,
+     *      'QueueClient' => object,
+     *      'nextQueueClient' => object,
      * ]
      * </code>
      *
@@ -63,9 +66,9 @@ class QueueBroker
     public function __construct($callbackManager, $queuesParams, $queuesClientsInstanses)
     {
         $this->callbackManager = $callbackManager;
-
         $this->queuesParams = $queuesParams;
         $this->queuesClientsInstanses = $queuesClientsInstanses;
+        $this->createAllQueues();
     }
 
     public function runAllWorkers()
@@ -78,6 +81,19 @@ class QueueBroker
         $this->runWorkers('HIGH');
     }
 
+    protected function createAllQueues()
+    {
+        foreach ($this->queuesClientsInstanses as $queueClientName => $queueClientNameInstanse) {
+            /* @var $queueClientNameInstanse \zaboy\async\Queue\Client\Client */
+            $existedQueues = $queueClientNameInstanse->listQueues();
+            foreach ($this->queuesParams[$queueClientName] as $queueNameFromParams => $val) {
+                if (!in_array($queueNameFromParams, $existedQueues)) {
+                    $queueClientNameInstanse->createQueue($queueNameFromParams);
+                }
+            }
+        }
+    }
+
     protected function runWorkers($priority = null)
     {
         $queueClientsNames = $this->getQueueClientsNames();
@@ -85,11 +101,27 @@ class QueueBroker
             $queuesNames = $this->getQueuesByClient($queueClientName);
             foreach ($queuesNames as $queueName) {
                 $worker = $this->getQueueWorkerInstanse($queueClientName, $queueName);
-                $queueClient = $this->getQueuesCleentsInstanse($queueClientName);
-                $numberOfMessages = $queueClient->getNumberMessages($queueName);
+                $queueClient = $this->getQueueCleentInstanse($queueClientName);
+
+                //$numberOfMessages = $queueClient->getNumberMessages($queueName);
+                if (isset($this->queuesParams[$queueClientName][$queueName]['messagesNumberInQuery'])) {
+                    $numberOfMessages = $this->queuesParams[$queueClientName][$queueName]['messagesNumberInQuery'];
+                } else {
+                    $numberOfMessages = self::DEFAULT_MSG_IN_QUERY;
+                }
+
                 $messages = $queueClient->getMessages($queueName, $numberOfMessages, $priority);
                 foreach ($messages as $message) {
-                    $worker->call($message); //use $message['Body']
+                    /* @var $worker zaboy\scheduler\Callback\Interfaces\CallbackInterface */
+                    $worker->call([$message]); //Params are sent to call() as array
+                    // $message = [
+                    //'id' => '1_ManagedQueue11__576522deb5ad08'
+                    //'queue_name' => 'ManagedQueue11'
+                    /* !!!! *///'message_body' => Array (...)
+                    //'priority' => 'HIGH'
+                    //'time_in_flight' => 1466245854
+                    //'created_on' => '1466245854'
+                    //]
                 }
             }
         }
@@ -109,7 +141,7 @@ class QueueBroker
      * @param string $queueClientName
      * @return QueueClientInterface
      */
-    protected function getQueuesCleentsInstanse($queueClientName)
+    protected function getQueueCleentInstanse($queueClientName)
     {
         return $this->queuesClientsInstanses[$queueClientName];
     }
