@@ -32,6 +32,25 @@ class Client extends QueueClient implements DataStoresInterface
     const TIME_IN_FLIGHT = 'time-in-flight';
 
     /**
+     * Return adapter
+     *
+     * I have no idea why, but ReputationVIP\QueueClient\QueueClient
+     * have not method getAdapter(). We fix it/
+     *
+     * @see ReputationVIP\QueueClient\QueueClient
+     * @return \zaboy\async\Queue\Adapter\DataStoresAbstruct
+     */
+    public function getAdapter()
+    {
+        $reflection = new \ReflectionClass('\ReputationVIP\QueueClient\QueueClient');
+        $adapterProperty = $reflection->getProperty('adapter');
+        $adapterProperty->setAccessible(true);
+        $adapter = $adapterProperty->getValue($this);
+        $adapterProperty->setAccessible(false);
+        return $adapter;
+    }
+
+    /**
      * {@inheritdoc}
      *
      * {@inheritdoc}
@@ -85,7 +104,7 @@ class Client extends QueueClient implements DataStoresInterface
      */
     public function query(Query $query)
     {
-        $this->throwException('query');
+        return['zaboy\async\Queue\Client\Client doesn\'t allow to work with method: query'];
     }
 
     /**
@@ -161,7 +180,7 @@ class Client extends QueueClient implements DataStoresInterface
      */
     public function getIdentifier()
     {
-        $this->throwException('getIdentifier');
+        return self::MESSAGE_ID;
     }
 
     /**

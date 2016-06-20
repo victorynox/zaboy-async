@@ -257,7 +257,7 @@ abstract class DataStoresAbstruct
         $numberInFly = (int) substr($id, 0, 1) + 1;
         $inFlyId = $numberInFly . substr($id, 1, strlen($id) - 1);
         if ($inFlyId === 9) {
-            throw new QueueException("message with id - $id, can not be resolved");
+            throw new QueueException("Message with id - $id, can not be resolved.");
         }
         return $inFlyId;
     }

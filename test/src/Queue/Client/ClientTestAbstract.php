@@ -54,6 +54,15 @@ abstract class ClientTestAbstract extends \PHPUnit_Framework_TestCase
         }
     }
 
+    public function test_getAdapter()
+    {
+        $this->assertTrue(
+                $this->object->getAdapter()
+                instanceof
+                \ReputationVIP\QueueClient\Adapter\AdapterInterface
+        );
+    }
+
     public function test_getPriorityHandler()
     {
         $this->assertTrue(

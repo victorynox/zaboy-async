@@ -5,9 +5,15 @@ namespace zaboy\test\async\Queue\Broker;
 use zaboy\async\Queue\Broker\QueueBroker;
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 use zaboy\async\Queue\Client\Client;
+use Interop\Container\ContainerInterface;
 
 class QueueBrokerTest extends \PHPUnit_Framework_TestCase
 {
+
+    /**
+     * @var ContainerInterface
+     */
+    protected $container;
 
     /**
      * @var QueueBroker
@@ -43,8 +49,8 @@ class QueueBrokerTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $container = include 'config/container.php';
-        $this->dataStore = $container->get('test_worker_datastore');
+        $this->container = include 'config/container.php';
+        $this->dataStore = $this->container->get('test_worker_datastore');
         $messageOut = $this->dataStore->deleteAll();
 
         $date = new \DateTime('@1419237113');
@@ -56,13 +62,28 @@ class QueueBrokerTest extends \PHPUnit_Framework_TestCase
             [$date, 'LOW'],
         );
 
-        $this->object = $container->get('QueueBroker');
+        $this->object = $this->container->get('QueueBroker');
 
-        $this->queueClient1 = $container->get('testMysqlQueue');
+        $this->queueClient1 = $this->container->get('testMysqlQueue');
         $this->queueClient1->purgeQueue('ManagedQueue11');
         $this->queueClient1->purgeQueue('ManagedQueue12');
 
-        $this->queueClient2 = $container->get('testDataStoresQueue');
+        $this->queueClient2 = $this->container->get('testDataStoresQueue');
+        $this->queueClient2->purgeQueue('ManagedQueue21');
+        $this->queueClient2->purgeQueue('ManagedQueue22');
+    }
+
+    /**
+     * Tears down the fixture, for example, closes a network connection.
+     * This method is called after a test is executed.
+     */
+    protected function tearDown()
+    {
+        $this->queueClient1 = $this->container->get('testMysqlQueue');
+        $this->queueClient1->purgeQueue('ManagedQueue11');
+        $this->queueClient1->purgeQueue('ManagedQueue12');
+
+        $this->queueClient2 = $this->container->get('testDataStoresQueue');
         $this->queueClient2->purgeQueue('ManagedQueue21');
         $this->queueClient2->purgeQueue('ManagedQueue22');
     }
