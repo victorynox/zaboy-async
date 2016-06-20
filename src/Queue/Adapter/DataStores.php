@@ -55,12 +55,13 @@ class DataStores extends DataStoresAbstruct implements AdapterInterface
             throw new QueueException('Parameter message empty or not defined.');
         }
         $identifier = $this->messagesDataStore->getIdentifier();
-        $id = uniqid(
+        $idWithDot = uniqid(
                 '0' . self::ID_SEPARATOR
                 . $queueName . self::ID_SEPARATOR
                 . $priority . self::ID_SEPARATOR
                 , true
         );
+        $id = str_replace('.', self::ID_SEPARATOR, $idWithDot);
         $priorityIndex = $this->getPriorityIndex($priority);
         $new_message = [
             $identifier => $id,

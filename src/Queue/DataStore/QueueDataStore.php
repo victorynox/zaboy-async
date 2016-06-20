@@ -1,12 +1,10 @@
 <?php
 
-namespace zaboy\async\Queue\Client;
+namespace zaboy\async\Queue\DataStore;
 
-use ReputationVIP\QueueClient\QueueClient;
-use zaboy\rest\DataStore\Interfaces\ReadInterface;
-use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
+use zaboy\rest\DataStore;
+use zaboy\async\Queue\Client\Client;
 use zaboy\async\Queue\QueueException;
-use zaboy\async\Queue\Adapter\DataStoresAbstruct;
 use Xiag\Rql\Parser\Query;
 
 /**
@@ -23,32 +21,25 @@ use Xiag\Rql\Parser\Query;
  * @category   async
  * @package    zaboy
  */
-class Client extends QueueClient implements DataStoresInterface
+class QueueDataStore extends DataStore\DataStoreAbstract
 {
 
-    const MESSAGE_ID = ReadInterface::DEF_ID;
-    const BODY = 'Body';
-    const PRIORITY = 'priority';
-    const QUEUE = 'queue';
-    const TIME_IN_FLIGHT = 'time-in-flight';
+    /**
+     *
+     * @var \zaboy\async\Queue\Client\Client
+     */
+    protected $queueClient;
 
     /**
-     * Return adapter
      *
-     * I have no idea why, but ReputationVIP\QueueClient\QueueClient
-     * have not method getAdapter(). We fix it/
-     *
-     * @see ReputationVIP\QueueClient\QueueClient
-     * @return \zaboy\async\Queue\Adapter\DataStoresAbstruct
+     * @var DataStoreAbstract
      */
-    public function getAdapter()
+    protected $messagesDataStore;
+
+    public function __construct(Client $queueClient)
     {
-        $reflection = new \ReflectionClass('\ReputationVIP\QueueClient\QueueClient');
-        $adapterProperty = $reflection->getProperty('adapter');
-        $adapterProperty->setAccessible(true);
-        $adapter = $adapterProperty->getValue($this);
-        $adapterProperty->setAccessible(false);
-        return $adapter;
+        $this->queueClient = $queueClient;
+        $this->messagesDataStore = $queueClient->getAdapter()->getMessagesDataStore();
     }
 
     /**
@@ -58,10 +49,7 @@ class Client extends QueueClient implements DataStoresInterface
      */
     public function read($id)
     {
-        $queueName = $id;
-        $messages = $this->getMessages($queueName, 1);
-        $message = empty($messages) ? null : $messages[0];
-        return $message;
+        return $this->messagesDataStore->read($id);
     }
 
 // ** Interface "zaboy\rest\DataStore\Interfaces\DataStoresInterface"  **/
@@ -73,7 +61,16 @@ class Client extends QueueClient implements DataStoresInterface
      */
     public function create($itemData, $rewriteIfExist = false)
     {
-        $this->throwException('create');
+        $queueName = $itemData[self::QUEUE];
+        unset($itemData[self::QUEUE]);
+        $message = $itemData;
+        if (!isset($message[self::BODY])) {
+            throw new QueueException('There is not "Body" key in message');
+        }
+        $priority = key_exists(self::PRIORITY, $message) ? $message[self::PRIORITY] : null;
+        $this->addMessage($queueName, $message[self::BODY], $priority);
+
+        return $message;
     }
 
     /**
@@ -83,7 +80,10 @@ class Client extends QueueClient implements DataStoresInterface
      */
     public function delete($id)
     {
-        $this->throwException('delete');
+        $queueName = explode(DataStoresAbstruct::ID_SEPARATOR, $id)[1];
+        $message = [self::MESSAGE_ID => $id];
+        $this->deleteMessage($queueName, $message);
+        return $message;
     }
 
     /**

@@ -16,7 +16,7 @@ return [
                 'workerName' => 'instance_worker_callback',
                 'messagesNumberInQuery' => 10
             ],
-            'ManagedQueue21' => [
+            'ManagedQueue12' => [
                 'workerName' => 'instance_worker_callback'
             ]
         ],
