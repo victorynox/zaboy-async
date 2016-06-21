@@ -1,13 +1,13 @@
 <?php
 
-namespace zaboy\test\async\Queue\Http;
+namespace zaboy\test\async\Queue\DataStore;
 
 use zaboy\async\Queue\DataStore\ClientDataStore;
 use zaboy\async\Queue;
 use zaboy\async\Queue\Client\Client;
 use Xiag\Rql\Parser\Query;
 
-class QueueClientDataStoreTest extends \PHPUnit_Framework_TestCase
+class ClientDataStoreTest extends \PHPUnit_Framework_TestCase
 {
 
     /**

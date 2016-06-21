@@ -3,9 +3,11 @@
 namespace zaboy\async\Queue\DataStore;
 
 use zaboy\rest\DataStore;
+use zaboy\rest\DataStore\DataStoreAbstract;
 use zaboy\async\Queue\Client\Client;
 use zaboy\async\Queue\QueueException;
 use Xiag\Rql\Parser\Query;
+use zaboy\async\Queue\Broker\QueueBrokerInterhace;
 
 /**
  *
@@ -18,6 +20,7 @@ use Xiag\Rql\Parser\Query;
  *   'dataStore' => [
  *       'test_ClientDataStore' => [
  *           'queueClient' => 'testMysqlQueue'
+ *           '
  *       ]
  *   ]
  * <code>
@@ -36,14 +39,21 @@ class ClientDataStore extends DataStore\DataStoreAbstract
 
     /**
      *
+     * @var QueueBrokerInterhace
+     */
+    protected $queueBroker;
+
+    /**
+     *
      * @var DataStoreAbstract
      */
     protected $queuesDataStore;
 
-    public function __construct(Client $queueClient)
+    public function __construct(Client $queueClient, QueueBrokerInterhace $queueBroker = null)
     {
         $this->queueClient = $queueClient;
         $this->queuesDataStore = $queueClient->getAdapter()->getQueuesDataStore();
+        $this->queueBroker = $queueBroker;
     }
 
     /**
@@ -97,7 +107,7 @@ class ClientDataStore extends DataStore\DataStoreAbstract
      */
     public function getIdentifier()
     {
-        return $this->queuesDataStore->getIdentifier();
+        return Client::MESSAGE_ID;
     }
 
     /**

@@ -4,9 +4,7 @@ namespace zaboy\async\Queue\Factory\DataStore;
 
 use Interop\Container\ContainerInterface;
 use zaboy\rest\AbstractFactoryAbstract;
-use zaboy\async\Queue\DataStore\ClientDataStore;
-use zaboy\async\Queue\Factory\DataStore\QueueDataStoreAbstractFactory;
-use zaboy\async\Queue\Factory\QueueBrokerFactory;
+use zaboy\async\Queue\DataStore\QueueDataStore;
 
 /**
  * Creates if can and returns an instance of class Queue\DataStore\ClientDataStore
@@ -15,23 +13,31 @@ use zaboy\async\Queue\Factory\QueueBrokerFactory;
  * <code>
  *   'services' => [
  *       'abstract_factories' => [
- *           'zaboy\async\Queue\Factory\DataStore\ClientDataStoreAbstractFactory'
+ *           'zaboy\async\Queue\Factory\DataStore\QueueDataStoreAbstractFactory'
  *       ]
  *   ],
  *   'dataStore' => [
- *       'test_ClientDataStore' => [
- *           'queueClient' => 'testMysqlQueue'
+ *       'test_QueueDataStore' => [
+ *           'queueClient' => 'testMysqlQueue' //name of service
+ *           'queueName' => 'theNameOfQueue'   //name of queue (not service name
  *       ]
- *   ]
+ *   ],
+ *   'queueClient' => [
+ *       'testMysqlQueue' => [
+ *           'QueueAdapter' => 'Test-Mysql_OueueAdapter 2sec',
+ *           'maxTimeInFlight' => 2
+ *    ]
+ *  ],
  * <code>
  *
  * @category   async
  * @package    zaboy
  */
-class ClientDataStoreAbstractFactory extends AbstractFactoryAbstract
+class QueueDataStoreAbstractFactory extends AbstractFactoryAbstract
 {
 
     const KEY_QUEUE_CLIENT = 'queueClient';
+    const KEY_QUEUE_NAME = 'queueName';
 
     /**
      * Create and return an instance of the ClientDataStore.
@@ -46,10 +52,10 @@ class ClientDataStoreAbstractFactory extends AbstractFactoryAbstract
     {
         $config = $container->get('config');
         $queueClientServiceName = $config['dataStore'][$requestedName][self::KEY_QUEUE_CLIENT];
+        $queueName = $config['dataStore'][$requestedName][self::KEY_QUEUE_NAME];
         $queueClientService = $container->get($queueClientServiceName);
-        $queueBroker = $container->has(QueueBrokerFactory::KEY_QUEUE_BROKER) ? $container->get(QueueBrokerFactory::KEY_QUEUE_BROKER) : null;
-        $clientDataStore = new ClientDataStore($queueClientService, $queueBroker);
-        return $clientDataStore;
+        $queueDataStore = new QueueDataStore($queueClientService, $queueName);
+        return $queueDataStore;
     }
 
     /**
@@ -62,8 +68,9 @@ class ClientDataStoreAbstractFactory extends AbstractFactoryAbstract
         $config = $container->get('config');
         return
                 isset($config['dataStore'][$requestedName][self::KEY_QUEUE_CLIENT]) &&
-                !isset($config['dataStore'][$requestedName][QueueDataStoreAbstractFactory::KEY_QUEUE_NAME]) &&
+                isset($config['dataStore'][$requestedName][self::KEY_QUEUE_NAME]) &&
                 $container->has($config['dataStore'][$requestedName][self::KEY_QUEUE_CLIENT])
+
         ;
     }
 

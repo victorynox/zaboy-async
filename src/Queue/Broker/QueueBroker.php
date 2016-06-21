@@ -19,7 +19,7 @@ use zaboy\scheduler\Callback\CallbackManager;
  * @category   async
  * @package    zaboy
  */
-class QueueBroker
+class QueueBroker implements QueueBrokerInterhace
 {
 
     const DEFAULT_MSG_IN_QUERY = 100;

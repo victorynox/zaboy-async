@@ -3,14 +3,11 @@
 namespace zaboy\async\Queue\Adapter;
 
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
-use zaboy\async\Queue\PriorityHandler\PriorityHandler;
 use zaboy\async\Queue\QueueException;
-use ReputationVIP\QueueClient\Adapter\AdapterInterface;
 use Xiag\Rql\Parser\Node\Query\ScalarOperator;
 use Xiag\Rql\Parser\Node\Query\LogicOperator;
 use Xiag\Rql\Parser\Query;
 use Xiag\Rql\Parser\Node;
-use Xiag\Rql\Parser\DataType\Glob;
 use zaboy\rest\DataStore\DataStoreException;
 use zaboy\async\Queue\Client\Client;
 

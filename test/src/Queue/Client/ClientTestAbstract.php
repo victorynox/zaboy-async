@@ -185,67 +185,6 @@ abstract class ClientTestAbstract extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function test_createMessage()
-    {
-        foreach ($this->_queuesList as $queueName) {
-            $this->object->createQueue($queueName);
-        }
-        foreach ($this->_messageList as $message) {
-            $this->object->create([Client::MESSAGE_ID => 'nextQueue21', Client::BODY => $message]);
-        }
-        $number = $this->object->getNumberMessages('nextQueue21');
-        $this->assertEquals(
-                5
-                , $number
-        );
-    }
-
-    public function test_readMessage()
-    {
-        foreach ($this->_queuesList as $queueName) {
-            $this->object->createQueue($queueName);
-        }
-        $prioritys = ['MID', 'HIGH', 'HIGH', 'LOW', 'MID',];
-        foreach ($this->_messageList as $message) {
-            $priority = array_shift($prioritys);
-
-            $this->object->create([
-                Client::MESSAGE_ID => 'nextQueue21',
-                Client::BODY => $message,
-                Client::PRIORITY => $priority
-            ]);
-        }
-        $message = $this->object->read('nextQueue21');
-        $this->assertEquals(
-                'HIGH'
-                , $message[Client::PRIORITY]
-        );
-        $message = $this->object->read('nextQueue21');
-        $this->assertEquals(
-                'HIGH'
-                , $message[Client::PRIORITY]
-        );
-        $message = $this->object->read('nextQueue21');
-        $this->assertEquals(
-                'MID'
-                , $message[Client::PRIORITY]
-        );
-        $message = $this->object->read('nextQueue21');
-        $this->assertEquals(
-                'MID'
-                , $message[Client::PRIORITY]
-        );
-        $message = $this->object->read('nextQueue21');
-        $this->assertEquals(
-                'LOW'
-                , $message[Client::PRIORITY]
-        );
-        $message = $this->object->read('nextQueue21');
-        $this->assertNull(
-                $message
-        );
-    }
-
     public function test_createMessageWithPriority()
     {
         $this->object->createQueue('nextQueue21');
@@ -361,32 +300,6 @@ abstract class ClientTestAbstract extends \PHPUnit_Framework_TestCase
                 , $number2
         );
         $this->object->deleteMessage('nextQueue21', $messages[0]);
-        sleep(3);
-        $number4 = $this->object->getNumberMessages('nextQueue21');
-        $this->assertEquals(
-                4
-                , $number4
-        );
-    }
-
-    public function test_returnToQueueAfterTimeCRUD()
-    {
-        $this->object->createQueue('nextQueue21');
-        foreach ($this->_messageList as $value) {
-            $this->object->create([
-                Client::MESSAGE_ID => 'nextQueue21',
-                Client::BODY => $value,
-            ]);
-        }
-        $message1 = $this->object->read('nextQueue21');
-        $message2 = $this->object->read('nextQueue21');
-        $message3 = $this->object->read('nextQueue21');
-        $number2 = $this->object->getNumberMessages('nextQueue21');
-        $this->assertEquals(
-                2
-                , $number2
-        );
-        $this->object->delete($message1[Client::MESSAGE_ID]);
         sleep(3);
         $number4 = $this->object->getNumberMessages('nextQueue21');
         $this->assertEquals(

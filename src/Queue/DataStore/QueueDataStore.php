@@ -3,9 +3,12 @@
 namespace zaboy\async\Queue\DataStore;
 
 use zaboy\rest\DataStore;
+use zaboy\rest\DataStore\DataStoreAbstract;
 use zaboy\async\Queue\Client\Client;
 use zaboy\async\Queue\QueueException;
+use zaboy\async\Queue\Adapter\DataStoresAbstruct;
 use Xiag\Rql\Parser\Query;
+use zaboy\rest\DataStore\ConditionBuilder\RqlConditionBuilder;
 
 /**
  *
@@ -24,6 +27,8 @@ use Xiag\Rql\Parser\Query;
 class QueueDataStore extends DataStore\DataStoreAbstract
 {
 
+    const TEXT_NULL = 'null';
+
     /**
      *
      * @var \zaboy\async\Queue\Client\Client
@@ -36,9 +41,16 @@ class QueueDataStore extends DataStore\DataStoreAbstract
      */
     protected $messagesDataStore;
 
-    public function __construct(Client $queueClient)
+    /**
+     *
+     * @var string
+     */
+    protected $queueName;
+
+    public function __construct(Client $queueClient, $queueName)
     {
         $this->queueClient = $queueClient;
+        $this->queueName = $queueName;
         $this->messagesDataStore = $queueClient->getAdapter()->getMessagesDataStore();
     }
 
@@ -49,7 +61,13 @@ class QueueDataStore extends DataStore\DataStoreAbstract
      */
     public function read($id)
     {
-        return $this->messagesDataStore->read($id);
+        if ($id === null || $id === RqlConditionBuilder::TEXT_NULL || self::TEXT_NULL) {
+            $message = $this->queueClient->getMessages($this->queueName, 1);
+            $message = !$message ? null : $message[0];
+        } else {
+            $message = $this->messagesDataStore->read($id);
+        }
+        return $message;
     }
 
 // ** Interface "zaboy\rest\DataStore\Interfaces\DataStoresInterface"  **/
@@ -61,16 +79,13 @@ class QueueDataStore extends DataStore\DataStoreAbstract
      */
     public function create($itemData, $rewriteIfExist = false)
     {
-        $queueName = $itemData[self::QUEUE];
-        unset($itemData[self::QUEUE]);
-        $message = $itemData;
-        if (!isset($message[self::BODY])) {
+        if (!isset($itemData[Client::BODY])) {
             throw new QueueException('There is not "Body" key in message');
         }
-        $priority = key_exists(self::PRIORITY, $message) ? $message[self::PRIORITY] : null;
-        $this->addMessage($queueName, $message[self::BODY], $priority);
+        $priority = key_exists(Client::PRIORITY, $itemData) ? $itemData[Client::PRIORITY] : null;
+        $this->queueClient->addMessage($this->queueName, $itemData[Client::BODY], $priority);
 
-        return $message;
+        return $itemData;
     }
 
     /**
@@ -80,30 +95,20 @@ class QueueDataStore extends DataStore\DataStoreAbstract
      */
     public function delete($id)
     {
-        $queueName = explode(DataStoresAbstruct::ID_SEPARATOR, $id)[1];
-        $message = [self::MESSAGE_ID => $id];
-        $this->deleteMessage($queueName, $message);
+        if (!is_string($id) && !isset($id[Client::MESSAGE_ID])) {
+            throw new QueueException('"id" must be string or array("id"->string)');
+        }
+        if (isset($id[Client::MESSAGE_ID])) {
+            $idSting = $id[Client::MESSAGE_ID];
+
+            if ((bool) strpos($idSting, $this->queueName)) {
+                throw new QueueException('Yuo try to delete message ' . $idSting . 'from queue' . $this->queueName);
+            }
+            $this->queueClient->deleteMessage($this->queueName, $id);
+        } else {
+            $message = $this->messagesDataStore->delete($id);
+        }
         return $message;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * {@inheritdoc}
-     */
-    public function query(Query $query)
-    {
-        return['zaboy\async\Queue\Client\Client doesn\'t allow to work with method: query'];
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * {@inheritdoc}
-     */
-    public function has($id)
-    {
-        $this->throwException('has');
     }
 
     /**
@@ -113,7 +118,7 @@ class QueueDataStore extends DataStore\DataStoreAbstract
      */
     public function update($itemData, $createIfAbsent = false)
     {
-        $this->throwException('update');
+        $this->messagesDataStore->update($itemData);
     }
 
     /**
@@ -121,21 +126,9 @@ class QueueDataStore extends DataStore\DataStoreAbstract
      *
      * {@inheritdoc}
      */
-    public function deleteAll()
+    public function query(Query $query)
     {
-        $this->throwException('deleteAll');
-    }
-
-// ** Interface "/Coutable"  **/
-
-    /**
-     * {@inheritdoc}
-     *
-     * {@inheritdoc}
-     */
-    public function count()
-    {
-        $this->throwException('count');
+        return $this->messagesDataStore->query($query);
     }
 
 // ** Interface "/IteratorAggregate"  **/
@@ -147,19 +140,7 @@ class QueueDataStore extends DataStore\DataStoreAbstract
      */
     public function getIterator()
     {
-        $this->throwException('getIterator');
-    }
-
-// ** protected  **/
-
-    /**
-     * {@inheritdoc}
-     *
-     * {@inheritdoc}
-     */
-    protected function getKeys()
-    {
-        $this->throwException('getKeys');
+        return $this->messagesDataStore->getIterator();
     }
 
     /**
@@ -169,7 +150,12 @@ class QueueDataStore extends DataStore\DataStoreAbstract
      */
     public function getIdentifier()
     {
-        return self::MESSAGE_ID;
+        return Client::MESSAGE_ID;
+    }
+
+    public function getQueueClient()
+    {
+        return $this->queueClient;
     }
 
     /**
