@@ -16,7 +16,7 @@ use zaboy\async\Queue\Client\Client;
  * @category   async
  * @package    zaboy
  */
-abstract class DataStoresAbstruct
+abstract class DataStoresAbstract
 {
 
     /**
@@ -32,7 +32,7 @@ abstract class DataStoresAbstruct
     //'id' - queue name
     //
     //MESSAGES_DATA_STORE
-    //'id' - unic id of message like: QueueName_LOW_jkkljnk;jn5kjh.95kj5ntk4
+    //'id' - unique id of message like: QueueName_LOW_jkkljnk;jn5kjh.95kj5ntk4
     const QUEUE_NAME = 'queue_name';
     const MESSAGE_BODY = 'message_body';
     const PRIORITY = 'priority';
@@ -72,13 +72,13 @@ abstract class DataStoresAbstruct
                 $flyIdMessage = array_merge($message, array($identifier => $idInFly, self::TIME_IN_FLIGHT => time()));
                 try {
                     // $flyIdMessage = [
-                    //'id' => '1_ManagedQueue11__576522deb5ad08'
-                    //'queue_name' => 'ManagedQueue11'
-                    //'message_body' => serialize($messageBody)
-                    //'priority' => 'HIGH'
-                    //'time_in_flight' => 1466245854
-                    //'created_on' => '1466245854'
-                    //]
+                    //      'id' => '1_ManagedQueue11__576522deb5ad08'
+                    //      'queue_name' => 'ManagedQueue11'
+                    //      'message_body' => serialize($messageBody)
+                    //      'priority' => 'HIGH'
+                    //      'time_in_flight' => 1466245854
+                    //      'created_on' => '1466245854'
+                    //  ]
                     $this->messagesDataStore->create($flyIdMessage);
                 } catch (DataStoreException $exc) {
                     continue;
@@ -91,11 +91,11 @@ abstract class DataStoresAbstruct
                 $resultMessage[Client::PRIORITY] = $this->getPriority($priorityIndex);
                 $resultMessage[Client::TIME_IN_FLIGHT] = $flyIdMessage[self::TIME_IN_FLIGHT];
                 // $resultMessage = [
-                //'id' => '1_ManagedQueue11__576522deb5ad08'
-                //'Body' => mix
-                //'priority' => 'HIGH'
-                //'time-in-flight' => 1466245854
-                //]
+                //      'id' => '1_ManagedQueue11__576522deb5ad08'
+                //      'Body' => mix
+                //      'priority' => 'HIGH'
+                //      'time-in-flight' => 1466245854
+                //  ]
                 return $resultMessage;
             }
         }
@@ -213,7 +213,7 @@ abstract class DataStoresAbstruct
         $priorityArray = $this->getPriorityHandler()->getAll();
         $priorityIndex = array_search($priority, $priorityArray);
         if (!is_numeric($priorityIndex)) {
-            throw new QueueException("Unknow priority - $priority");
+            throw new QueueException("Unknown priority - $priority");
         }
         return $priorityIndex;
     }
@@ -254,7 +254,7 @@ abstract class DataStoresAbstruct
         $numberInFly = (int) substr($id, 0, 1) + 1;
         $inFlyId = $numberInFly . substr($id, 1, strlen($id) - 1);
         if ($inFlyId === 9) {
-            throw new QueueException("Message with id - $id, can not be resolved.");
+            throw new QueueException("Message with id - $id can not be resolved.");
         }
         return $inFlyId;
     }

@@ -5,7 +5,6 @@ namespace zaboy\async\Queue\Factory\DataStore;
 use Interop\Container\ContainerInterface;
 use zaboy\rest\AbstractFactoryAbstract;
 use zaboy\async\Queue\DataStore\ClientDataStore;
-use zaboy\async\Queue\Factory\DataStore\QueueDataStoreAbstractFactory;
 use zaboy\async\Queue\Factory\QueueBrokerFactory;
 
 /**
@@ -37,10 +36,10 @@ class ClientDataStoreAbstractFactory extends AbstractFactoryAbstract
      * Create and return an instance of the ClientDataStore.
      *
      *
-     * @param  Interop\Container\ContainerInterface $container
+     * @param  \Interop\Container\ContainerInterface $container
      * @param  string $requestedName
      * @param  array $options
-     * @return \DataStores\Interfaces\DataStoresInterface
+     * @return \ReputationVIP\QueueClient\Adapter\AdapterInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {

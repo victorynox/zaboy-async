@@ -9,15 +9,13 @@
 
 namespace zaboy\async\Queue;
 
-use Exception;
-
 /**
  * Exception class for middleware
  *
  * @category   async
  * @package    zaboy
  */
-class QueueException extends Exception
+class QueueException extends \Exception
 {
 
 }

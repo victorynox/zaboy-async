@@ -33,7 +33,7 @@ class QueueBrokerTest extends \PHPUnit_Framework_TestCase
 
     /**
      *
-     * @var zaboy\async\Queue\Client\Client
+     * @var \zaboy\async\Queue\Client\Client
      */
     protected $queueClient2;
 

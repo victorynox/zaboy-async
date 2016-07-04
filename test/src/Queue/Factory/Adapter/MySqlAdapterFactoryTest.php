@@ -18,7 +18,7 @@ class MySqlAdapterFactoryTest extends \PHPUnit_Framework_TestCase
     protected $object;
 
     /**
-     * @var Zend\Db\Adapter\Adapter
+     * @var \Zend\Db\Adapter\Adapter
      */
     protected $adapter;
 
@@ -51,15 +51,15 @@ class MySqlAdapterFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testMySqlAdapterFactory__invoke()
     {
-        //if tables is absent
+        // if tables is absent
         $adapter = $this->object->__invoke($this->container, 'testQueueAdapterFactory');
         $this->assertSame(
-                get_class($adapter), 'zaboy\async\Queue\Adapter\MysqlOueueAdapter'
+                get_class($adapter), 'zaboy\async\Queue\Adapter\MysqlQueueAdapter'
         );
-        //if tables is present
+        // if tables is present
         $adapter = $this->object->__invoke($this->container, 'testQueueAdapterFactory');
         $this->assertSame(
-                get_class($adapter), 'zaboy\async\Queue\Adapter\MysqlOueueAdapter'
+                get_class($adapter), 'zaboy\async\Queue\Adapter\MysqlQueueAdapter'
         );
     }
 

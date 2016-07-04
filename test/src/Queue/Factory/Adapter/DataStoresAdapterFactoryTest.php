@@ -2,8 +2,6 @@
 
 namespace zaboy\test\async\Queue\Factory\Adapter;
 
-use zaboy\async\Queue\Factory\Adapter\MemoryStoresAdapterFactory;
-use zaboy\rest\TableGateway\TableManagerMysql;
 use Interop\Container\ContainerInterface;
 
 /**
@@ -18,7 +16,7 @@ class DataStoresAdapterFactoryTest extends \PHPUnit_Framework_TestCase
     protected $object;
 
     /**
-     * @var Zend\Db\Adapter\Adapter
+     * @var \Zend\Db\Adapter\Adapter
      */
     protected $adapter;
 
@@ -34,7 +32,7 @@ class DataStoresAdapterFactoryTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->container = include './config/container.php';
-        $this->object = $this->container->get('TestDataStoresOueueAdapter');
+        $this->object = $this->container->get('TestDataStoresQueueAdapter');
     }
 
     /**

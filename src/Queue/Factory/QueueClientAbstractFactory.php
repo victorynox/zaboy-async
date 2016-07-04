@@ -11,7 +11,6 @@ namespace zaboy\async\Queue\Factory;
 
 use Interop\Container\ContainerInterface;
 use zaboy\rest\AbstractFactoryAbstract;
-use zaboy\async\Queue\QueueException;
 use zaboy\async\Queue\Adapter;
 use zaboy\async\Queue\Client\Client;
 
@@ -56,10 +55,10 @@ class QueueClientAbstractFactory extends AbstractFactoryAbstract
      * Create and return an instance of the Queue Client.
      *
      *
-     * @param  Interop\Container\ContainerInterface $container
+     * @param  \Interop\Container\ContainerInterface $container
      * @param  string $requestedName
      * @param  array $options
-     * @return \DataStores\Interfaces\DataStoresInterface
+     * @return \ReputationVIP\QueueClient\Adapter\AdapterInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {

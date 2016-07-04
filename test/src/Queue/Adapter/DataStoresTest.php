@@ -2,11 +2,7 @@
 
 namespace zaboy\test\async\Queue\Adapter;
 
-use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
-use zaboy\async\Queue\QueueException;
 use zaboy\async\Queue\Adapter\DataStores;
-use ReputationVIP\QueueClient\PriorityHandler\PriorityHandlerInterface;
-use ReputationVIP\QueueClient\Adapter\AdapterInterface;
 use zaboy\rest\DataStore\Memory;
 use Xiag\Rql\Parser\Query;
 use zaboy\async\Queue\Client\Client;
