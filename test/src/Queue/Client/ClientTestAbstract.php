@@ -123,7 +123,7 @@ abstract class ClientTestAbstract extends \PHPUnit_Framework_TestCase
         );
 
 
-        $queues = $this->object->listQueues('/^next.*/');
+        $queues = $this->object->listQueues('/^next.*' . '/');
         $this->assertEquals(
                 2
                 , count($queues)

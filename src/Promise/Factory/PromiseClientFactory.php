@@ -7,44 +7,43 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace zaboy\async\Queue\Factory;
+namespace zaboy\async\Promise\Factory;
 
 use Interop\Container\ContainerInterface;
 use zaboy\rest\FactoryAbstract;
 use zaboy\async\Queue\Broker;
 use zaboy\scheduler\Callback\CallbackManager;
+use zaboy\async\Promise\Exception;
 
 /**
- * Create and return an instance of the Queue Broker
+ * Create and return an instance of the Promise Client
  *
  * This Factory depends on Container (which should return an 'config' as array)
  *
  * The configuration can contain:
  * <code>
- * 'queueBroker' =>[
- *      'ManagedQueueClient' => [
- *          'ManagedQueue1' => [
- *              'workerName' => 'someCallBack'
- *          ]
- *          'ManagedQueue2' => [
- *              'workerName' => 'anotherCallBack'
- *          ]
- *      ],
- *      'nextManagedQueueClient' => [
- *          'nextManagedQueue1' => [...
+ * 'promiseClient' =>[
+ *      'PromiseAdapterDataStore' => 'PromiseAdapterDefaultDataStore'
+ * ],
+ * 'dataStore' => [
+ *     'PromiseAdapterDefaultDataStore' => [
+ *          'class' => 'zaboy\rest\DataStore\DbTable',
+ *          'tableName' => 'promise_adapter_default'
+ *     ],
  * ]
  * </code>
  *
  * @category   async
  * @package    zaboy
  */
-class QueueBrokerFactory extends FactoryAbstract
+class PromiseClientFactory extends FactoryAbstract
 {
 
-    const KEY_QUEUE_BROKER = 'queueBroker';
+    const KEY_PROMISE_CLIENT = 'promiseClient';
+    const KEY_PROMISE_ADAPTER_DATA_STORE = 'PromiseAdapterDataStore';
 
     /**
-     * Create and return an instance of the QueueBroker.
+     * Create and return an instance of the Promise Client.
      *
      * @param  Interop\Container\ContainerInterface $container
      * @return zaboy\async\Queue\Broker
@@ -52,12 +51,15 @@ class QueueBrokerFactory extends FactoryAbstract
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $config = $container->get('config');
-        $serviceConfig = $config[self::KEY_QUEUE_BROKER];
-        $queueClientsNames = array_keys($serviceConfig);
-        $queuesClientsInstanses = [];
-        foreach ($queueClientsNames as $queueClientName) {
-            $queuesClientsInstanses[$queueClientName] = $container->get($queueClientName);
+        if (!key_exists(self::KEY_PROMISE_CLIENT, $config)) {
+            throw new Exception("There is not key 'promiseClient' in  config");
         }
+        if (!key_exists(self::KEY_PROMISE_ADAPTER_DATA_STORE, $config[self::KEY_PROMISE_CLIENT])) {
+            throw new Exception("There is not key 'promiseClient'/'PromiseAdapterDataStore' in  config");
+        }
+        $dataStoreServiceName = $config[self::KEY_PROMISE_CLIENT][self::KEY_PROMISE_ADAPTER_DATA_STORE];
+        $dataStoreService = $container->get($dataStoreServiceName);
+
         if ($container->has(CallbackManager::SERVICE_NAME)) {
             /* @var \zaboy\scheduler\Callback\CallbackManager $callbackManager */
             $callbackManager = $container->get(CallbackManager::SERVICE_NAME);

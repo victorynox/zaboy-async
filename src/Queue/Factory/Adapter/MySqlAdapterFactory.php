@@ -25,8 +25,8 @@ class MySqlAdapterFactory extends FactoryAbstract
 
     const QUEUES_TABLE_NAME_PREFIX = 'queue_queues_';
     const MESSAGES_TABLE_NAME_PREFIX = 'queue_messages_';
-    const FILD_TYPE = 'fild_type';
-    const FILD_PARAMS = 'fild_params';
+    const FIELD_TYPE = 'field_type';
+    const FIELD_PARAMS = 'field_params';
 
     /** @var \Zend\Db\Adapter\Adapter $db */
     protected $db;
@@ -35,8 +35,8 @@ class MySqlAdapterFactory extends FactoryAbstract
     protected $dataStore;
     protected $queuesTableData = [
         DataStore::DEF_ID => [
-            'fild_type' => 'Varchar',
-            'fild_params' => [
+            'field_type' => 'Varchar',
+            'field_params' => [
                 'length' => 128,
                 'nullable' => false
             ]
@@ -44,41 +44,41 @@ class MySqlAdapterFactory extends FactoryAbstract
     ];
     protected $messagesTableData = [
         DataStore::DEF_ID => [
-            'fild_type' => 'Varchar',
-            'fild_params' => [
+            'field_type' => 'Varchar',
+            'field_params' => [
                 'length' => 128,
                 'nullable' => false
             ]
         ],
         QueueDataStores::QUEUE_NAME => [
-            'fild_type' => 'Varchar',
-            'fild_params' => [
+            'field_type' => 'Varchar',
+            'field_params' => [
                 'length' => 128,
                 'nullable' => false
             ]
         ],
         QueueDataStores::MESSAGE_BODY => [
-            'fild_type' => 'Varchar',
-            'fild_params' => [
+            'field_type' => 'Varchar',
+            'field_params' => [
                 'length' => 65535,
                 'nullable' => false
             ]
         ],
         QueueDataStores::PRIORITY => [
-            'fild_type' => 'Integer',
-            'fild_params' => [
+            'field_type' => 'Integer',
+            'field_params' => [
                 'nullable' => false
             ]
         ],
         QueueDataStores::TIME_IN_FLIGHT => [
-            'fild_type' => 'Integer',
-            'fild_params' => [
+            'field_type' => 'Integer',
+            'field_params' => [
                 'nullable' => false
             ]
         ],
         QueueDataStores::CREATED_ON => [
-            'fild_type' => 'Integer',
-            'fild_params' => [
+            'field_type' => 'Integer',
+            'field_params' => [
                 'nullable' => false
             ]
         ]
@@ -106,10 +106,12 @@ class MySqlAdapterFactory extends FactoryAbstract
 
         $tableNameQueues = self::QUEUES_TABLE_NAME_PREFIX . strtolower(str_replace(['-', '_', ' '], '', $requestedName));
         $hasTableQueues = $tableManager->hasTable($tableNameQueues);
+
         if (!$hasTableQueues) {
             $tableManager->rewriteTable($tableNameQueues, $this->queuesTableData);
         }
         $tableGatewayQueues = new TableGateway($tableNameQueues, $this->db);
+
         $queuesDataStore = new DbTable($tableGatewayQueues);
 
         $tableNameMessages = self::MESSAGES_TABLE_NAME_PREFIX . strtolower(str_replace(['-', '_', ' '], '', $requestedName));

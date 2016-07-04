@@ -6,19 +6,37 @@ use zaboy\rest\DataStore;
 use zaboy\rest\DataStore\DataStoreAbstract;
 use zaboy\async\Queue\Client\Client;
 use zaboy\async\Queue\QueueException;
-use zaboy\async\Queue\Adapter\DataStoresAbstruct;
 use Xiag\Rql\Parser\Query;
 use zaboy\rest\DataStore\ConditionBuilder\RqlConditionBuilder;
 
 /**
+ * You can use queue as data store
  *
  * <code>
+ *
+ * //How to get meeage from queue:
+ * $message = $this->read(null) or 'null' or 'null()'
+ * You'ii get
+ * [
+ *     'id' => '1_ManagedQueue11__576522deb5ad08'
+ *     'Body' => mix
+ *     'priority' => 'HIGH'
+ *     'time-in-flight' => 1466245854
+ * ]
+ *
+ * Add to queue:
  * $message = [
  *     'id' => '1_ManagedQueue11__576522deb5ad08'
  *     'Body' => mix
  *     'priority' => 'HIGH'
  *     'time-in-flight' => 1466245854
  * ]
+ * $this->create($message)
+ *
+ * Delete from queue:
+ * $this->delete( '1_ManagedQueue11__576522deb5ad08')
+ * or (better):
+ * $this->delete(['id' => '1_ManagedQueue11__576522deb5ad08']) or
  *  </code>
  *
  * @category   async

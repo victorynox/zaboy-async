@@ -81,7 +81,6 @@ class QueueClientAbstractFactory extends AbstractFactoryAbstract
     public function canCreate(ContainerInterface $container, $requestedName)
     {
         $config = $container->get('config');
-
         return isset($config[self::KEY_QUEUE_CLIENT][$requestedName][self::KEY_QUEUE_ADAPTER]);
     }
 

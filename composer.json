@@ -9,12 +9,14 @@
     "require": {
         "avz-cmf/zaboy-rest": "^3.5.0",
         "avz-cmf/zaboy-scheduler": "^1.0.0",
+        "guzzlehttp/promises": "^1.0.0",
         "reputation-vip/queue-client": "1.0.2"
     },
     "autoload": {
         "psr-4": {
             "zaboy\\async\\": "src/",
             "zaboy\\test\\async\\": "test/src/"
+
         }
     },
     "suggest": {
