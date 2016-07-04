@@ -118,15 +118,16 @@ class QueueDataStore extends DataStore\DataStoreAbstract
         }
         if (isset($id[Client::MESSAGE_ID])) {
             $idSting = $id[Client::MESSAGE_ID];
-
-            if ((bool) strpos($idSting, $this->queueName)) {
-                throw new QueueException('You\'re trying to delete the message with id=' . $idSting . ' from the queue'
-                    . $this->queueName . '. But such message does not exist.');
-            }
-            $this->queueClient->deleteMessage($this->queueName, $id);
         } else {
-            $message = $this->messagesDataStore->delete($id);
+            $idSting = $id;
         }
+        if (!strpos($idSting, $this->queueName)) {
+            throw new QueueException('You\'re trying to delete the message with id=' . $idSting . ' from the queue: '
+            . $this->queueName . '. But such message does not exist.');
+        }
+
+        $message = $this->messagesDataStore->delete($id);
+
         return $message;
     }
 
