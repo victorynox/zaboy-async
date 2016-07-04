@@ -14,9 +14,9 @@ use zaboy\rest\DataStore\ConditionBuilder\RqlConditionBuilder;
  *
  * <code>
  *
- * //How to get meeage from queue:
+ * // How to get message from queue:
  * $message = $this->read(null) or 'null' or 'null()'
- * You'ii get
+ * You'll get
  * [
  *     'id' => '1_ManagedQueue11__576522deb5ad08'
  *     'Body' => mix
@@ -24,7 +24,7 @@ use zaboy\rest\DataStore\ConditionBuilder\RqlConditionBuilder;
  *     'time-in-flight' => 1466245854
  * ]
  *
- * Add to queue:
+ * Add to the queue:
  * $message = [
  *     'id' => '1_ManagedQueue11__576522deb5ad08'
  *     'Body' => mix
@@ -33,7 +33,7 @@ use zaboy\rest\DataStore\ConditionBuilder\RqlConditionBuilder;
  * ]
  * $this->create($message)
  *
- * Delete from queue:
+ * Delete from the queue:
  * $this->delete( '1_ManagedQueue11__576522deb5ad08')
  * or (better):
  * $this->delete(['id' => '1_ManagedQueue11__576522deb5ad08']) or
@@ -100,7 +100,7 @@ class QueueDataStore extends DataStore\DataStoreAbstract
         if (!isset($itemData[Client::BODY])) {
             throw new QueueException('There is not "Body" key in message');
         }
-        $priority = key_exists(Client::PRIORITY, $itemData) ? $itemData[Client::PRIORITY] : null;
+        $priority = array_key_exists(Client::PRIORITY, $itemData) ? $itemData[Client::PRIORITY] : null;
         $this->queueClient->addMessage($this->queueName, $itemData[Client::BODY], $priority);
 
         return $itemData;
@@ -114,13 +114,14 @@ class QueueDataStore extends DataStore\DataStoreAbstract
     public function delete($id)
     {
         if (!is_string($id) && !isset($id[Client::MESSAGE_ID])) {
-            throw new QueueException('"id" must be string or array("id"->string)');
+            throw new QueueException('The field "id" must be string or array("id" => "some string")');
         }
         if (isset($id[Client::MESSAGE_ID])) {
             $idSting = $id[Client::MESSAGE_ID];
 
             if ((bool) strpos($idSting, $this->queueName)) {
-                throw new QueueException('Yuo try to delete message ' . $idSting . 'from queue' . $this->queueName);
+                throw new QueueException('You\'re trying to delete the message with id=' . $idSting . ' from the queue'
+                    . $this->queueName . '. But such message does not exist.');
             }
             $this->queueClient->deleteMessage($this->queueName, $id);
         } else {
@@ -178,7 +179,7 @@ class QueueDataStore extends DataStore\DataStoreAbstract
 
     /**
      * @param $methodName
-     * @throws TimelineDataStoreException
+     * @throws QueueException
      */
     protected function throwException($methodName)
     {

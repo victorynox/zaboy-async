@@ -17,7 +17,7 @@ class MemoryStoresAdapterFactoryTest extends \PHPUnit_Framework_TestCase
     protected $object;
 
     /**
-     * @var Zend\Db\Adapter\Adapter
+     * @var \Zend\Db\Adapter\Adapter
      */
     protected $adapter;
 

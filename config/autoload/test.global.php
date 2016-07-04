@@ -30,13 +30,13 @@ return [
         ],
     ],
     'queueAdapter' => [
-        'Test-Mysql_OueueAdapter 2sec' => [
-            'class' => 'zaboy\async\Queue\Adapter\MysqlOueueAdapter'
+        'Test-Mysql_QueueAdapter 2sec' => [
+            'class' => 'zaboy\async\Queue\Adapter\MysqlQueueAdapter'
         ],
-        'TestMemoryStoresOueueAdapter' => [
-            'class' => 'zaboy\async\Queue\Adapter\MemoryStoresOueueAdapter'
+        'TestMemoryStoresQueueAdapter' => [
+            'class' => 'zaboy\async\Queue\Adapter\MemoryStoresQueueAdapter'
         ],
-        'TestDataStoresOueueAdapter' => [
+        'TestDataStoresQueueAdapter' => [
             'class' => 'zaboy\async\Queue\Adapter\DataStores',
             //there are additional options in this case
             'QueuesDataStore' => 'QueuesMemoryDataStore',
@@ -45,11 +45,11 @@ return [
     ],
     'queueClient' => [
         'testMysqlQueue' => [
-            'QueueAdapter' => 'Test-Mysql_OueueAdapter 2sec',
+            'QueueAdapter' => 'Test-Mysql_QueueAdapter 2sec',
             'maxTimeInFlight' => 2
         ],
         'testDataStoresQueue' => [
-            'QueueAdapter' => 'TestDataStoresOueueAdapter',
+            'QueueAdapter' => 'TestDataStoresQueueAdapter',
             'maxTimeInFlight' => 2
         ],
     ],

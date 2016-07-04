@@ -42,7 +42,7 @@ class MysqlDataStoresTest extends \PHPUnit_Framework_TestCase
         $container = include 'config/container.php';
         $this->adapter = $container->get('db');
 
-        $this->object = $container->get('Test-Mysql_OueueAdapter 2sec');
+        $this->object = $container->get('Test-Mysql_QueueAdapter 2sec');
 
 
         $date = new \DateTime('@1419237113');
@@ -62,8 +62,8 @@ class MysqlDataStoresTest extends \PHPUnit_Framework_TestCase
     protected function tearDown()
     {
         $tableManagerMysql = new TableManagerMysql($this->adapter);
-        $tableManagerMysql->deleteTable('queue_messages_testmysqloueueadapter2sec');
-        $tableManagerMysql->deleteTable('queue_queues_testmysqloueueadapter2sec');
+        $tableManagerMysql->deleteTable('queue_messages_testmysqlqueueadapter2sec');
+        $tableManagerMysql->deleteTable('queue_queues_testmysqlqueueadapter2sec');
     }
 
     public function test_getPriorityHandler()

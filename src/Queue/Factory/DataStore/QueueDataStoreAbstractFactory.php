@@ -24,7 +24,7 @@ use zaboy\async\Queue\DataStore\QueueDataStore;
  *   ],
  *   'queueClient' => [
  *       'testMysqlQueue' => [
- *           'QueueAdapter' => 'Test-Mysql_OueueAdapter 2sec',
+ *           'QueueAdapter' => 'Test-Mysql_QueueAdapter 2sec',
  *           'maxTimeInFlight' => 2
  *    ]
  *  ],
@@ -40,13 +40,13 @@ class QueueDataStoreAbstractFactory extends AbstractFactoryAbstract
     const KEY_QUEUE_NAME = 'queueName';
 
     /**
-     * Create and return an instance of the ClientDataStore.
+     * Creates and returns an instance of the ClientDataStore.
      *
      *
-     * @param  Interop\Container\ContainerInterface $container
+     * @param  \Interop\Container\ContainerInterface $container
      * @param  string $requestedName
      * @param  array $options
-     * @return \DataStores\Interfaces\DataStoresInterface
+     * @return \ReputationVIP\QueueClient\Adapter\AdapterInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {

@@ -2,7 +2,7 @@
 
 namespace zaboy\async\Queue\Adapter;
 
-use zaboy\async\Queue\Adapter\DataStoresAbstruct;
+use ReputationVIP\QueueClient\QueueClientInterface;
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 use zaboy\async\Queue\PriorityHandler\PriorityHandler;
 use zaboy\async\Queue\QueueException;
@@ -18,7 +18,7 @@ use Xiag\Rql\Parser\DataType\Glob;
  * @category   async
  * @package    zaboy
  */
-class DataStores extends DataStoresAbstruct implements AdapterInterface
+class DataStores extends DataStoresAbstract implements AdapterInterface
 {
 
     /**
@@ -30,7 +30,7 @@ class DataStores extends DataStoresAbstruct implements AdapterInterface
     public function __construct(DataStoresInterface $queuesDataStore, DataStoresInterface $messagesDataStore)
     {
         if (is_null($queuesDataStore) || is_null($messagesDataStore)) {
-            throw new QueueException('Argument not defined.');
+            throw new QueueException('Argument is not defined.');
         }
 
         $this->queuesDataStore = $queuesDataStore;
@@ -46,13 +46,13 @@ class DataStores extends DataStoresAbstruct implements AdapterInterface
     {
 
         if (empty($queueName)) {
-            throw new QueueException('Parameter queueName empty or not defined.');
+            throw new QueueException('The parameter "queueName" is empty or not defined.');
         }
         if (!in_array($queueName, $this->listQueues())) {
-            throw new QueueException('Queue with name ' . $queueName . 'is not exist.');
+            throw new QueueException('The queue with name "' . $queueName . '" does not exist.');
         }
         if (empty($message)) {
-            throw new QueueException('Parameter message empty or not defined.');
+            throw new QueueException('The parameter "message" is empty or not defined.');
         }
         $identifier = $this->messagesDataStore->getIdentifier();
         $idWithDot = uniqid(
@@ -114,7 +114,7 @@ class DataStores extends DataStoresAbstruct implements AdapterInterface
     {
         $identifier = $this->messagesDataStore->getIdentifier();
         if (!isset($message[$identifier])) {
-            throw new QueueException('Message identifier not found in message.');
+            throw new QueueException('The message identifier is not found in the message.');
         }
         $this->messagesDataStore->delete($message[$identifier]);
         return $this;
@@ -156,28 +156,28 @@ class DataStores extends DataStoresAbstruct implements AdapterInterface
         $scalarNodeQueue = new ScalarOperator\EqNode(
                 self::QUEUE_NAME, $queueName
         );
-        $scalarNodeNotInFlihgt = new ScalarOperator\EqNode(
+        $scalarNodeNotInFlight = new ScalarOperator\EqNode(
                 self::TIME_IN_FLIGHT, 0
         );
-        $scalarNodeLongnInFlihgt = new ScalarOperator\LtNode(
+        $scalarNodeLongnInFlight = new ScalarOperator\LtNode(
                 self::TIME_IN_FLIGHT, time() - $this->getMaxTimeInFlight()
         );
-        $orNodeInFlihgt = new LogicOperator\OrNode([
-            $scalarNodeNotInFlihgt,
-            $scalarNodeLongnInFlihgt
+        $orNodeInFlight = new LogicOperator\OrNode([
+            $scalarNodeNotInFlight,
+            $scalarNodeLongnInFlight
         ]);
         if (isset($priority)) {
             $scalarNodePriority = new ScalarOperator\EqNode(
                     self::PRIORITY, $this->getPriorityIndex($priority)
             );
             $andNode = new LogicOperator\AndNode([
-                $orNodeInFlihgt,
+                $orNodeInFlight,
                 $scalarNodePriority,
                 $scalarNodeQueue
             ]);
         } else {
             $andNode = new LogicOperator\AndNode([
-                $orNodeInFlihgt,
+                $orNodeInFlight,
                 $scalarNodeQueue
             ]);
         }
@@ -274,7 +274,7 @@ class DataStores extends DataStoresAbstruct implements AdapterInterface
     }
 
     /*
-      //for last commented test
+      // for the last commented test
       protected function readMessageFifoButNewerFlightInFirst($queueName, $priority = null, $attemptNumber = 1)
       {
       var_dump('start PRIORITY-' . $priority);

@@ -8,7 +8,7 @@ use zaboy\rest\FactoryAbstract;
 use zaboy\async\Queue\Adapter;
 
 /**
- * Creates if can and returns an instance of class Queue\Adapter\DataStoresAbstruct - Adapter for Queue
+ * Creates if can and returns an instance of class Queue\Adapter\DataStoresAbstract - Adapter for Queue
  *
  * Class ScriptAbstractFactory
  *

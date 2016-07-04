@@ -2,12 +2,10 @@
 
 namespace zaboy\async\Queue\Client;
 
+use ReputationVIP\QueueClient\Adapter\AdapterInterface;
 use ReputationVIP\QueueClient\QueueClient;
 use zaboy\rest\DataStore\Interfaces\ReadInterface;
-use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
-use zaboy\async\Queue\QueueException;
-use zaboy\async\Queue\Adapter\DataStoresAbstruct;
-use Xiag\Rql\Parser\Query;
+use zaboy\async\Queue\Adapter\DataStoresAbstract;
 
 /**
  *
@@ -34,19 +32,21 @@ class Client extends QueueClient
     /**
      * @param AdapterInterface $adapter
      */
-    public function __construct(DataStoresAbstruct $adapter)
+    public function __construct(DataStoresAbstract $adapter)
     {
         parent::__construct($adapter);
     }
 
     /**
-     * Return adapter
+     * Returns the adapter
      *
-     * I have no idea why, but ReputationVIP\QueueClient\QueueClient
-     * have not method getAdapter(). We fix it/
+     * I have no idea why,
+     * but ReputationVIP\QueueClient\QueueClient
+     * have not got the method getAdapter().
+     * We fix it.
      *
-     * @see ReputationVIP\QueueClient\QueueClient
-     * @return \zaboy\async\Queue\Adapter\DataStoresAbstruct
+     * @see \ReputationVIP\QueueClient\QueueClient
+     * @return \zaboy\async\Queue\Adapter\DataStoresAbstract
      */
     public function getAdapter()
     {

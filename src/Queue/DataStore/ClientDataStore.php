@@ -7,7 +7,7 @@ use zaboy\rest\DataStore\DataStoreAbstract;
 use zaboy\async\Queue\Client\Client;
 use zaboy\async\Queue\QueueException;
 use Xiag\Rql\Parser\Query;
-use zaboy\async\Queue\Broker\QueueBrokerInterhace;
+use zaboy\async\Queue\Broker\QueueBrokerInterface;
 
 /**
  *
@@ -39,7 +39,7 @@ class ClientDataStore extends DataStore\DataStoreAbstract
 
     /**
      *
-     * @var QueueBrokerInterhace
+     * @var QueueBrokerInterface
      */
     protected $queueBroker;
 
@@ -49,7 +49,7 @@ class ClientDataStore extends DataStore\DataStoreAbstract
      */
     protected $queuesDataStore;
 
-    public function __construct(Client $queueClient, QueueBrokerInterhace $queueBroker = null)
+    public function __construct(Client $queueClient, QueueBrokerInterface $queueBroker = null)
     {
         $this->queueClient = $queueClient;
         $this->queuesDataStore = $queueClient->getAdapter()->getQueuesDataStore();
@@ -157,7 +157,7 @@ class ClientDataStore extends DataStore\DataStoreAbstract
 
     /**
      * @param $methodName
-     * @throws TimelineDataStoreException
+     * @throws QueueException
      */
     protected function throwException($methodName)
     {

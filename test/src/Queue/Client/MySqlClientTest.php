@@ -2,7 +2,6 @@
 
 namespace zaboy\test\async\Queue\Client;
 
-use zaboy\test\async\Queue\Client\ClientTestAbstract;
 use zaboy\async\Queue;
 
 class MySqlClientTest extends ClientTestAbstract

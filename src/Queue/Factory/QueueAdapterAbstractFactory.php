@@ -6,7 +6,7 @@ use Interop\Container\ContainerInterface;
 use zaboy\rest\AbstractFactoryAbstract;
 
 /**
- * Creates if can and returns an instance of class Queue\Adapter\DataStoresAbstruct - Adapter for Queue
+ * Creates if can and returns an instance of class Queue\Adapter\DataStoresAbstract - Adapter for Queue
  *
  * Class ScriptAbstractFactory
  *
@@ -21,11 +21,11 @@ class QueueAdapterAbstractFactory extends AbstractFactoryAbstract
     const DEFAULT_QUEUES_DATA_STORE = 'QueuesDataStore';
 
     protected $suppotedClasses = [
-        'zaboy\async\Queue\Adapter\MysqlOueueAdapter' =>
+        'zaboy\async\Queue\Adapter\MysqlQueueAdapter' =>
         'zaboy\async\Queue\Factory\Adapter\MySqlAdapterFactory',
         'zaboy\async\Queue\Adapter\DataStores' =>
         'zaboy\async\Queue\Factory\Adapter\DataStoresAdapterFactory',
-        'zaboy\async\Queue\Adapter\MemoryStoresOueueAdapter' =>
+        'zaboy\async\Queue\Adapter\MemoryStoresQueueAdapter' =>
         'zaboy\async\Queue\Factory\Adapter\MemoryStoresAdapterFactory',
     ];
 
@@ -33,10 +33,10 @@ class QueueAdapterAbstractFactory extends AbstractFactoryAbstract
      * Create and return an instance of the Queue Adapter.
      *
      *
-     * @param  Interop\Container\ContainerInterface $container
+     * @param  \Interop\Container\ContainerInterface $container
      * @param  string $requestedName
      * @param  array $options
-     * @return \DataStores\Interfaces\DataStoresInterface
+     * @return \ReputationVIP\QueueClient\Adapter\AdapterInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {

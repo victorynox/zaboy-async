@@ -9,11 +9,11 @@ use zaboy\rest\FactoryAbstract;
 use Zend\Db\TableGateway\TableGateway;
 use zaboy\rest\TableGateway\TableManagerMysql;
 use zaboy\async\Queue\Adapter;
-use zaboy\async\Queue\Adapter\DataStoresAbstruct as QueueDataStores;
+use zaboy\async\Queue\Adapter\DataStoresAbstract as QueueDataStores;
 use zaboy\rest\DataStore\DataStoreAbstract as DataStore;
 
 /**
- * Creates if can and returns an instance of class Queue\Adapter\DataStoresAbstruct - Adapter for Queue
+ * Creates if can and returns an instance of class Queue\Adapter\DataStoresAbstract - Adapter for Queue
  *
  * Class ScriptAbstractFactory
  *
@@ -122,7 +122,7 @@ class MySqlAdapterFactory extends FactoryAbstract
         $tableGatewayMessages = new TableGateway($tableNameMessages, $this->db);
         $messagesDataStore = new DbTable($tableGatewayMessages);
 
-        $adapterQueues = new Adapter\MysqlOueueAdapter($queuesDataStore, $messagesDataStore);
+        $adapterQueues = new Adapter\MysqlQueueAdapter($queuesDataStore, $messagesDataStore);
         return $adapterQueues;
     }
 

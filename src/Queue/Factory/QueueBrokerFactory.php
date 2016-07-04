@@ -15,9 +15,9 @@ use zaboy\async\Queue\Broker;
 use zaboy\scheduler\Callback\CallbackManager;
 
 /**
- * Create and return an instance of the Queue Broker
+ * Creates and returns an instance of the Queue Broker
  *
- * This Factory depends on Container (which should return an 'config' as array)
+ * This Factory depends on Container (which should return a 'config' as array)
  *
  * The configuration can contain:
  * <code>
@@ -46,8 +46,8 @@ class QueueBrokerFactory extends FactoryAbstract
     /**
      * Create and return an instance of the QueueBroker.
      *
-     * @param  Interop\Container\ContainerInterface $container
-     * @return zaboy\async\Queue\Broker
+     * @param  \Interop\Container\ContainerInterface $container
+     * @return \zaboy\async\Queue\Broker
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {

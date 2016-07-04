@@ -19,7 +19,7 @@ use zaboy\scheduler\Callback\CallbackManager;
  * @category   async
  * @package    zaboy
  */
-class QueueBroker implements QueueBrokerInterhace
+class QueueBroker implements QueueBrokerInterface
 {
 
     const DEFAULT_MSG_IN_QUERY = 100;
@@ -55,7 +55,7 @@ class QueueBroker implements QueueBrokerInterhace
      *
      * @var array
      */
-    var $queuesClientsInstanses;
+    var $queuesClientsInstances;
 
     /**
      *
@@ -63,11 +63,11 @@ class QueueBroker implements QueueBrokerInterhace
      */
     var $callbackManager;
 
-    public function __construct($callbackManager, $queuesParams, $queuesClientsInstanses)
+    public function __construct($callbackManager, $queuesParams, $queuesClientsInstances)
     {
         $this->callbackManager = $callbackManager;
         $this->queuesParams = $queuesParams;
-        $this->queuesClientsInstanses = $queuesClientsInstanses;
+        $this->queuesClientsInstances = $queuesClientsInstances;
         $this->createAllQueues();
     }
 
@@ -83,12 +83,12 @@ class QueueBroker implements QueueBrokerInterhace
 
     protected function createAllQueues()
     {
-        foreach ($this->queuesClientsInstanses as $queueClientName => $queueClientNameInstanse) {
-            /* @var $queueClientNameInstanse \zaboy\async\Queue\Client\Client */
-            $existedQueues = $queueClientNameInstanse->listQueues();
+        foreach ($this->queuesClientsInstances as $queueClientName => $queueClientNameInstance) {
+            /* @var $queueClientNameInstance \zaboy\async\Queue\Client\Client */
+            $existedQueues = $queueClientNameInstance->listQueues();
             foreach ($this->queuesParams[$queueClientName] as $queueNameFromParams => $val) {
                 if (!in_array($queueNameFromParams, $existedQueues)) {
-                    $queueClientNameInstanse->createQueue($queueNameFromParams);
+                    $queueClientNameInstance->createQueue($queueNameFromParams);
                 }
             }
         }
@@ -100,8 +100,8 @@ class QueueBroker implements QueueBrokerInterhace
         foreach ($queueClientsNames as $queueClientName) {
             $queuesNames = $this->getQueuesByClient($queueClientName);
             foreach ($queuesNames as $queueName) {
-                $worker = $this->getQueueWorkerInstanse($queueClientName, $queueName);
-                $queueClient = $this->getQueueCleentInstanse($queueClientName);
+                $worker = $this->getQueueWorkerInstance($queueClientName, $queueName);
+                $queueClient = $this->getQueueClientInstance($queueClientName);
 
                 //$numberOfMessages = $queueClient->getNumberMessages($queueName);
                 if (isset($this->queuesParams[$queueClientName][$queueName]['messagesNumberInQuery'])) {
@@ -112,15 +112,15 @@ class QueueBroker implements QueueBrokerInterhace
 
                 $messages = $queueClient->getMessages($queueName, $numberOfMessages, $priority);
                 foreach ($messages as $message) {
-                    /* @var $worker zaboy\scheduler\Callback\Interfaces\CallbackInterface */
+                    /* @var $worker \zaboy\scheduler\Callback\Interfaces\CallbackInterface */
                     $worker->call([$message]);
                     ////Params are sent to call() as array
                     // $message = [
-                    //'id' => '1_ManagedQueue11__576522deb5ad08'
-                    //'Body' => Array (...)
-                    //'priority' => 'HIGH'
-                    //'time_in_flight' => 1466245854
-                    //]
+                    //      'id' => '1_ManagedQueue11__576522deb5ad08'
+                    //      'Body' => Array (...)
+                    //      'priority' => 'HIGH'
+                    //      'time_in_flight' => 1466245854
+                    // ]
                 }
             }
         }
@@ -140,9 +140,9 @@ class QueueBroker implements QueueBrokerInterhace
      * @param string $queueClientName
      * @return QueueClientInterface
      */
-    protected function getQueueCleentInstanse($queueClientName)
+    protected function getQueueClientInstance($queueClientName)
     {
-        return $this->queuesClientsInstanses[$queueClientName];
+        return $this->queuesClientsInstances[$queueClientName];
     }
 
     protected function getQueuesByClient($queueClientName)
@@ -150,7 +150,7 @@ class QueueBroker implements QueueBrokerInterhace
         return array_keys($this->queuesParams[$queueClientName]);
     }
 
-    protected function getQueueWorkerInstanse($queueClientName, $queueName)
+    protected function getQueueWorkerInstance($queueClientName, $queueName)
     {
         $queueClientParams = $this->queuesParams[$queueClientName];
         $workerName = $queueClientParams[$queueName]['workerName'];
