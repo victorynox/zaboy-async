@@ -6,6 +6,7 @@ use zaboy\rest\DataStore\DbTable;
 use Zend\Db\Adapter\AdapterInterface;
 use Zend\Db\TableGateway\TableGateway;
 use zaboy\rest\DataStore\Interfaces\ReadInterface;
+use zaboy\scheduler\DataStore\UTCTime;
 
 /**
  *
@@ -17,7 +18,7 @@ use zaboy\rest\DataStore\Interfaces\ReadInterface;
  * wait_fn => string, php callable or callback service name;
  * wait_list =>  json array of promise_id;
  * handlers = json array of arrays [string promise_id, string - callable $onFulfilled, string - callable $onRejected];
- * actual_time_end = 2216125; UTC time when promise can be deleted
+ * time_in_flight = 2216125; UTC time when promise has sarted
  * parent_id => promise_id_123456789qwerty2 - promise that gave birth to it
  * on_fulfilled => string, php callable or callback service name;
  * on_rejected => string, php callable or callback service name;
@@ -32,9 +33,10 @@ class MySqlPromiseAdapter extends TableGateway
     //
     //'id' - unique id of promise: promise_id_123456789qwerty
     const PROMISE_ID = ReadInterface::DEF_ID;
+    const CLASS_NAME = 'class_name';
     const STATE = 'state';
     const RESULT = 'result';
-    const MAX_ENDING_TIME = 'max_ending_time';
+    const TIME_IN_FLIGHT = 'time_in_flight';
     //
     const CANCEL_FN = 'cancel_fn';
     const WAIT_FN = 'wait_fn';
@@ -42,5 +44,23 @@ class MySqlPromiseAdapter extends TableGateway
     const PARENT_ID = 'parent_id';
     const ON_FULFILLED = 'on_fulfilled';
     const ON_REJECTED = 'on_rejected';
+
+    /**
+     *
+     * @return int Grivich UTC time in seconds
+     */
+    public function getUtcTime()
+    {
+        return (int) UTCTime::getUTCTimestamp(0, 0);
+    }
+
+    /**
+     *
+     * @return int Grivich UTC time in microseconds
+     */
+    public function getUtcMicrotime()
+    {
+        return (int) UTCTime::getUTCTimestamp(0, 6);
+    }
 
 }

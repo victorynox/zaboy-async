@@ -18,5 +18,7 @@ namespace zaboy\async\Promise\Interfaces;
 interface PromiseBrokerInterface
 {
 
-    public function make();
+    public function getPromise($promiseId);
+
+    public function makePromise();
 }

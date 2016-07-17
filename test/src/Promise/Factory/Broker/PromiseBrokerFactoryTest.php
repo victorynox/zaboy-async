@@ -1,6 +1,6 @@
 <?php
 
-namespace zaboy\test\async\Promise\Factory\Adapter\Broker;
+namespace zaboy\test\async\Promise\Factory\Broker;
 
 use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
 use zaboy\async\Promise\Factory\Broker\PromiseBrokerFactory;
@@ -55,7 +55,7 @@ class PromiseBrokerFactoryTest extends \PHPUnit_Framework_TestCase
     {
         $adapter = $this->object->__invoke($this->container, '', [MySqlAdapterFactory::KEY_PROMISE_TABLE_NAME => self::TEST_TABLE_NAME]);
         $this->assertSame(
-                get_class($adapter), 'zaboy\async\Promise\PromiseBroker'
+                get_class($adapter), 'zaboy\async\Promise\Broker\PromiseBroker'
         );
     }
 

@@ -9,18 +9,11 @@
 
 namespace zaboy\async\Promise;
 
-use GuzzleHttp\Promise\Promise;
-//use GuzzleHttp\Promise\PromiseInterface;
-use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 use zaboy\async\Promise\PromiseException;
-use zaboy\async\Promise\PromiseAbstract;
 use zaboy\async\Promise\Pending\PendingPromise;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
-use zaboy\async\Promise\PromiseBroker;
-use zaboy\async\Promise\Adapter\MySqlPromiseAdapter;
-use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
-use zaboy\scheduler\DataStore\UTCTime;
-use zaboy\async\Promise\Pending\PendingPromise;
+use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
+use Zend\Db\Sql\Select;
 
 /**
  * PromiseClient
@@ -31,12 +24,9 @@ use zaboy\async\Promise\Pending\PendingPromise;
 class PromiseClient implements PromiseInterface//extends PromiseAbstract//implements PromiseInterface
 {
 
-    const PROMISE_ID_PREFIX = 'promise';
-    const ID_SEPARATOR = '_';
-
     /**
      *
-     * @var MySqlPromiseAdapter
+     * @var \zaboy\async\Promise\Adapter\MySqlPromiseAdapter
      */
     public $promiseAdapter;
 
@@ -46,26 +36,35 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
      */
     public $promiseId;
 
-    public function __construct(MySqlPromiseAdapter $promiseAdapter, $promiseId = null)
+    public function __construct(Store $promiseAdapter, $promiseId = null)
     {
         $this->promiseAdapter = $promiseAdapter;
         if (!isset($promiseId)) {
-            $promiseId = $this->makePromise();
+            $promise = new PendingPromise($promiseAdapter);
+            $this->insertPromise($promise);
+            $this->promiseId = $promise->getPromiseId();
+        } else {
+            $this->promiseId = $promiseId;
         }
-        $this->promiseId = $promiseId;
     }
 
-    protected function makePromise()
+    public function getPromiseId()
     {
-        $promise = new PendingPromise($this->promiseAdapter);
-        $promiseId = $promise->getPromiseId();
-        return $promiseId;
+        return $this->promiseId;
+    }
+
+    public function getState()
+    {
+        $promiseData = $this->getPromiseData(true);
+        $state = $promiseData[Store::STATE];
+        return $state;
     }
 
     protected function getPromiseData($exceptionIfAbsent = false)
     {
-        $where = [MySqlPromiseAdapter::PROMISE_ID => $this->promiseId];
+        $where = [Store::PROMISE_ID => $this->promiseId];
         $rowset = $this->promiseAdapter->select($where);
+
         $promiseData = $rowset->current();
         if (!isset($promiseData)) {
             if ($exceptionIfAbsent) {
@@ -80,11 +79,75 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
         }
     }
 
-    public function getState()
+    public function resolve($value)
     {
-        $promiseData = $this->getPromiseData(true);
-        $state = $promiseData[MySqlPromiseAdapter::STATE];
-        return $state;
+        $promiseData = $this->runTransaction('resolve', $value);
+        return $promiseData;
+    }
+
+    public function wait()
+    {
+        $promiseData = $this->runTransaction('wait');
+        return $promiseData[Store::RESULT];
+    }
+
+    public function insertPromise(PromiseAbstract $promise)
+    {
+        try {
+            $promiseData = $promise->getPromiseData();
+            $rowsCount = $this->promiseAdapter->insert($promiseData);
+        } catch (\Exception $e) {
+            throw new PromiseException('Can\'t insert promiseData', 0, $e);
+        }
+        if (!$rowsCount) {
+            throw new PromiseException('Can\'t insert promiseData', 0, $e);
+        }
+    }
+
+    protected function runTransaction($methodName, $param1 = null, $params2 = null)
+    {
+        $identifier = Store::PROMISE_ID;
+        $db = $this->promiseAdapter->getAdapter();
+        $queryStrPromise = 'SELECT ' . Select::SQL_STAR
+                . ' FROM ' . $db->platform->quoteIdentifier($this->promiseAdapter->getTable())
+                . ' WHERE ' . $db->platform->quoteIdentifier($identifier) . ' = ?'
+                . ' FOR UPDATE';
+        try {
+            $errorMsg = "Can\'t start transaction for $methodName";
+            $db->getDriver()->getConnection()->beginTransaction();
+            //is row with this index exist?
+            $rowset = $db->query($queryStrPromise, array($this->promiseId));
+            var_dump($methodName . PHP_EOL);
+
+            $errorMsg = "Can not execute $methodName. Pomise is not exist.";
+            if (is_null($rowset->current())) {
+                throw new PromiseException( );
+            }
+
+            $promiseData = $rowset->current()->getArrayCopy();
+
+            $promiseClass = $promiseData[Store::CLASS_NAME];
+
+            $promise = new $promiseClass($this->promiseAdapter, $promiseData);
+
+            $errorMsg = "Can not execute $methodName. Class: $promiseClass";
+
+            $promiseDataReturned = call_user_func([$promise, $methodName], $param1, $params2);
+
+            if (!is_null($promiseDataReturned)) {
+                $errorMsg = "Can not promiseAdapter->update.";
+                $this->promiseAdapter->update($promiseDataReturned);
+                var_dump($promiseClass);
+            } else {
+                $promiseDataReturned = $promiseData;
+            }
+
+            $db->getDriver()->getConnection()->commit();
+        } catch (\Exception $e) {
+            $db->getDriver()->getConnection()->rollback();
+            throw new PromiseException($errorMsg . ' Pomise: ' . $this->promiseId, 0, $e);
+        }
+        return $promiseDataReturned;
     }
 
 }

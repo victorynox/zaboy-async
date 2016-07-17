@@ -9,12 +9,13 @@
 
 namespace zaboy\async\Promise;
 
+use zaboy\scheduler\DataStore\UTCTime;
 use GuzzleHttp\Promise\Promise;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\Broker\PromiseBroker;
-use zaboy\async\Promise\Adapter\MySqlPromiseAdapter;
+use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
 use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
 
 /**
@@ -23,17 +24,17 @@ use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
  * @category   async
  * @package    zaboy
  */
-class PromiseAbstract implements PromiseInterface
+abstract class PromiseAbstract implements PromiseInterface
 {
 
-    public $promiseId;
-    public $state;
+    const PROMISE_ID_PREFIX = 'promise';
+    const ID_SEPARATOR = '_';
 
     /**
      *
-     * @var string unique id of promise: promise_id_123456789qwerty
+     * @var array
      */
-    public $promiseId;
+    public $promiseData;
 
     /**
      *
@@ -46,15 +47,25 @@ class PromiseAbstract implements PromiseInterface
      * @param MySqlPromiseAdapter $promiseAdapter
      * @throws PromiseException
      */
-    public function __construct(MySqlPromiseAdapter $promiseAdapter, $promiseId = null)
+    public function __construct(Store $promiseAdapter, $promiseData = null)
     {
         $this->promiseAdapter = $promiseAdapter;
-        $this->promiseId = $promiseId;
+        $this->promiseData = $promiseData;
+        if (!isset($this->promiseData[Store::PROMISE_ID])) {
+            $this->setPromiseData();
+        }
+    }
+
+    protected function setPromiseData()
+    {
+        $this->promiseData[Store::PROMISE_ID] = $this->makePromiseId();
+        $this->promiseData[Store::CLASS_NAME] = get_class($this);
+        $this->promiseData[Store::TIME_IN_FLIGHT] = $this->promiseAdapter->getUtcTime();
     }
 
     protected function makePromiseId()
     {
-        $time = UTCTime::getUTCTimestamp(0, 6); //Grivich UTC time
+        $time = $this->promiseAdapter->getUtcMicrotime(); //Grivich UTC time in microsec
         $idWithDot = uniqid(
                 self::PROMISE_ID_PREFIX . self::ID_SEPARATOR . self::ID_SEPARATOR
                 . $time . self::ID_SEPARATOR . self::ID_SEPARATOR
@@ -65,50 +76,37 @@ class PromiseAbstract implements PromiseInterface
         return $promiseId;
     }
 
-    protected function makeTimeEnd($maxLifeTime = 3600)
-    {
-        return (int) UTCTime::getUTCTimestamp(0, 0) + $maxLifeTime;
-    }
-
     public function getPromiseId()
     {
-        return $this->promiseId;
-    }
-
-    public function getState()
-    {
-        $where = [MySqlPromiseAdapter::PROMISE_ID => $this->promiseId];
-        $rowset = $this->promiseAdapter->select($where);
-        $row = $rowset->current();
-        if (isset($row)) {
-            return $row[MySqlPromiseAdapter::STATE];
+        if (isset($this->promiseData[Store::PROMISE_ID])) {
+            return $this->promiseData[Store::PROMISE_ID];
         } else {
             throw new PromiseException(
-            "Pomise $promiseId is not exist"
+            "PomiseId is not set."
             );
         }
     }
 
-    protected function makePromise($addPromiseData = [])
+    public function getState()
     {
-        $itemData = $addPromiseData;
-
-        $promiseId = $this->makePromiseId();
-        $itemData[MySqlPromiseAdapter::PROMISE_ID] = $promiseId;
-
-        $timeEnd = $this->makeTimeEnd();
-        $itemData[MySqlPromiseAdapter::ACTUAL_TIME_END] = $timeEnd;
-
-        $tableGateway = $this->promiseAdapter;
-        try {
-            $rowsCount = $tableGateway->insert($itemData);
-        } catch (\Exception $e) {
-            throw new PromiseException('Can\'t insert item', 0, $e);
+        if (isset($this->promiseData[Store::STATE])) {
+            return $this->promiseData[Store::STATE];
+        } else {
+            throw new PromiseException(
+            "Pomise State is not set."
+            );
         }
-        if (!$rowsCount) {
-            throw new PromiseException('Can\'t insert item', 0, $e);
+    }
+
+    public function getPromiseData()
+    {
+        if (isset($this->promiseData)) {
+            return $this->promiseData;
+        } else {
+            throw new PromiseException(
+            "Pomise promiseData is not set."
+            );
         }
-        return $promiseId;
     }
 
 }

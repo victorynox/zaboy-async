@@ -4,6 +4,7 @@ namespace zaboy\async\Promise\Broker;
 
 use zaboy\scheduler\Callback\Interfaces\CallbackInterface;
 use zaboy\async\Promise\PromiseClient;
+use zaboy\async\Promise\Interfaces\PromiseBrokerInterface;
 use zaboy\async\Promise\Adapter\MySqlPromiseAdapter;
 use zaboy\async\Promise\PromiseException;
 use zaboy\rest\DataStore\DbTable;
@@ -19,6 +20,9 @@ class PromiseBroker implements PromiseBrokerInterface
 {
 
     const SERVICE_NAME = 'promise_broker';
+    const DEFAULT_MAX_TIME_IN_FLIGHT_VALUE = 3600;
+
+    protected $maxTimeInFlight;
 
     /**
      *
@@ -34,6 +38,7 @@ class PromiseBroker implements PromiseBrokerInterface
     public function __construct(MySqlPromiseAdapter $promiseAdapter)
     {
         $this->promiseAdapter = $promiseAdapter;
+        $this->setMaxTimeInFlight();
     }
 
     public function makePromise()
@@ -49,6 +54,20 @@ class PromiseBroker implements PromiseBrokerInterface
         }
         $promise = new PromiseClient($this->promiseAdapter, $promiseId);
         return $promise;
+    }
+
+    protected function setMaxTimeInFlight($maxTimeInFlight = null)
+    {
+        $this->maxTimeInFlight = !$maxTimeInFlight ? static::DEFAULT_MAX_TIME_IN_FLIGHT_VALUE : $maxTimeInFlight;
+    }
+
+    /**
+     *
+     * @return int
+     */
+    protected function getMaxTimeInFlight()
+    {
+        return $this->maxTimeInFlight;
     }
 
 }

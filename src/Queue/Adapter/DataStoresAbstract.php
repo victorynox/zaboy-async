@@ -238,9 +238,9 @@ abstract class DataStoresAbstract
         return $this->maxTimeInFlight;
     }
 
-    public function setMaxTimeInFlight($time = null)
+    public function setMaxTimeInFlight($maxTimeInFlight = null)
     {
-        $this->maxTimeInFlight = !$time ? self::DEFAULT_MAX_TIME_IN_FLIGHT_VALUE : $time;
+        $this->maxTimeInFlight = !$maxTimeInFlight ? self::DEFAULT_MAX_TIME_IN_FLIGHT_VALUE : $maxTimeInFlight;
     }
 
     /**

@@ -70,7 +70,7 @@ class PromiseBroker implements PromiseBrokerInterface
             MySqlPromiseAdapter::CANCEL_FN => $serializedCancelFn,
             MySqlPromiseAdapter::WAIT_FN => $serializedWaitFn,
             MySqlPromiseAdapter::WAIT_LIST => $serializedEmptyArray,
-            MySqlPromiseAdapter::ACTUAL_TIME_END => $timeEnd,
+            MySqlPromiseAdapter::MAX_ENDING_TIME => $timeEnd,
             MySqlPromiseAdapter::PARENT_ID => $parentId,
             MySqlPromiseAdapter::ON_FULFILLED => $serializedOnFulfilled,
             MySqlPromiseAdapter::ON_REJECTED => $serializedOnRejected,

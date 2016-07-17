@@ -7,15 +7,15 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace zaboy\async\Promise;
+namespace zaboy\async\Promise\Determined;
 
-use GuzzleHttp\Promise\Promise;
+use zaboy\async\Promise\Determined\DeterminedPromise;
 use GuzzleHttp\Promise\PromiseInterface;
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\PromiseAbstract;
 use zaboy\async\Promise\Broker\PromiseBroker;
-use zaboy\async\Promise\Adapter\MySqlPromiseAdapter;
+use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
 use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
 
 /**
@@ -24,20 +24,31 @@ use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
  * @category   async
  * @package    zaboy
  */
-class FulfilledPromise extends PromiseAbstract
+class FulfilledPromise extends DeterminedPromise
 {
 
-    /**
-     *
-     * @param MySqlPromiseAdapter $promiseAdapter
-     * @param mix $result
-     * @throws PromiseException
-     */
-    public function __construct(MySqlPromiseAdapter $promiseAdapter, $promiseId, $result)
+    public function setPromiseData()
     {
-        parent::__construct($promiseAdapter);
-        $this->result = $result;
-        $this->state = Promise::FULFILLED;
+        parent::setPromiseData();
+        $this->promiseData[Store::STATE] = PromiseInterface::FULFILLED;
+    }
+
+    public function getState()
+    {
+        return PromiseInterface::FULFILLED;
+    }
+
+    public function wait()
+    {
+        return null;
+    }
+
+    public function resolve($value)
+    {
+        if ($value != $this->promiseData[Store::RESULT]) {
+            throw new PromiseException('Pomise already resolved.  Pomise: ' . $this->promiseData[Store::PROMISE_ID]);
+        }
+        return $this->promiseData;
     }
 
 }

@@ -2,13 +2,14 @@
 
 namespace zaboy\test\async\Promise;
 
+use zaboy\async\Promise\PromiseClient;
 use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
-use zaboy\async\Promise\Factory\Broker\PromiseBrokerFactory;
-use zaboy\async\Promise\PromiseBroker;
 use Interop\Container\ContainerInterface;
 use zaboy\rest\TableGateway\TableManagerMysql;
+use zaboy\async\Promise\Adapter\MySqlPromiseAdapter;
+use zaboy\async\Promise\Interfaces\PromiseInterface;
 
-class PromiseBrokerTest extends \PHPUnit_Framework_TestCase
+class PromiseClientTest extends \PHPUnit_Framework_TestCase
 {
 
     const TEST_TABLE_NAME = 'test_mysqlpromisebroker';
@@ -19,7 +20,13 @@ class PromiseBrokerTest extends \PHPUnit_Framework_TestCase
     protected $adapter;
 
     /**
-     * @var PromiseBroker
+     *
+     * @var MySqlPromiseAdapter
+     */
+    protected $mySqlPromiseAdapter;
+
+    /**
+     * @var PromiseClient
      */
     protected $object;
 
@@ -36,8 +43,8 @@ class PromiseBrokerTest extends \PHPUnit_Framework_TestCase
     {
         $this->container = include './config/container.php';
         $this->adapter = $this->container->get('db');
-        $promiseBrokerFactory = new PromiseBrokerFactory();
-        $this->object = $promiseBrokerFactory->__invoke(
+        $mySqlAdapterFactory = new MySqlAdapterFactory();
+        $this->mySqlPromiseAdapter = $mySqlAdapterFactory->__invoke(
                 $this->container
                 , ''
                 , [MySqlAdapterFactory::KEY_PROMISE_TABLE_NAME => self::TEST_TABLE_NAME]
@@ -54,35 +61,26 @@ class PromiseBrokerTest extends \PHPUnit_Framework_TestCase
         $tableManagerMysql->deleteTable(self::TEST_TABLE_NAME);
     }
 
-    public function testPromiseBrokerTest__makePromise()
+    public function testPromiseTest__makePromise()
     {
-        $promise = $this->object->makePromise();
-        $promiseId = $promise->getPromiseId();
-
-        $promise = $this->object->getPromise($promiseId);
+        $this->object = new PromiseClient($this->mySqlPromiseAdapter);
         $this->assertSame(
-                get_class($promise), 'zaboy\async\Promise\PromiseClient'
+                get_class($this->object), 'zaboy\async\Promise\PromiseClient'
         );
-        $this->assertEquals(
-                $promise->getState(), 'pending'
+        $this->assertSame(
+                $this->object->getState(), PromiseInterface::PENDING
         );
-        $this->assertEquals(
-                strpos($promise->promiseId, 'promise'), 0
-        );
-//        $time = $promise->timeEnd - 3600;
-//        $this->assertTrue(
-//                abs($time - (microtime(1) - date('Z'))) < 10
-//        );
     }
 
-    public function testPromiseBrokerTest__getPromise()
+    public function testPromiseTest__resolve()
     {
-        $promiseId = $this->object->makePromise();
+        $this->object = new PromiseClient($this->mySqlPromiseAdapter);
+        $this->object->resolve(1);
         $this->assertSame(
-                get_class($this->object->getPromise($promiseId)), 'zaboy\async\Promise\PromiseClient'
+                $this->object->getState(), 'fulfilled'
         );
         $this->assertEquals(
-                get_class($this->object->getPromise($promiseId)), 'zaboy\async\Promise\PromiseClient'
+                $this->object->wait(), 1
         );
     }
 

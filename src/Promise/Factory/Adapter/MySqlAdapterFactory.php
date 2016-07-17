@@ -35,11 +35,14 @@ use zaboy\rest\DataStore\DataStoreAbstract as RestDataStore;
  * id => promise_id_123456789qwerty
  * state => pending || fulfilled || rejected;
  * result => mix;
- * cancel_fn => string, callable;
- * wait_fn => string - callable;
+ * cancel_fn => string, php callable or callback service name;
+ * wait_fn => string, php callable or callback service name;
  * wait_list =>  json array of promise_id;
  * handlers = json array of arrays [string promise_id, string - callable $onFulfilled, string - callable $onRejected];
- * actual_time_end = 2216125;
+ * time_in_flight = 2216125; UTC time when promise has sarted
+ * parent_id => promise_id_123456789qwerty2 - promise that gave birth to it
+ * on_fulfilled => string, php callable or callback service name;
+ * on_rejected => string, php callable or callback service name;
  *
  * @category   async
  * @package    zaboy
@@ -63,10 +66,17 @@ class MySqlAdapterFactory extends FactoryAbstract
     /** @var  \zaboy\rest\DataStore\DbTable */
     protected $dataStore;
     protected $promiseTableData = [
-        RestDataStore::DEF_ID => [
+        MySqlPromiseAdapter::PROMISE_ID => [
             'field_type' => 'Varchar',
             'field_params' => [
                 'length' => 128,
+                'nullable' => false
+            ]
+        ],
+        MySqlPromiseAdapter::CLASS_NAME => [
+            'field_type' => 'Varchar',
+            'field_params' => [
+                'length' => 256,
                 'nullable' => false
             ]
         ],
@@ -105,7 +115,7 @@ class MySqlAdapterFactory extends FactoryAbstract
                 'nullable' => true
             ]
         ],
-        MySqlPromiseAdapter::ACTUAL_TIME_END => [
+        MySqlPromiseAdapter::TIME_IN_FLIGHT => [
             'field_type' => 'Integer',
             'field_params' => [
                 'nullable' => false

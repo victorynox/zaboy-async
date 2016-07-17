@@ -14,8 +14,9 @@ use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\PromiseAbstract;
 use zaboy\async\Promise\Broker\PromiseBroker;
-use zaboy\async\Promise\Adapter\MySqlPromiseAdapter;
+use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
 use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
+use zaboy\async\Promise\Determined\FulfilledPromise;
 
 /**
  * PromiseAbstract
@@ -26,32 +27,38 @@ use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
 class PendingPromise extends PromiseAbstract
 {
 
-    public function __construct(MySqlPromiseAdapter $promiseAdapter, $promiseId = null)
+    public function setPromiseData()
     {
-        parent::__construct($promiseAdapter, $promiseId);
-        if (isset($this->promiseId)) {
-            $state = $this->getState();
-            if ($state !== PromiseInterface::PENDING) {
-                throw new PromiseException('Can\'t make  PendingPromise. Status in store is: ' . $state);
-            } else {
-                $this->state = $state;
-            }
-        } else {
-            $this->promiseId = $this->makePromise();
-        }
+        parent::setPromiseData();
+        $this->promiseData[Store::STATE] = PromiseInterface::PENDING;
     }
 
-    public function getState()
+    public function resolve($value)
     {
-        return PromiseInterface::PENDING;
+        $this->promiseData[Store::STATE] = PromiseInterface::FULFILLED;
+        $this->promiseData[Store::CLASS_NAME] = '\zaboy\async\Promise\Determined\FulfilledPromise';
+        $this->promiseData[Store::RESULT] = $value;
+        return $this->promiseData;
     }
 
-    protected function makePromise($addPromiseData = [])
+    protected function writePromise($addPromiseData = [])
     {
+        $promiseId = $this->makePromiseId();
+
         $itemData = $addPromiseData;
         $itemData[MySqlPromiseAdapter::STATE] = PromiseInterface::PENDING;
+        $itemData[MySqlPromiseAdapter::PROMISE_ID] = $promiseId;
+        $itemData[MySqlPromiseAdapter::TIME_IN_FLIGHT] = $this->promiseAdapter->getUtcTime();
 
-        $promiseId = parent::makePromise($itemData);
+        try {
+            $rowsCount = $this->promiseAdapter->insert($itemData);
+        } catch (\Exception $e) {
+            throw new PromiseException('Can\'t insert item', 0, $e);
+        }
+        if (!$rowsCount) {
+            throw new PromiseException('Can\'t insert item', 0, $e);
+        }
+
         return $promiseId;
     }
 
