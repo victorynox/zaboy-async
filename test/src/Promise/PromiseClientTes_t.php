@@ -5,7 +5,7 @@ namespace zaboy\test\async\PromiseClient;
 use zaboy\test\async\Queue\Client\ClientTestAbstract;
 use zaboy\async\Queue;
 
-class PromiseClientTest extends ClientTestAbstract
+class PromiseClientTest //extends ClientTestAbstract
 {
 
     /**

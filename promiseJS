@@ -1,0 +1,43 @@
+https://jsfiddle.net/
+
+<p id="p10">
+
+p10
+</p>
+<p id="p21">
+
+p21
+</p>
+<p id="p22">
+
+
+var p10 = new Promise(function(
+resolve, 
+reject
+) {
+setTimeout(function() {
+  	document.getElementById("p10").innerHTML = 10
+   	resolve(10) ;
+}, 2000 );
+
+setTimeout(function() {
+  	var p21 = p10.then(
+    		function(val) {
+            document.getElementById("p21").innerHTML = val + 11; // 1
+        },
+    		function(val) {
+            document.getElementById("p21").innerHTML = "error 10"; // 1
+        }
+    );
+}, 1000 );
+
+
+setTimeout(function() {
+
+  	var p22 = p10.then(function(val) {
+    document.getElementById("p22").innerHTML = val +12; // 3
+  });
+}, 3000 );
+
+});
+

@@ -68,7 +68,7 @@ abstract class DataStoresAbstract
             foreach ($messages as $message) {
                 $id = $message[$identifier];
                 $idInFly = $this->increaseInFlightNumberInId($id);
-                //"0_nextQueue21_HIGH_572ca3202b3bf1.21681861" --> "1_nextQueue21_HIGH_572ca3202b3bf1.21681861"
+                //"0_nextQueue21_HIGH_572ca3202b3bf1_21681861" --> "1_nextQueue21_HIGH_572ca3202b3bf1_21681861"
                 $flyIdMessage = array_merge($message, array($identifier => $idInFly, self::TIME_IN_FLIGHT => time()));
                 try {
                     // $flyIdMessage = [

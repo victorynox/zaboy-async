@@ -7,6 +7,27 @@ chdir(dirname(__DIR__));
 // Setup autoloading
 require 'vendor/autoload.php';
 
+use GuzzleHttp\Promise\Promise;
+
+$p1 = new Promise(null, function () {
+    echo 'cancel p1';
+});
+
+$p21 = $p1->then(function ($res) {
+    echo $res . ' + resalt p21' . PHP_EOL . '<br>';
+});
+
+$p22 = $p1->then(function ($res) {
+    echo $res . ' + resalt p22' . PHP_EOL . '<br>';
+});
+
+$p21->cancel();
+$p1->resolve('resalt1');
+
+//$p1->cancel();
+//var_dump($p1);
+exit;
+
 use zaboy\rest\Pipe\MiddlewarePipeOptions;
 use Zend\Diactoros\Server;
 use zaboy\rest\Pipe\Factory\RestRqlFactory;

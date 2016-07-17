@@ -7,7 +7,9 @@ return [
         ],
         'factories' => [
             'TableManagerMysql' => 'zaboy\rest\TableGateway\Factory\TableManagerMysqlFactory',
-            'QueueBroker' => 'zaboy\async\Queue\Factory\QueueBrokerFactory'
+            'QueueBroker' => 'zaboy\async\Queue\Factory\QueueBrokerFactory',
+            'MySqlPromiseAdapter' => 'zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory',
+            'PromiseBroker' => 'zaboy\async\Promise\Factory\Broker\PromiseBrokerFactory'
         ],
         'abstract_factories' => [
             'zaboy\rest\DataStore\Factory\DbTableAbstractFactory',
