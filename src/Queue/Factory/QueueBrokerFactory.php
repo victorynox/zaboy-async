@@ -12,7 +12,6 @@ namespace zaboy\async\Queue\Factory;
 use Interop\Container\ContainerInterface;
 use zaboy\rest\FactoryAbstract;
 use zaboy\async\Queue\Broker;
-use zaboy\scheduler\Callback\CallbackManager;
 
 /**
  * Creates and returns an instance of the Queue Broker

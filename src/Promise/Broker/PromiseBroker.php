@@ -2,7 +2,6 @@
 
 namespace zaboy\async\Promise\Broker;
 
-use zaboy\scheduler\Callback\Interfaces\CallbackInterface;
 use zaboy\async\Promise\PromiseClient;
 use zaboy\async\Promise\Interfaces\PromiseBrokerInterface;
 use zaboy\async\Promise\Adapter\MySqlPromiseAdapter;

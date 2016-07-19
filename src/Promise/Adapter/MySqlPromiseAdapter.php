@@ -6,7 +6,6 @@ use zaboy\rest\DataStore\DbTable;
 use Zend\Db\Adapter\AdapterInterface;
 use Zend\Db\TableGateway\TableGateway;
 use zaboy\rest\DataStore\Interfaces\ReadInterface;
-use zaboy\scheduler\DataStore\UTCTime;
 
 /**
  *
@@ -51,7 +50,7 @@ class MySqlPromiseAdapter extends TableGateway
      */
     public function getUtcTime()
     {
-        return (int) UTCTime::getUTCTimestamp(0, 0);
+        return (int) (time() - date('Z'));
     }
 
     /**
@@ -60,7 +59,7 @@ class MySqlPromiseAdapter extends TableGateway
      */
     public function getUtcMicrotime()
     {
-        return (int) UTCTime::getUTCTimestamp(0, 6);
+        return round(microtime(1) - date('Z'), 6);
     }
 
 }

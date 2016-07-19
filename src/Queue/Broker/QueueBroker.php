@@ -11,7 +11,6 @@ namespace zaboy\async\Queue\Broker;
 
 use ReputationVIP\QueueClient\QueueClientInterface;
 use ReputationVIP\QueueClient\QueueClient;
-use zaboy\scheduler\Callback\CallbackManager;
 
 /**
  * QueueBroker for Queue Client
