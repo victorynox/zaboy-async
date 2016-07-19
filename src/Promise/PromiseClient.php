@@ -60,22 +60,22 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
         return $state;
     }
 
-    protected function getPromiseData($exceptionIfAbsent = false)
+    protected function getPromiseData($exceptionIfAbsent = false, $promiseId = null)
     {
-        $where = [Store::PROMISE_ID => $this->promiseId];
+        $promiseId = !$promiseId ? $promiseId : $this->promiseId;
+        $where = [Store::PROMISE_ID => $promiseId];
         $rowset = $this->promiseAdapter->select($where);
-
         $promiseData = $rowset->current();
         if (!isset($promiseData)) {
             if ($exceptionIfAbsent) {
                 throw new PromiseException(
-                "There is  not data in store  for promiseId: $this->promiseId"
+                "There is  not data in store  for promiseId: $promiseId"
                 );
             } else {
                 return null;
             }
         } else {
-            return $promiseData;
+            return $promiseData->getArrayCopy();
         }
     }
 
@@ -85,10 +85,34 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
         return $promiseData;
     }
 
+    public function reject($value)
+    {
+        $promiseData = $this->runTransaction('reject', $value);
+        return $promiseData;
+    }
+
     public function wait()
     {
-        $promiseData = $this->runTransaction('wait');
-        return $promiseData[Store::RESULT];
+        $rejected = false;
+        $waitingTime = 60;
+        $waitingCheckInterval = 1;
+        for ($index = 0; $index < (int) $waitingTime / $waitingCheckInterval; $index++) {
+            $result = $this->getPromiseId();
+            while (PendingPromise::isPromiseId($result)) {
+                $promiseData = $this->getPromiseData(true, $result);
+                $promiseClass = $promiseData[Store::CLASS_NAME];
+                /* @var $promise PromiseInterface  */
+                $promise = new $promiseClass($this->promiseAdapter, $promiseData);
+                //if rejected promise present in chain of promises - result will reject
+                $rejected = $rejected || ($promise->getState() === PromiseInterface::REJECTED);
+                $result = $promise->wait();
+            }
+            if (!($result instanceof PromiseInterface)) {
+                return $result;
+            }
+        }
+        $e = new PromiseException('Time is out for wait Pomise: ' . $this->promiseId);
+        $promise->reject($e);
     }
 
     public function insertPromise(PromiseAbstract $promise)
@@ -123,21 +147,14 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
             if (is_null($rowset->current())) {
                 throw new PromiseException( );
             }
-
             $promiseData = $rowset->current()->getArrayCopy();
-
             $promiseClass = $promiseData[Store::CLASS_NAME];
-
             $promise = new $promiseClass($this->promiseAdapter, $promiseData);
-
             $errorMsg = "Can not execute $methodName. Class: $promiseClass";
-
             $promiseDataReturned = call_user_func([$promise, $methodName], $param1, $params2);
-
             if (!is_null($promiseDataReturned)) {
                 $errorMsg = "Can not promiseAdapter->update.";
                 $this->promiseAdapter->update($promiseDataReturned);
-                var_dump($promiseClass);
             } else {
                 $promiseDataReturned = $promiseData;
             }

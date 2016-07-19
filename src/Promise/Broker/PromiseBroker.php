@@ -7,14 +7,6 @@ use zaboy\async\Promise\PromiseClient;
 use zaboy\async\Promise\Interfaces\PromiseBrokerInterface;
 use zaboy\async\Promise\Adapter\MySqlPromiseAdapter;
 use zaboy\async\Promise\PromiseException;
-use zaboy\rest\DataStore\DbTable;
-use Zend\ServiceManager\ServiceLocatorInterface;
-use zaboy\scheduler\DataStore\UTCTime;
-use zaboy\rest\DataStore\Interfaces\ReadInterface;
-use GuzzleHttp\Promise\Promise;
-use Zend\Db\Adapter\AdapterInterface;
-use Zend\Db\TableGateway\TableGateway;
-use Zend\Db\Sql\Select;
 
 class PromiseBroker implements PromiseBrokerInterface
 {

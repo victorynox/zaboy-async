@@ -19,42 +19,48 @@ use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
 use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
 
 /**
- * FulfilledPromise
+ * RejectedPromise
  *
  * @category   async
  * @package    zaboy
  */
-class FulfilledPromise extends DeterminedPromise
+class RejectedPromise extends DeterminedPromise
 {
 
     public function setPromiseData()
     {
         parent::setPromiseData();
-        $this->promiseData[Store::STATE] = PromiseInterface::FULFILLED;
+        $this->promiseData[Store::STATE] = PromiseInterface::REJECTED;
     }
 
     public function getState()
     {
-        return PromiseInterface::FULFILLED;
+        return PromiseInterface::REJECTED;
     }
 
     public function wait()
     {
+        if (!isset($this->promiseData[Store::RESULT])) {
+            throw new PromiseException('Pomise was rejected without Reason.');
+        }
         $result = $this->promiseData[Store::RESULT];
-        return $result;
+        if (is_a($result, \Exception, true)) {
+            throw new PromiseException('Pomise was rejected', 0, $result);
+        }
+        if (self::isPromiseId($result)) {
+            return $result;
+        }
+        throw new PromiseException('Pomise was rejected ' . strval($result));
     }
 
     public function resolve($value)
     {
-        if ($value != $this->promiseData[Store::RESULT]) {
-            throw new PromiseException('Pomise already resolved.  Pomise: ' . $this->promiseData[Store::PROMISE_ID]);
-        }
-        return $this->promiseData;
+        throw new PromiseException('Can not resolve. Pomise already rejected.  Pomise: ' . $this->promiseData[Store::PROMISE_ID]);
     }
 
     public function reject($reason)
     {
-        throw new PromiseException('Cannot reject a fulfilled promise.  Pomise: ' . $this->promiseData[Store::PROMISE_ID]);
+        throw new PromiseException('Cannot reject a rejected promise.  Pomise: ' . $this->promiseData[Store::PROMISE_ID]);
     }
 
 }

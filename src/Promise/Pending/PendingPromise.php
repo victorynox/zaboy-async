@@ -41,25 +41,17 @@ class PendingPromise extends PromiseAbstract
         return $this->promiseData;
     }
 
-    protected function writePromise($addPromiseData = [])
+    public function reject($reason)
     {
-        $promiseId = $this->makePromiseId();
+        $this->promiseData[Store::STATE] = PromiseInterface::REJECTED;
+        $this->promiseData[Store::CLASS_NAME] = '\zaboy\async\Promise\Determined\RejectedPromise';
+        $this->promiseData[Store::RESULT] = $reason;
+        return $this->promiseData;
+    }
 
-        $itemData = $addPromiseData;
-        $itemData[MySqlPromiseAdapter::STATE] = PromiseInterface::PENDING;
-        $itemData[MySqlPromiseAdapter::PROMISE_ID] = $promiseId;
-        $itemData[MySqlPromiseAdapter::TIME_IN_FLIGHT] = $this->promiseAdapter->getUtcTime();
-
-        try {
-            $rowsCount = $this->promiseAdapter->insert($itemData);
-        } catch (\Exception $e) {
-            throw new PromiseException('Can\'t insert item', 0, $e);
-        }
-        if (!$rowsCount) {
-            throw new PromiseException('Can\'t insert item', 0, $e);
-        }
-
-        return $promiseId;
+    public function wait()
+    {
+        return $this;
     }
 
 }

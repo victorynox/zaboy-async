@@ -66,14 +66,15 @@ interface PromiseInterface
      * @throws \RuntimeException if the promise is already resolved.
      */
     public function resolve($value);
-//
-//    /**
-//     * Reject the promise with the given reason.
-//     *
-//     * @param mixed $reason
-//     * @throws \RuntimeException if the promise is already resolved.
-//     */
-//    public function reject($reason);
+
+    /**
+     * Reject the promise with the given reason.
+     *
+     * @param mixed $reason
+     * @throws \RuntimeException if the promise is already resolved.
+     */
+    public function reject($reason);
+
 //
 //    /**
 //     * Cancels the promise if possible.
@@ -82,20 +83,19 @@ interface PromiseInterface
 //     */
 //    public function cancel();
 //
-//    /**
-//     * Waits until the promise completes if possible.
-//     *
-//     * Pass $unwrap as true to unwrap the result of the promise, either
-//     * returning the resolved value or throwing the rejected exception.
-//     *
-//     * If the promise cannot be waited on, then the promise will be rejected.
-//     *
-//     * @param bool $unwrap
-//     *
-//     * @return mixed
-//     * @throws \LogicException if the promise has no wait function or if the
-//     *                         promise does not settle after waiting.
-//     */
-//    public function wait($unwrap = true);
+    /**
+     * Waits until the promise completes if possible.
+     *
+     * Pass $unwrap as true to unwrap the result of the promise, either
+     * returning the resolved value or throwing the rejected exception.
+     *
+     * If the promise cannot be waited on, then the promise will be rejected.
+     *
+     *
+     * @return mixed
+     * @throws \LogicException if the promise has no wait function or if the
+     *                         promise does not settle after waiting.
+     */
+    public function wait();
 //
 }
