@@ -108,6 +108,7 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
                 $result = $promise->wait();
             }
             if (!($result instanceof PromiseInterface)) {
+
                 return $result;
             }
         }
