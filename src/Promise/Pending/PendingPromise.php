@@ -9,6 +9,7 @@
 
 namespace zaboy\async\Promise\Pending;
 
+use zaboy\async\Promise\Interfaces\JsonSerialize;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 use zaboy\async\Promise\PromiseException;
@@ -52,6 +53,40 @@ class PendingPromise extends PromiseAbstract
     public function wait()
     {
         return $this;
+    }
+
+    protected function serializeResult($result)
+    {
+        switch (true) {
+            case $result instanceof PromiseInterface:
+                $result = $result->getPromiseId();
+                break;
+
+            case $result instanceof JsonSerialize:
+                $result = $result->getPromiseId();
+                break;
+
+            case is_object($result):
+                try {
+                    $result = serialize($result);
+                } catch (PromiseException $e) {
+                    throw new PromiseException("Can not serialize " . get_class($result), 0, $e);
+                }
+                break;
+            default:
+                break;
+        }
+
+
+        if ($result instanceof PromiseInterface) {
+            /* @var $result PromiseInterface */
+            $result = $result->getPromiseId();
+        }
+        try {
+
+        } catch (PromiseException $ex) {
+
+        }
     }
 
 }

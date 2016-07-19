@@ -62,7 +62,7 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
 
     protected function getPromiseData($exceptionIfAbsent = false, $promiseId = null)
     {
-        $promiseId = !$promiseId ? $promiseId : $this->promiseId;
+        $promiseId = !$promiseId ? $this->promiseId : $promiseId;
         $where = [Store::PROMISE_ID => $promiseId];
         $rowset = $this->promiseAdapter->select($where);
         $promiseData = $rowset->current();
@@ -91,13 +91,14 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
         return $promiseData;
     }
 
-    public function wait()
+    public function wait($waitingTime = 60)
     {
-        $rejected = false;
-        $waitingTime = 60;
         $waitingCheckInterval = 1;
+        $rejected = false;
+
         for ($index = 0; $index < (int) $waitingTime / $waitingCheckInterval; $index++) {
             $result = $this->getPromiseId();
+            //walk along the chain of resolved promises, wich resolved via another promise
             while (PendingPromise::isPromiseId($result)) {
                 $promiseData = $this->getPromiseData(true, $result);
                 $promiseClass = $promiseData[Store::CLASS_NAME];
@@ -107,13 +108,30 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
                 $rejected = $rejected || ($promise->getState() === PromiseInterface::REJECTED);
                 $result = $promise->wait();
             }
-            if (!($result instanceof PromiseInterface)) {
-
-                return $result;
+            //promise->wait() has returned value or $this (if it is pending)
+            if (($result instanceof PromiseInterface)) {
+                //there is pending promise in the end of the chain - we wait
+                sleep($waitingCheckInterval);
+                continue;
             }
+
+            if ($rejected) {
+                //promise->wait() has returned value, but has rejected promise in the chain -   throw exception
+                if (empty($result)) {
+                    throw new PromiseException('Pomise was rejected without Reason.');
+                }
+                if (is_a($result, \Exception, true)) {
+                    throw new PromiseException('Pomise was rejected with exception', 0, $result);
+                }
+                throw new PromiseException('Pomise was rejected ' . strval($result));
+            }
+            //promise->wait() has returned value - Promise resolved successfully
+            return $result;
         }
+        //Time is out
         $e = new PromiseException('Time is out for wait Pomise: ' . $this->promiseId);
         $promise->reject($e);
+        throw $e;
     }
 
     public function insertPromise(PromiseAbstract $promise)
@@ -142,8 +160,6 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
             $db->getDriver()->getConnection()->beginTransaction();
             //is row with this index exist?
             $rowset = $db->query($queryStrPromise, array($this->promiseId));
-            var_dump($methodName . PHP_EOL);
-
             $errorMsg = "Can not execute $methodName. Pomise is not exist.";
             if (is_null($rowset->current())) {
                 throw new PromiseException( );

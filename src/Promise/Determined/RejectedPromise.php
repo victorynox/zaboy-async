@@ -45,7 +45,7 @@ class RejectedPromise extends DeterminedPromise
         }
         $result = $this->promiseData[Store::RESULT];
         if (is_a($result, \Exception, true)) {
-            throw new PromiseException('Pomise was rejected', 0, $result);
+            throw new PromiseException('Pomise was rejected with exception', 0, $result);
         }
         if (self::isPromiseId($result)) {
             return $result;

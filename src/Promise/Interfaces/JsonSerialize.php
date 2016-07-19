@@ -10,18 +10,16 @@
 namespace zaboy\async\Promise\Interfaces;
 
 /**
- * Full Interface for Async callable objects
+ * Interfaces for json Serialize and for Unserialize for objects
  *
  *
  * @category   async
  * @package    zaboy
  */
-interface AsyncInterface
+interface JsonSerialize
 {
 
-    /**
-     *
-     * @return PromiseInterface
-     */
-    public function asyncCall();
+    public function jsonSerialize();
+
+    public static function jsonUnserialize($serializedObject);
 }

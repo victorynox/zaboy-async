@@ -106,7 +106,12 @@ abstract class PromiseAbstract implements PromiseInterface
 
     public static function isPromiseId($param)
     {
-        return (bool) strpos($param, static::PROMISE_ID_PREFIX . static::ID_SEPARATOR);
+        try {
+            $strParam = strval($param);
+        } catch (\Exception $exc) {
+            return false;
+        }
+        return 0 === strpos($strParam, static::PROMISE_ID_PREFIX . static::ID_SEPARATOR);
     }
 
 }

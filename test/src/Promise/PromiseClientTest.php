@@ -72,6 +72,22 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testPromiseTest__PendingWait()
+    {
+        $this->object = new PromiseClient($this->mySqlPromiseAdapter);
+        $this->setExpectedException('\zaboy\async\Promise\PromiseException');
+        $this->object->wait(2);
+    }
+
+    public function testPromiseTest__PendingAfterFulfilledWait()
+    {
+        $this->object = new PromiseClient($this->mySqlPromiseAdapter);
+        $result = new PromiseClient($this->mySqlPromiseAdapter);
+        $this->object->resolve($result);
+        $this->setExpectedException('\zaboy\async\Promise\PromiseException');
+        $this->object->wait(1);
+    }
+
     public function testPromiseTest__resolve()
     {
         $this->object = new PromiseClient($this->mySqlPromiseAdapter);

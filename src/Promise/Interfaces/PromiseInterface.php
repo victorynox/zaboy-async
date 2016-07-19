@@ -97,5 +97,6 @@ interface PromiseInterface
      *                         promise does not settle after waiting.
      */
     public function wait();
-//
+
+    public function getPromiseId();
 }

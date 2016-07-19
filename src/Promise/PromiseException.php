@@ -9,7 +9,7 @@
 
 namespace zaboy\async\Promise;
 
-use Exception;
+use zaboy\async\Promise\Interfaces\JsonSerialize;
 
 /**
  * Exception class for PromiseException
@@ -17,7 +17,27 @@ use Exception;
  * @category   async
  * @package    zaboy
  */
-class PromiseException extends Exception
+class PromiseException extends \Exception implements JsonSerialize
 {
+
+    public function jsonSerialize()
+    {
+        $arrayObject = new \ArrayObject;
+        $arrayObject['class'] = __CLASS__;
+        $arrayObject['message'] = $this->getMessage();
+        $arrayObject['code'] = $this->getCode();
+        $prev = $this->getPrevious();
+        $arrayObject['prev_exc'] = !$prev ? null : $prev->jsonSerialize();
+        return json_encode($arrayObject);
+    }
+
+    public static function jsonUnserialize($serializedObject)
+    {
+        $stdObject = json_decode($serializedObject);
+        $objectClass = $stdObject->class;
+        $prev = !$stdObject->prev_exc ? null : PromiseException::jsonUnserialize($stdObject->prev_exc);
+        $object = new $objectClass($stdObject->message, $stdObject->code, $prev);
+        return $object;
+    }
 
 }
