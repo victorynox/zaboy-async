@@ -171,7 +171,9 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
             $promiseDataReturned = call_user_func([$promise, $methodName], $param1, $params2);
             if (!is_null($promiseDataReturned)) {
                 $errorMsg = "Can not promiseAdapter->update.";
-                $this->promiseAdapter->update($promiseDataReturned);
+                $promiseId = $promiseDataReturned[Store::PROMISE_ID];
+                unset($promiseDataReturned[Store::PROMISE_ID]);
+                $this->promiseAdapter->update($promiseDataReturned, [Store::PROMISE_ID => $promiseId]);
             } else {
                 $promiseDataReturned = $promiseData;
             }

@@ -27,7 +27,7 @@ class JsonCoder
         }
         if ($object instanceof JsonSerialize) {
             $jsonString = $object->jsonSerialize();
-            $objectMarker = '>>JsonCoder. Class:' . get_class() . '<<';
+            $objectMarker = '>>JsonCoder. Class:' . get_class($object) . '<<';
             return $objectMarker . $jsonString;
         } else {
             throw new \Exception(get_class($object) . "do not instanceof JsonSerialize Interface");
@@ -36,19 +36,55 @@ class JsonCoder
 
     public static function jsonUnserialize($serializedObject)
     {
-
-        $stdObject = json_decode($serializedObject);
-        $objectClass = $stdObject->class;
-        $prev = !$stdObject->prev_exc ? null : PromiseException::jsonUnserialize($stdObject->prev_exc);
-        $object = new $objectClass($stdObject->message, $stdObject->code, $prev);
+        $className = self::getSerializedClass($serializedObject);
+        $jsonString = substr($serializedObject, strpos($serializedObject, '<<') + 2);
+        $object = $className::jsonUnserialize($jsonString);
         return $object;
     }
 
     public static function getSerializedClass($serializedObject)
     {
+        if (strpos($serializedObject, '>>JsonCoder. Class:') === 0) {
+            $start = strlen('>>JsonCoder. Class:');
+            $length = strpos($serializedObject, '<<') - $start;
+            $className = substr($serializedObject, $start, $length);
+            return $className;
+        } else {
+            throw new \Exception("Can not unserialize string.");
+        }
+    }
 
-        $serializedObject
-        return $object;
+    public static function isSerializedObject($serializedObject)
+    {
+        return strpos($serializedObject, '>>JsonCoder. Class:') === 0;
+    }
+
+    public static function jsonDecode($data)
+    {
+        json_encode(null); // Clear json_last_error()
+        $result = Json::decode($data, Json::TYPE_ARRAY); //json_decode($data);
+        if (JSON_ERROR_NONE !== json_last_error()) {
+            $jsonErrorMsg = json_last_error_msg();
+            json_encode(null);  // Clear json_last_error()
+            throw new DataStoreException(
+            'Unable to decode data from JSON - ' . $jsonErrorMsg
+            );
+        }
+        return $result;
+    }
+
+    public static function jsonEncode($data)
+    {
+        json_encode(null); // Clear json_last_error()
+        $result = json_encode($data, 79);
+        if (JSON_ERROR_NONE !== json_last_error()) {
+            $jsonErrorMsg = json_last_error_msg();
+            json_encode(null);  // Clear json_last_error()
+            throw new DataStoreException(
+            'Unable to encode data to JSON - ' . $jsonErrorMsg
+            );
+        }
+        return $result;
     }
 
 }

@@ -9,6 +9,7 @@
 
 namespace zaboy\async\Promise\Pending;
 
+use zaboy\async\Json\JsonCoder;
 use zaboy\async\Promise\Interfaces\JsonSerialize;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
@@ -36,9 +37,11 @@ class PendingPromise extends PromiseAbstract
 
     public function resolve($value)
     {
+
         $this->promiseData[Store::STATE] = PromiseInterface::FULFILLED;
         $this->promiseData[Store::CLASS_NAME] = '\zaboy\async\Promise\Determined\FulfilledPromise';
-        $this->promiseData[Store::RESULT] = $value;
+        $resalt = $this->serializeResult($value);
+        $this->promiseData[Store::RESULT] = $resalt;
         return $this->promiseData;
     }
 
@@ -46,7 +49,7 @@ class PendingPromise extends PromiseAbstract
     {
         $this->promiseData[Store::STATE] = PromiseInterface::REJECTED;
         $this->promiseData[Store::CLASS_NAME] = '\zaboy\async\Promise\Determined\RejectedPromise';
-        $this->promiseData[Store::RESULT] = $reason;
+        $this->promiseData[Store::RESULT] = $this->serializeResult($reason);
         return $this->promiseData;
     }
 
@@ -58,35 +61,27 @@ class PendingPromise extends PromiseAbstract
     protected function serializeResult($result)
     {
         switch (true) {
+            case $this->isPromiseId($result):
+                break;
+
             case $result instanceof PromiseInterface:
                 $result = $result->getPromiseId();
                 break;
 
-            case $result instanceof JsonSerialize:
-                $result = $result->getPromiseId();
+            case is_object($result) && $result instanceof JsonSerialize:
+                $result = JsonCoder::jsonSerialize($result);
                 break;
-
             case is_object($result):
+                throw new PromiseException("Can not serialize object: " . get_class($result));
+
+            default :
                 try {
-                    $result = serialize($result);
-                } catch (PromiseException $e) {
-                    throw new PromiseException("Can not serialize " . get_class($result), 0, $e);
+                    $result = JsonCoder::jsonEncode($result);
+                } catch (PromiseException $ex) {
+                    throw new PromiseException("Can not serialize result" . get_class($result), 0, $ex);
                 }
-                break;
-            default:
-                break;
         }
-
-
-        if ($result instanceof PromiseInterface) {
-            /* @var $result PromiseInterface */
-            $result = $result->getPromiseId();
-        }
-        try {
-
-        } catch (PromiseException $ex) {
-
-        }
+        return $result;
     }
 
 }

@@ -43,7 +43,7 @@ class RejectedPromise extends DeterminedPromise
         if (!isset($this->promiseData[Store::RESULT])) {
             throw new PromiseException('Pomise was rejected without Reason.');
         }
-        $result = $this->promiseData[Store::RESULT];
+        $result = $this->unserializeResult($this->promiseData[Store::RESULT]);
         if (is_a($result, \Exception, true)) {
             throw new PromiseException('Pomise was rejected with exception', 0, $result);
         }
