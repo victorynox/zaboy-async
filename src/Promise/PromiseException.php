@@ -23,7 +23,7 @@ class PromiseException extends \Exception implements JsonSerialize
     public function jsonSerialize()
     {
         $arrayObject = new \ArrayObject;
-        $arrayObject['class'] = __CLASS__;
+        $arrayObject['class'] = get_class($this);
         $arrayObject['message'] = $this->getMessage();
         $arrayObject['code'] = $this->getCode();
         $prev = $this->getPrevious();

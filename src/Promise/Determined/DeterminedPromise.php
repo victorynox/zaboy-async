@@ -12,9 +12,9 @@ namespace zaboy\async\Promise\Determined;
 use zaboy\async\Json\JsonCoder;
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 use zaboy\async\Promise\PromiseException;
-use zaboy\async\Promise\Broker\PromiseBroker;
+use zaboy\async\Promise\PromiseClient;
 use zaboy\async\Promise\Adapter\MySqlPromiseAdapter;
-use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
+use zaboy\async\Promise\Pending\PendingPromise;
 use zaboy\async\Promise\PromiseAbstract;
 
 /**
@@ -54,6 +54,16 @@ abstract class DeterminedPromise extends PromiseAbstract
                     throw new PromiseException("Can not unserialize string: " . $result, 0, $ex);
                 }
         }
+    }
+
+    public function wait($unwrap = true, $waitingTime = 60, $waitingCheckInterval = 1)
+    {
+        $result = $this->unserializeResult($this->promiseData[MySqlPromiseAdapter::RESULT]);
+        if (PendingPromise::isPromiseId($result)) {
+            $nextPromise = new PromiseClient($this->promiseAdapter, $result);
+            $result = $nextPromise->wait(false);
+        }
+        return $result;
     }
 
 }

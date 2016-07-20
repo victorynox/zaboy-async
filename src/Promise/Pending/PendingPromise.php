@@ -14,6 +14,7 @@ use zaboy\async\Promise\Interfaces\JsonSerialize;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 use zaboy\async\Promise\PromiseException;
+use zaboy\async\Promise\Determined\Exception\RejectedException;
 use zaboy\async\Promise\PromiseAbstract;
 use zaboy\async\Promise\Broker\PromiseBroker;
 use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
@@ -45,11 +46,25 @@ class PendingPromise extends PromiseAbstract
         return $this->promiseData;
     }
 
-    public function reject($reason)
+    public function reject($result)
     {
         $this->promiseData[Store::STATE] = PromiseInterface::REJECTED;
         $this->promiseData[Store::CLASS_NAME] = '\zaboy\async\Promise\Determined\RejectedPromise';
-        $this->promiseData[Store::RESULT] = $this->serializeResult($reason);
+        if (
+                $this->isPromiseId($result) ||
+                is_a($result, '\zaboy\async\Promise\Determined\Exception\RejectedException', true) ||
+                is_a($result, '\zaboy\async\Promise\PromiseClient', true)
+        ) {
+            $this->promiseData[Store::RESULT] = $this->serializeResult($result);
+        } else {
+            if (is_object($result) || is_array($result) || is_callable($result) || is_resource($result)) {
+                $reson = 'Reason can not be converted to string.';
+            } else {
+                $reson = strval($result);
+            }
+            $result = new RejectedException($reson);
+            $this->promiseData[Store::RESULT] = $this->serializeResult($result);
+        }
         return $this->promiseData;
     }
 

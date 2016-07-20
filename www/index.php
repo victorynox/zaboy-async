@@ -6,11 +6,22 @@ chdir(dirname(__DIR__));
 //test_res_http
 // Setup autoloading
 require 'vendor/autoload.php';
+$container = include 'config/container.php';
 
-use zaboy\async\Json\JsonCoder;
+use zaboy\async\Promise\PromiseClient;
+use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
 
-$result = JsonCoder::jsonEncode('result');
-var_dump($result);
+$mySqlAdapterFactory = new MySqlAdapterFactory();
+$mySqlPromiseAdapter = $mySqlAdapterFactory->__invoke(
+        $container
+        , ''
+        , [MySqlAdapterFactory::KEY_PROMISE_TABLE_NAME => 'test_mysqlpromisebroker']
+);
+
+$object = new PromiseClient($mySqlPromiseAdapter);
+$object->reject('reason');
+$object->wait(true, 0);
+var_dump(get_class($object->wait(true)));
 
 use zaboy\rest\Pipe\MiddlewarePipeOptions;
 use Zend\Diactoros\Server;
@@ -18,7 +29,7 @@ use zaboy\rest\Pipe\Factory\RestRqlFactory;
 use zaboy\rest\DataStore\HttpClient;
 
 /* @var $httpClientQueue HttpClient */
-$container = include 'config/container.php';
+
 
 $container->get('QueueBroker');
 //$queue = $container->get('testMysqlQueue');

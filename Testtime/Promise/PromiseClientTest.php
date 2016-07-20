@@ -8,6 +8,7 @@ use Interop\Container\ContainerInterface;
 use zaboy\rest\TableGateway\TableManagerMysql;
 use zaboy\async\Promise\Adapter\MySqlPromiseAdapter;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
+use zaboy\async\Promise\Determined\Exception\RejectedException;
 
 class PromiseClientTest extends \PHPUnit_Framework_TestCase
 {
@@ -61,6 +62,8 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
         $tableManagerMysql->deleteTable(self::TEST_TABLE_NAME);
     }
 
+    /* ---------------------------------------------------------------------------------- */
+
     public function testPromiseTest__makePromise()
     {
         $this->object = new PromiseClient($this->mySqlPromiseAdapter);
@@ -72,23 +75,39 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testPromiseTest__PendingWait()
-    {
-        $this->object = new PromiseClient($this->mySqlPromiseAdapter);
-        $this->setExpectedException('\zaboy\async\Promise\PromiseException');
-        $this->object->wait(2);
-    }
-
     public function testPromiseTest__resolve()
     {
         $this->object = new PromiseClient($this->mySqlPromiseAdapter);
         $this->object->resolve(1);
         $this->assertSame(
-                $this->object->getState(), 'fulfilled'
+                $this->object->getState(), PromiseInterface::FULFILLED
         );
-        $this->assertEquals(
-                $this->object->wait(), 1
+    }
+
+    public function testPromiseTest__reject()
+    {
+        $this->object = new PromiseClient($this->mySqlPromiseAdapter);
+        $this->object->reject('1reason');
+        $this->assertSame(
+                $this->object->getState(), PromiseInterface::REJECTED
         );
+    }
+
+    /*     * ************* Wait() with $unwrap = true ******************************* */
+
+    public function testPromiseTest__PendingWait()
+    {
+        $this->object = new PromiseClient($this->mySqlPromiseAdapter);
+        $this->setExpectedException('\zaboy\async\Promise\Pending\TimeIsOutException');
+        $this->object->wait(true, 0);
+    }
+
+    public function testPromiseTest__RejectedWait()
+    {
+        $this->object = new PromiseClient($this->mySqlPromiseAdapter);
+        $this->object->reject('reason');
+        $this->setExpectedException('\zaboy\async\Promise\Determined\Exception\RejectedException');
+        $this->object->wait(true, 0);
     }
 
     public function testPromiseTest__PendingAfterPendingWait()
@@ -96,8 +115,8 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
         $this->object = new PromiseClient($this->mySqlPromiseAdapter);
         $result = new PromiseClient($this->mySqlPromiseAdapter);
         $this->object->resolve($result);
-        $this->setExpectedException('\zaboy\async\Promise\PromiseException');
-        $this->object->wait(1);
+        $this->setExpectedException('\zaboy\async\Promise\Pending\TimeIsOutException');
+        $this->object->wait(true, 1);
     }
 
     public function testPromiseTest__PendingAfterFulfilledWait()
@@ -108,6 +127,70 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
         $result->resolve('result');
         $this->assertEquals(
                 $this->object->wait(), 'result'
+        );
+        $this->assertEquals(
+                $this->object->getState(), PromiseInterface::FULFILLED
+        );
+    }
+
+    public function testPromiseTest__PendingAfterRejecteddWait()
+    {
+        $this->object = new PromiseClient($this->mySqlPromiseAdapter);
+        $result = new PromiseClient($this->mySqlPromiseAdapter);
+        $this->object->reject($result);
+        $this->setExpectedException('\zaboy\async\Promise\Determined\Exception\ReasonPendingException');
+        //time is out
+        $this->object->wait(true, 0);
+    }
+
+    /*     * ************* Wait() with $unwrap = false ******************************* */
+
+    public function testPromiseTest__PendingWaitUnwrapFalse()
+    {
+        $this->object = new PromiseClient($this->mySqlPromiseAdapter);
+        $this->assertEquals(
+                $this->object->wait(false)->getState(), PromiseInterface::PENDING
+        );
+    }
+
+    public function testPromiseTest__RejectedWaitUnwrapFalse()
+    {
+        $this->object = new PromiseClient($this->mySqlPromiseAdapter);
+        $this->object->reject('reason');
+        $this->assertEquals(
+                get_class($this->object->wait(false)), 'zaboy\async\Promise\Determined\Exception\RejectedException'
+        );
+    }
+
+    public function testPromiseTest__PendingAfterPendingWaitUnwrapFalse()
+    {
+        $this->object = new PromiseClient($this->mySqlPromiseAdapter);
+        $result = new PromiseClient($this->mySqlPromiseAdapter);
+        $this->object->resolve($result);
+        $this->assertEquals(
+                $this->object->wait(false)->getState(), PromiseInterface::PENDING
+        );
+    }
+
+    public function testPromiseTest__PendingAfterFulfilledWaitUnwrapFalse()
+    {
+        $this->object = new PromiseClient($this->mySqlPromiseAdapter);
+        $result = new PromiseClient($this->mySqlPromiseAdapter);
+        $this->object->resolve($result);
+        $result->resolve('result');
+        $this->assertEquals(
+                $this->object->wait(false), 'result'
+        );
+    }
+
+    public function testPromiseTest__PendingAfterRejecteddWaitUnwrapFalse()
+    {
+        $this->object = new PromiseClient($this->mySqlPromiseAdapter);
+        $result = new PromiseClient($this->mySqlPromiseAdapter);
+        $this->object->reject($result);
+
+        $this->assertEquals(
+                get_class($this->object->wait(false)), 'zaboy\async\Promise\Determined\Exception\ReasonPendingException'
         );
     }
 
