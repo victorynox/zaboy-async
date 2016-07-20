@@ -62,10 +62,11 @@ class JsonCoder
     public static function jsonDecode($data)
     {
         json_encode(null); // Clear json_last_error()
-        $result = Json::decode($data, Json::TYPE_ARRAY); //json_decode($data);
+        $result = json_decode((string) $data, 1); //json_decode($data);
         if (JSON_ERROR_NONE !== json_last_error()) {
             $jsonErrorMsg = json_last_error_msg();
             json_encode(null);  // Clear json_last_error()
+            $decode = json_decode($encodedValue, $objectDecodeType);
             throw new DataStoreException(
             'Unable to decode data from JSON - ' . $jsonErrorMsg
             );

@@ -38,10 +38,10 @@ class FulfilledPromise extends DeterminedPromise
         return PromiseInterface::FULFILLED;
     }
 
-    public function wait()
+    public function wait($unwrap = true)
     {
         $result = $this->promiseData[Store::RESULT];
-        return $result;
+        return $this->unserializeResult($result);
     }
 
     public function resolve($value)

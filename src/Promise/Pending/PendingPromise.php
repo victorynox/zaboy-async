@@ -53,7 +53,7 @@ class PendingPromise extends PromiseAbstract
         return $this->promiseData;
     }
 
-    public function wait()
+    public function wait($unwrap = true)
     {
         return $this;
     }

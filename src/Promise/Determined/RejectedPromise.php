@@ -9,14 +9,15 @@
 
 namespace zaboy\async\Promise\Determined;
 
+use zaboy\async\Promise\Determined\RejectedPromiseException;
 use zaboy\async\Promise\Determined\DeterminedPromise;
 use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Promise\PromiseClient;
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\PromiseAbstract;
 use zaboy\async\Promise\Broker\PromiseBroker;
 use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
-use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
 
 /**
  * RejectedPromise
@@ -38,19 +39,23 @@ class RejectedPromise extends DeterminedPromise
         return PromiseInterface::REJECTED;
     }
 
-    public function wait()
+    public function wait($unwrap = true)
     {
-        if (!isset($this->promiseData[Store::RESULT])) {
-            throw new PromiseException('Pomise was rejected without Reason.');
+        if (!$unwrap) {
+            if (!isset($this->promiseData[Store::RESULT])) {
+                throw new RejectedPromiseException('Pomise was rejected without Reason.');
+            }
+            $result = $this->unserializeResult($this->promiseData[Store::RESULT]);
+            if (is_a($result, '\Exception', true)) {
+                throw new RejectedPromiseException('Pomise was rejected with exception', 0, $result);
+            }
+            if (self::isPromiseId($result)) {
+                return $result;
+            }
+            throw new RejectedPromiseException('Pomise was rejected with reason: ' . strval($result));
+        } else {
+            return new PromiseClient($this->promiseAdapter, $this->getPromiseId());
         }
-        $result = $this->unserializeResult($this->promiseData[Store::RESULT]);
-        if (is_a($result, \Exception, true)) {
-            throw new PromiseException('Pomise was rejected with exception', 0, $result);
-        }
-        if (self::isPromiseId($result)) {
-            return $result;
-        }
-        throw new PromiseException('Pomise was rejected ' . strval($result));
     }
 
     public function resolve($value)

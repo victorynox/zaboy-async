@@ -91,12 +91,13 @@ interface PromiseInterface
      *
      * If the promise cannot be waited on, then the promise will be rejected.
      *
+     * @param bool $unwrap
      *
      * @return mixed
      * @throws \LogicException if the promise has no wait function or if the
      *                         promise does not settle after waiting.
      */
-    public function wait();
+    public function wait($unwrap = true);
 
     public function getPromiseId();
 }

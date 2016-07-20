@@ -273,31 +273,23 @@ class DataStores extends DataStoresAbstract implements AdapterInterface
         return $this->priorityHandler;
     }
 
-    /*
-      // for the last commented test
-      protected function readMessageFifoButNewerFlightInFirst($queueName, $priority = null, $attemptNumber = 1)
-      {
-      var_dump('start PRIORITY-' . $priority);
-      $messages = parent::readMessageFifoButNewerFlightInFirst($queueName, $priority, $attemptNumber);
-      if ($this->getMaxTimeInFlight() !== 5) {
-      var_dump('start m1');
-      $this->setMaxTimeInFlight(5);
-      $messages2 = $this->getMessages($queueName, 7, 'HIGH');
-
-      var_dump('$messages2');
-      foreach ($messages2 as $val) {
-      var_dump('PRIORITY');
-      var_dump($val[self::PRIORITY]);
-      }
-      } else {
-      var_dump('$messages1');
-      foreach ($messages as $val) {
-      var_dump('PRIORITY');
-      var_dump($val[self::PRIORITY]);
-      }
-      }
-
-      return $messages;
-      }
-     */
+//    // for the last commented test
+//    protected function readMessageFifoButNewerFlightInFirst($queueName, $priority = null, $attemptNumber = 1)
+//    {
+//        $messages = parent::readMessageFifoButNewerFlightInFirst($queueName, $priority, $attemptNumber);
+//        if ($this->getMaxTimeInFlight() !== 5) {
+//            $this->setMaxTimeInFlight(5);
+//            $messages2 = $this->getMessages($queueName, 7, 'HIGH');
+//
+//            foreach ($messages2 as $val) {
+//
+//            }
+//        } else {
+//            foreach ($messages as $val) {
+//
+//            }
+//        }
+//
+//        return $messages;
+//    }
 }

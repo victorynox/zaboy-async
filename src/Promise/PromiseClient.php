@@ -10,6 +10,7 @@
 namespace zaboy\async\Promise;
 
 use zaboy\async\Promise\PromiseException;
+use zaboy\async\Promise\Pending\TimeIsOutException;
 use zaboy\async\Promise\Pending\PendingPromise;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
@@ -91,47 +92,68 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
         return $promiseData;
     }
 
-    public function wait($waitingTime = 60)
+    public function wait($unwrap = true, $waitingTime = 60, $waitingCheckInterval = 1)
     {
-        $waitingCheckInterval = 1;
+        $stepsNumber = $waitingTime / $waitingCheckInterval;
+        $step = 0;
         $rejected = false;
-
-        for ($index = 0; $index < (int) $waitingTime / $waitingCheckInterval; $index++) {
+        do {
             $result = $this->getPromiseId();
             //walk along the chain of resolved promises, wich resolved via another promise
-            while (PendingPromise::isPromiseId($result)) {
+            while ((!$rejected || $unwrap) && PendingPromise::isPromiseId($result)) {
+                var_dump('while');
                 $promiseData = $this->getPromiseData(true, $result);
                 $promiseClass = $promiseData[Store::CLASS_NAME];
+                var_dump('CLASS_NAME ' . $promiseClass);
+
                 /* @var $promise PromiseInterface  */
                 $promise = new $promiseClass($this->promiseAdapter, $promiseData);
+
+                var_dump('public function wait state - ' . $promise->getState());
+                var_dump('public function wait  id - ' . $promise->getPromiseId());
+
                 //if rejected promise present in chain of promises - result will reject
                 $rejected = $rejected || ($promise->getState() === PromiseInterface::REJECTED);
+                var_dump('$rejected ' . $rejected);
                 $result = $promise->wait();
             }
-            //promise->wait() has returned value or $this (if it is pending)
-            if (($result instanceof PromiseInterface)) {
-                //there is pending promise in the end of the chain - we wait
-                sleep($waitingCheckInterval);
-                continue;
-            }
+            $fulfilled = $promise->getState() === PromiseInterface::FULFILLED;
+            $pending = $promise->getState() === PromiseInterface::PENDING;
 
-            if ($rejected) {
-                //promise->wait() has returned value, but has rejected promise in the chain -   throw exception
-                if (empty($result)) {
+            var_dump('$fulfilled ' . $fulfilled);
+            var_dump('$pending ' . $pending);
+
+            switch (true) {
+                case ($fulfilled && $unwrap):
+                    return $result;
+                case (($fulfilled || $rejected) && !$unwrap):
+                    $promiseClient = new static($this->promiseAdapter, $promise->getPromiseId());
+                    return $promiseClient;
+                case $rejected && empty($result) && !$pending:
+                    var_dump('case  -  Pomise was rejected without Reason.');
                     throw new PromiseException('Pomise was rejected without Reason.');
-                }
-                if (is_a($result, \Exception, true)) {
+                case $rejected && is_a($result, '\Exception', true) && !$pending:
                     throw new PromiseException('Pomise was rejected with exception', 0, $result);
-                }
-                throw new PromiseException('Pomise was rejected ' . strval($result));
+                case $rejected && !$pending :
+                    //promise->wait() has returned value, but has rejected promise in the chain -   throw exception
+                    throw new PromiseException('Pomise was rejected with reason: ' . strval($result));
+                default:
+                    //there is pending promise in the end of the chain - we wait
+                    $step = $step + 1;
+                    if ($step <= $stepsNumber) {
+                        sleep($waitingCheckInterval); // if not last step
+                    }
             }
-            //promise->wait() has returned value - Promise resolved successfully
-            return $result;
-        }
+        } while ($step <= $stepsNumber);
         //Time is out
-        $e = new PromiseException('Time is out for wait Pomise: ' . $this->promiseId);
-        $promise->reject($e);
-        throw $e;
+        if (!$unwrap) {
+            $promiseClient = new static($this->promiseAdapter, $promise->getPromiseId());
+            return $promiseClient;
+        } else {
+            $e = new TimeIsOutException('Time is out for wait Pomise: ' . $this->promiseId);
+            $promise->reject($e);
+            throw $e;
+        }
     }
 
     public function insertPromise(PromiseAbstract $promise)
