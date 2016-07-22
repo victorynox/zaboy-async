@@ -4,27 +4,27 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "c192a856231a27d1cb2111dd77d5e66e",
-    "content-hash": "fc7f8cd4ac92cbe7e400642c572f5813",
+    "hash": "1e349e95c35ae0d41905c5cb29dead5a",
+    "content-hash": "6563f3a5f77e4b91ebc27d77663e9154",
     "packages": [
         {
             "name": "avz-cmf/zaboy-rest",
-            "version": "3.7.5",
+            "version": "3.8.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/avz-cmf/zaboy-rest.git",
-                "reference": "2d55ce4c284ec635b71ece3eeb7e8ef088a3b973"
+                "reference": "07ab27b5385d10a232da5a3a9aa6ff3faaedaab0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/avz-cmf/zaboy-rest/zipball/2d55ce4c284ec635b71ece3eeb7e8ef088a3b973",
-                "reference": "2d55ce4c284ec635b71ece3eeb7e8ef088a3b973",
+                "url": "https://api.github.com/repos/avz-cmf/zaboy-rest/zipball/07ab27b5385d10a232da5a3a9aa6ff3faaedaab0",
+                "reference": "07ab27b5385d10a232da5a3a9aa6ff3faaedaab0",
                 "shasum": ""
             },
             "require": {
                 "psr/http-message": "^1.0",
                 "symfony/filesystem": ">=2.7",
-                "xiag/rql-parser": "*",
+                "xiag/rql-parser": "^1.0",
                 "zendframework/zend-config": "^2.5",
                 "zendframework/zend-db": "^2.8",
                 "zendframework/zend-diactoros": "^1.1",
@@ -40,7 +40,8 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "zaboy\\rest\\": "src/"
+                    "zaboy\\rest\\": "src/",
+                    "zaboy\\test\\rest\\": "test/src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -55,58 +56,26 @@
                 "php",
                 "rest"
             ],
-            "time": "2016-06-29 13:35:46"
-        },
-        {
-            "name": "avz-cmf/zaboy-scheduler",
-            "version": "1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/avz-cmf/zaboy-scheduler.git",
-                "reference": "54dccb22ca4709e1010be77e87a1975a6b39331b"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/avz-cmf/zaboy-scheduler/zipball/54dccb22ca4709e1010be77e87a1975a6b39331b",
-                "reference": "54dccb22ca4709e1010be77e87a1975a6b39331b",
-                "shasum": ""
-            },
-            "require": {
-                "avz-cmf/zaboy-rest": "^3.5.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "zaboy\\scheduler\\": "src/",
-                    "zaboy\\test\\scheduler\\": "test/src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-3.0"
-            ],
-            "description": "Unlimited ticker that works with tact less than minute",
-            "homepage": "https://github.com/avz-cmf/zaboy-sheduler",
-            "time": "2016-06-12 10:14:46"
+            "time": "2016-07-22 07:37:55"
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.18.22",
+            "version": "3.18.32",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "d1a990d3a7c1fec992abdb508b47271ba089586e"
+                "reference": "84b9927ee116b30babf90a9fc723764672543e29"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/d1a990d3a7c1fec992abdb508b47271ba089586e",
-                "reference": "d1a990d3a7c1fec992abdb508b47271ba089586e",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/84b9927ee116b30babf90a9fc723764672543e29",
+                "reference": "84b9927ee116b30babf90a9fc723764672543e29",
                 "shasum": ""
             },
             "require": {
-                "guzzlehttp/guzzle": "~5.3|~6.0.1|~6.1",
+                "guzzlehttp/guzzle": "^5.3.1|^6.2.1",
                 "guzzlehttp/promises": "~1.0",
-                "guzzlehttp/psr7": "~1.0",
+                "guzzlehttp/psr7": "~1.3.1",
                 "mtdowling/jmespath.php": "~2.2",
                 "php": ">=5.5"
             },
@@ -167,7 +136,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2016-06-28 23:29:43"
+            "time": "2016-07-21 22:30:58"
         },
         {
             "name": "container-interop/container-interop",
@@ -198,27 +167,27 @@
         },
         {
             "name": "guzzlehttp/guzzle",
-            "version": "6.2.0",
+            "version": "6.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "d094e337976dff9d8e2424e8485872194e768662"
+                "reference": "3f808fba627f2c5b69e2501217bf31af349c1427"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/d094e337976dff9d8e2424e8485872194e768662",
-                "reference": "d094e337976dff9d8e2424e8485872194e768662",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/3f808fba627f2c5b69e2501217bf31af349c1427",
+                "reference": "3f808fba627f2c5b69e2501217bf31af349c1427",
                 "shasum": ""
             },
             "require": {
-                "guzzlehttp/promises": "~1.0",
-                "guzzlehttp/psr7": "~1.1",
-                "php": ">=5.5.0"
+                "guzzlehttp/promises": "^1.0",
+                "guzzlehttp/psr7": "^1.3.1",
+                "php": ">=5.5"
             },
             "require-dev": {
                 "ext-curl": "*",
-                "phpunit/phpunit": "~4.0",
-                "psr/log": "~1.0"
+                "phpunit/phpunit": "^4.0",
+                "psr/log": "^1.0"
             },
             "type": "library",
             "extra": {
@@ -256,7 +225,7 @@
                 "rest",
                 "web service"
             ],
-            "time": "2016-03-21 20:02:09"
+            "time": "2016-07-15 17:22:37"
         },
         {
             "name": "guzzlehttp/promises",
@@ -423,6 +392,54 @@
             "time": "2016-01-05 18:25:05"
         },
         {
+            "name": "opis/closure",
+            "version": "2.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/opis/closure.git",
+                "reference": "d531fa3e53bd94eae6f0cf14703bdaa4f5737bc0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/opis/closure/zipball/d531fa3e53bd94eae6f0cf14703bdaa4f5737bc0",
+                "reference": "d531fa3e53bd94eae6f0cf14703bdaa4f5737bc0",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "3.7.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Opis\\Closure\\": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Marius Sarca",
+                    "email": "marius.sarca@gmail.com"
+                }
+            ],
+            "description": "A library for PHP 5.3+ that can be used to serialize closures (anonymous functions).",
+            "homepage": "http://www.opis.io/closure",
+            "keywords": [
+                "anonymous functions",
+                "closure",
+                "function",
+                "serializable",
+                "serialization",
+                "serialize"
+            ],
+            "time": "2015-09-30 12:11:59"
+        },
+        {
             "name": "psr/http-message",
             "version": "1.0",
             "source": {
@@ -512,16 +529,16 @@
         },
         {
             "name": "symfony/filesystem",
-            "version": "v3.1.1",
+            "version": "v3.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
-                "reference": "5751e80d6f94b7c018f338a4a7be0b700d6f3058"
+                "reference": "322da5f0910d8aa0b25fa65ffccaba68dbddb890"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/filesystem/zipball/5751e80d6f94b7c018f338a4a7be0b700d6f3058",
-                "reference": "5751e80d6f94b7c018f338a4a7be0b700d6f3058",
+                "url": "https://api.github.com/repos/symfony/filesystem/zipball/322da5f0910d8aa0b25fa65ffccaba68dbddb890",
+                "reference": "322da5f0910d8aa0b25fa65ffccaba68dbddb890",
                 "shasum": ""
             },
             "require": {
@@ -557,20 +574,20 @@
             ],
             "description": "Symfony Filesystem Component",
             "homepage": "https://symfony.com",
-            "time": "2016-04-12 18:27:47"
+            "time": "2016-06-29 05:41:56"
         },
         {
             "name": "symfony/finder",
-            "version": "v3.1.1",
+            "version": "v3.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/finder.git",
-                "reference": "40d17ed287bf51a2f884c4619ce8ff2a1c5cd219"
+                "reference": "8201978de88a9fa0923e18601bb17f1df9c721e7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/finder/zipball/40d17ed287bf51a2f884c4619ce8ff2a1c5cd219",
-                "reference": "40d17ed287bf51a2f884c4619ce8ff2a1c5cd219",
+                "url": "https://api.github.com/repos/symfony/finder/zipball/8201978de88a9fa0923e18601bb17f1df9c721e7",
+                "reference": "8201978de88a9fa0923e18601bb17f1df9c721e7",
                 "shasum": ""
             },
             "require": {
@@ -606,20 +623,20 @@
             ],
             "description": "Symfony Finder Component",
             "homepage": "https://symfony.com",
-            "time": "2016-05-13 18:06:41"
+            "time": "2016-06-29 05:41:56"
         },
         {
             "name": "xiag/rql-parser",
-            "version": "v1.0.1",
+            "version": "v1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/xiag-ag/rql-parser.git",
-                "reference": "92e8245ea52b170998d6b3be538de20d4cddd2a3"
+                "reference": "82eb4155983775b6afec48a9c32f6bc8332161a6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/xiag-ag/rql-parser/zipball/92e8245ea52b170998d6b3be538de20d4cddd2a3",
-                "reference": "92e8245ea52b170998d6b3be538de20d4cddd2a3",
+                "url": "https://api.github.com/repos/xiag-ag/rql-parser/zipball/82eb4155983775b6afec48a9c32f6bc8332161a6",
+                "reference": "82eb4155983775b6afec48a9c32f6bc8332161a6",
                 "shasum": ""
             },
             "require": {
@@ -649,7 +666,7 @@
                 "rest",
                 "rql"
             ],
-            "time": "2015-08-21 11:19:07"
+            "time": "2016-07-03 08:43:00"
         },
         {
             "name": "zendframework/zend-config",
@@ -816,20 +833,20 @@
         },
         {
             "name": "zendframework/zend-escaper",
-            "version": "2.5.1",
+            "version": "2.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-escaper.git",
-                "reference": "a4b227d8a477f4e7e9073f8e0a7ae7dbd3104a73"
+                "reference": "2dcd14b61a72d8b8e27d579c6344e12c26141d4e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-escaper/zipball/a4b227d8a477f4e7e9073f8e0a7ae7dbd3104a73",
-                "reference": "a4b227d8a477f4e7e9073f8e0a7ae7dbd3104a73",
+                "url": "https://api.github.com/repos/zendframework/zend-escaper/zipball/2dcd14b61a72d8b8e27d579c6344e12c26141d4e",
+                "reference": "2dcd14b61a72d8b8e27d579c6344e12c26141d4e",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.23"
+                "php": ">=5.5"
             },
             "require-dev": {
                 "fabpot/php-cs-fixer": "1.7.*",
@@ -856,7 +873,7 @@
                 "escaper",
                 "zf2"
             ],
-            "time": "2015-06-03 14:05:37"
+            "time": "2016-06-30 19:48:38"
         },
         {
             "name": "zendframework/zend-http",

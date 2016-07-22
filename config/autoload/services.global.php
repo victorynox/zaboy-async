@@ -18,7 +18,7 @@ return [
             'Zend\Db\Adapter\AdapterAbstractServiceFactory',
             'zaboy\async\Queue\Factory\QueueClientAbstractFactory',
             'zaboy\async\Queue\Factory\QueueAdapterAbstractFactory',
-            'zaboy\scheduler\Callback\Factory\InstanceAbstractFactory',
+        //'zaboy\scheduler\Callback\Factory\InstanceAbstractFactory',
         ]
     ]
 ];

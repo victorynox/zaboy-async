@@ -54,7 +54,7 @@ class RejectedPromise extends DeterminedPromise
         $result = parent::wait(false);
         if (is_a($result, '\zaboy\async\Promise\Determined\Exception\RejectedException', true)) {
             //resalt is exception
-            $reason = 'There is exception while Reason was resolving';
+            $reason = 'Exception was thrown while Reason was resolving';
             return new ReasonRejectedException($reason, 0, $result);
         }
         if (is_a($result, '\zaboy\async\Promise\Pending\PendingPromise', true)) {
@@ -62,6 +62,12 @@ class RejectedPromise extends DeterminedPromise
             $reason = $result->getPromiseId();
             return new ReasonPendingException($reason);
         }
+
+        set_error_handler(function ($number, $string) {
+            throw new PromiseException(
+            "RejectedPromise. String: $string,  Number: $number", null, null
+            );
+        });
         try {
             //result can be converted to string
             $reason = strval($result);
@@ -71,6 +77,7 @@ class RejectedPromise extends DeterminedPromise
             $reason = 'Reason can not be converted to string.';
             return new RejectedException($reason, 0, $exc);
         }
+        restore_error_handler();
     }
 
     public function resolve($value)
@@ -81,6 +88,11 @@ class RejectedPromise extends DeterminedPromise
     public function reject($reason)
     {
         throw new PromiseException('Cannot reject a rejected promise.  Pomise: ' . $this->promiseData[Store::PROMISE_ID]);
+    }
+
+    public function then(callable $onFulfilled = null, callable $onRejected = null)
+    {
+        return $promiseData;
     }
 
     protected function getReason($resalt)

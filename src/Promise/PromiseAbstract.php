@@ -112,4 +112,12 @@ abstract class PromiseAbstract implements PromiseInterface
         ;
     }
 
+    protected function serializeCallback($callable)
+    {
+        if ($callable instanceof \Closure) {
+            $callable = new SerializableClosure($closure);
+        }
+        return serialize($callable);
+    }
+
 }

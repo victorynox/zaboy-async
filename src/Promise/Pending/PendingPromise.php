@@ -57,20 +57,38 @@ class PendingPromise extends PromiseAbstract
         ) {
             $this->promiseData[Store::RESULT] = $this->serializeResult($result);
         } else {
-            if (is_object($result) || is_array($result) || is_callable($result) || is_resource($result)) {
-                $reson = 'Reason can not be converted to string.';
-            } else {
-                $reson = strval($result);
+
+            set_error_handler(function ($number, $string) {
+                throw new PromiseException(
+                "PendingPromise. String: $string,  Number: $number", null, null
+                );
+            });
+            try {
+                //result can be converted to string
+                $reason = strval($result);
+                $result = new RejectedException($reason);
+            } catch (\Exception $exc) {
+                //result can not be converted to string
+                $reason = 'Reason can not be converted to string.';
+                $result = new RejectedException($reason, 0, $exc);
             }
-            $result = new RejectedException($reson);
+            restore_error_handler();
             $this->promiseData[Store::RESULT] = $this->serializeResult($result);
         }
+
         return $this->promiseData;
     }
 
     public function wait($unwrap = true)
     {
         return $this;
+    }
+
+    public function then(callable $onFulfilled = null, callable $onRejected = null)
+    {
+        $dependentPromise = new DependentPromiseData($promiseAdapter, $parentPromiseId, $onFulfilled, $onRejected);
+        $dependentPromiseData = $dependentPromise->getPromiseData();
+        return $dependentPromiseData;
     }
 
     protected function serializeResult($result)
@@ -87,7 +105,7 @@ class PendingPromise extends PromiseAbstract
                 $result = JsonCoder::jsonSerialize($result);
                 break;
             case is_object($result):
-                throw new PromiseException("Can not serialize object: " . get_class($result));
+                throw new PromiseException("Can not serialize object: " . get_class($result) . ' Try use interfaces JsonSerialize');
 
             default :
                 try {

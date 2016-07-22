@@ -62,6 +62,12 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
         return $state;
     }
 
+    public function then(callable $onFulfilled = null, callable $onRejected = null)
+    {
+        $promiseData = $this->runTransaction('then', $onFulfilled, $onRejected);
+        return $promiseData;
+    }
+
     protected function getPromiseData($exceptionIfAbsent = false, $promiseId = null)
     {
         $promiseId = !$promiseId ? $this->promiseId : $promiseId;

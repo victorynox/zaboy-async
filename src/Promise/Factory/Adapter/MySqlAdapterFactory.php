@@ -102,14 +102,14 @@ class MySqlAdapterFactory extends FactoryAbstract
             ]
         ],
         MySqlPromiseAdapter::ON_FULFILLED => [
-            'field_type' => 'Varchar',
+            'field_type' => 'Blob',
             'field_params' => [
                 'length' => 65535,
                 'nullable' => true
             ]
         ],
         MySqlPromiseAdapter::ON_REJECTED => [
-            'field_type' => 'Varchar',
+            'field_type' => 'Blob',
             'field_params' => [
                 'length' => 65535,
                 'nullable' => true

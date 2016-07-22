@@ -64,12 +64,16 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
 
     /* ---------------------------------------------------------------------------------- */
 
-    public function testPromiseTest__makePromise()
+    public function testPromiseTest__makeNewPromise()
     {
+        /* @var $this \PHPUnit_Framework_TestCase */
         $this->object = new PromiseClient($this->mySqlPromiseAdapter);
         $this->assertSame(
                 get_class($this->object), 'zaboy\async\Promise\PromiseClient'
         );
+
+        $this->assertInstanceOf('zaboy\async\Promise\PromiseClient1', $this->object);
+
         $this->assertSame(
                 $this->object->getState(), PromiseInterface::PENDING
         );

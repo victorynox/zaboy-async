@@ -19,9 +19,9 @@ $mySqlPromiseAdapter = $mySqlAdapterFactory->__invoke(
 );
 
 $object = new PromiseClient($mySqlPromiseAdapter);
-$object->reject('reason');
-$object->wait(true, 0);
-var_dump(get_class($object->wait(true)));
+$object->reject(new \stdClass());
+$object->wait(false);
+var_dump(get_class($object->wait(false)));
 
 use zaboy\rest\Pipe\MiddlewarePipeOptions;
 use Zend\Diactoros\Server;

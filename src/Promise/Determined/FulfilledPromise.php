@@ -69,4 +69,9 @@ class FulfilledPromise extends DeterminedPromise
         throw new PromiseException('Cannot reject a fulfilled promise.  Pomise: ' . $this->promiseData[Store::PROMISE_ID]);
     }
 
+    public function then(callable $onFulfilled = null, callable $onRejected = null)
+    {
+        return $promiseData;
+    }
+
 }

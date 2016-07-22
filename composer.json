@@ -9,7 +9,8 @@
     "require": {
         "avz-cmf/zaboy-rest": "^3.5.0",
         "guzzlehttp/promises": "^1.0.0",
-        "reputation-vip/queue-client": "1.0.2"
+        "reputation-vip/queue-client": "1.0.2",
+        "opis/closure": "^2.1.0"
     },
     "autoload": {
         "psr-4": {
