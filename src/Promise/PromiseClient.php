@@ -174,11 +174,41 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
             }
 
             $db->getDriver()->getConnection()->commit();
+            if ($methodName === 'resolve') {
+                $this->resolveDependent($result);
+            }
         } catch (\Exception $e) {
             $db->getDriver()->getConnection()->rollback();
             throw new PromiseException($errorMsg . ' Pomise: ' . $this->promiseId, 0, $e);
         }
+
         return $promiseDataReturned;
+    }
+
+    protected function resolveDependent($result)
+    {
+        //are dependent promises exist?
+        $rowset = $this->promiseAdapter->select(array(Store::PARENT_ID => $this->promiseId));
+        if (is_null($rowset->current())) {
+            return;
+        }
+        foreach ($rowset as $row) {
+            $dependentPromiseData = $row->getArrayCopy();
+            $dependentPromiseId = $dependentPromiseData[Store::PROMISE_ID];
+            $dependentPromiseClient = new static($this->promiseAdapter, $dependentPromiseId);
+            try {
+                $dependentPromiseClient->resolve($result);
+            } catch (\Exception $e) {
+                $exception = new PromiseException('Can not resolve dependent Pomise: ' . $dependentPromiseId, 0, $e);
+                $this->log($exception);
+            }
+        }
+        return;
+    }
+
+    protected function log($info)
+    {
+        var_dump($info);
     }
 
 }

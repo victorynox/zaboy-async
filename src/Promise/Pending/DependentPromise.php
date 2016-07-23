@@ -31,36 +31,27 @@ class DependentPromise extends PendingPromise
      * @param MySqlPromiseAdapter $promiseAdapter
      * @throws PromiseException
      */
-    public function __construct(MySqlPromiseAdapter $promiseAdapter, $parentPromiseId, callable $onFulfilled = null, callable $onRejected = null)
+    public function __construct(MySqlPromiseAdapter $promiseAdapter, $promiseData, $parentPromiseId = null, callable $onFulfilled = null, callable $onRejected = null)
     {
-        parent::setPromiseData($parentPromiseId, $onFulfilled, $onRejected);
-    }
-
-    public function setPromiseData($parentPromiseId, callable $onFulfilled = null, callable $onRejected = null)
-    {
-        parent::setPromiseData();
-        $this->promiseData[Store::PARENT_ID] = $parentPromiseId;
-        $this->promiseData[Store::ON_FULFILLED] = $this->serializeCallback($onFulfilled);
-        $this->promiseData[Store::ON_REJECTED] = $this->serializeCallback($onRejected);
+        parent::__construct($promiseAdapter, $promiseData);
+        $this->promiseData[Store::PARENT_ID] = $parentPromiseId ? $parentPromiseId : $this->promiseData[Store::PARENT_ID];
+        $this->promiseData[Store::ON_FULFILLED] = $onFulfilled ? $onFulfilled : $this->serializeCallback($onFulfilled);
+        $this->promiseData[Store::ON_REJECTED] = $onRejected ? $onRejected : $this->serializeCallback($onRejected);
     }
 
     public function resolve($value)
     {
-
-        $this->promiseData[Store::STATE] = PromiseInterface::FULFILLED;
-        $this->promiseData[Store::CLASS_NAME] = '\zaboy\async\Promise\Determined\FulfilledPromise';
-        $this->promiseData[Store::PARENT_ID] = null;
-        $this->promiseData[Store::ON_FULFILLED] = null;
-        $this->promiseData[Store::ON_REJECTED] = null;
-        $promiseData = $this->getPromiseData();
-        $onFulfilled = $promiseData[Store::ON_FULFILLED];
         $onFulfilledCallback = unserialize($onFulfilled);
-
         $resalt = call_user_func($onFulfilledCallback, $value);
+        return parent::resolve($resalt);
+    }
 
-        $serializeredResalt = $this->serializeResult($resalt);
-        $this->promiseData[Store::RESULT] = $serializeredResalt;
-        return $this->promiseData;
+    protected function serializeCallback($callable)
+    {
+        if ($callable instanceof \Closure) {
+            $callable = new SerializableClosure($closure);
+        }
+        return serialize($callable);
     }
 
 }

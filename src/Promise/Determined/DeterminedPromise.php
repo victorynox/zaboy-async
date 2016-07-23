@@ -31,9 +31,38 @@ abstract class DeterminedPromise extends PromiseAbstract
      * @param MySqlPromiseAdapter $promiseAdapter
      * @throws PromiseException
      */
-    public function __construct(MySqlPromiseAdapter $promiseAdapter, $promiseId)
+    public function __construct(MySqlPromiseAdapter $promiseAdapter, $promiseData = [])
     {
-        parent::__construct($promiseAdapter, $promiseId);
+        parent::__construct($promiseAdapter, $promiseData);
+        $this->promiseData[Store::PARENT_ID] = null;
+        $this->promiseData[Store::ON_FULFILLED] = null;
+        $this->promiseData[Store::ON_REJECTED] = null;
+    }
+
+    protected function serializeResult($result)
+    {
+        switch (true) {
+            case $this->isPromiseId($result):
+                break;
+
+            case $result instanceof PromiseInterface:
+                $result = $result->getPromiseId();
+                break;
+
+            case is_object($result) && $result instanceof JsonSerialize:
+                $result = JsonCoder::jsonSerialize($result);
+                break;
+            case is_object($result):
+                throw new PromiseException("Can not serialize object: " . get_class($result) . ' Try use interfaces JsonSerialize');
+
+            default :
+                try {
+                    $result = JsonCoder::jsonEncode($result);
+                } catch (PromiseException $ex) {
+                    throw new PromiseException("Can not serialize result" . get_class($result), 0, $ex);
+                }
+        }
+        return $result;
     }
 
     protected function unserializeResult($result)

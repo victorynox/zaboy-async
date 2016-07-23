@@ -58,11 +58,12 @@ class PromiseBrokerTest extends \PHPUnit_Framework_TestCase
     {
         $promise = $this->object->makePromise();
         $promiseId = $promise->getPromiseId();
-
         $promise = $this->object->getPromise($promiseId);
-        $this->assertSame(
-                get_class($promise), 'zaboy\async\Promise\PromiseClient'
+
+        $this->assertInstanceOf(
+                'zaboy\async\Promise\PromiseClient', $promise
         );
+
         $this->assertEquals(
                 $promise->getState(), 'pending'
         );

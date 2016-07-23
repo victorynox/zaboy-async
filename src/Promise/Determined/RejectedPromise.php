@@ -31,10 +31,45 @@ use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
 class RejectedPromise extends DeterminedPromise
 {
 
-    public function setPromiseData()
+    /**
+     *
+     * @param MySqlPromiseAdapter $promiseAdapter
+     * @throws PromiseException
+     */
+    public function __construct(Store $promiseAdapter, $promiseData = [], $reason = null)
     {
-        parent::setPromiseData();
+        parent::__construct($promiseAdapter, $promiseData);
         $this->promiseData[Store::STATE] = PromiseInterface::REJECTED;
+        if (is_null($reason)) {
+            return;
+        }
+
+
+        if (
+                $this->isPromiseId($reason) ||
+                is_a($result, '\zaboy\async\Promise\Determined\Exception\RejectedException', true) ||
+                is_a($result, '\zaboy\async\Promise\PromiseClient', true)
+        ) {
+            $this->promiseData[Store::RESULT] = $this->serializeResult($result);
+        } else {
+
+            set_error_handler(function ($number, $string) {
+                throw new PromiseException(
+                "PendingPromise. String: $string,  Number: $number", null, null
+                );
+            });
+            try {
+                //result can be converted to string
+                $reason = strval($result);
+                $result = new RejectedException($reason);
+            } catch (\Exception $exc) {
+                //result can not be converted to string
+                $reason = 'Reason can not be converted to string.';
+                $result = new RejectedException($reason, 0, $exc);
+            }
+            restore_error_handler();
+            $this->promiseData[Store::RESULT] = $this->serializeResult($result);
+        }
     }
 
     public function getState()

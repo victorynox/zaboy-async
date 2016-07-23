@@ -238,17 +238,16 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    /*     * ************* Then()  ******************************* */
-
-    public function testPromiseThen__PendingAfterRejecteddWaitUnwrapFalse()
-    {
-        $promise = new PromiseClient($this->mySqlPromiseAdapter);
-        $this->object = $promise->then([self, 'callback']);
-
-        $promise->resolve('result');
-        $this->assertEquals(
-                $this->object->wait(false), 'result after callbak'
-        );
-    }
-
+//    /*     * ************* Then()  ******************************* */
+//
+//    public function testPromiseThen__PendingAfterRejecteddWaitUnwrapFalse()
+//    {
+//        $promise = new PromiseClient($this->mySqlPromiseAdapter);
+//        $this->object = $promise->then([self, 'callback']);
+//
+//        $promise->resolve('result');
+//        $this->assertEquals(
+//                $this->object->wait(false), 'result after callbak'
+//        );
+//    }
 }

@@ -42,20 +42,18 @@ abstract class PromiseAbstract implements PromiseInterface
      * @param MySqlPromiseAdapter $promiseAdapter
      * @throws PromiseException
      */
-    public function __construct(Store $promiseAdapter, $promiseData = null)
+    public function __construct(Store $promiseAdapter, $promiseData = [])
     {
         $this->promiseAdapter = $promiseAdapter;
         $this->promiseData = $promiseData;
-        if (!isset($this->promiseData[Store::PROMISE_ID])) {
-            $this->setPromiseData();
-        }
-    }
 
-    protected function setPromiseData()
-    {
-        $this->promiseData[Store::PROMISE_ID] = $this->makePromiseId();
+        if (!isset($this->promiseData[Store::PROMISE_ID])) {
+            $this->promiseData[Store::PROMISE_ID] = $this->makePromiseId();
+        }
+        if (!$this->promiseData[Store::TIME_IN_FLIGHT]) {
+            $this->promiseData[Store::TIME_IN_FLIGHT] = $this->promiseAdapter->getUtcTime();
+        }
         $this->promiseData[Store::CLASS_NAME] = get_class($this);
-        $this->promiseData[Store::TIME_IN_FLIGHT] = $this->promiseAdapter->getUtcTime();
     }
 
     protected function makePromiseId()
@@ -110,14 +108,6 @@ abstract class PromiseAbstract implements PromiseInterface
                 is_string($param) &&
                 0 === strpos($param, static::PROMISE_ID_PREFIX . static::ID_SEPARATOR)
         ;
-    }
-
-    protected function serializeCallback($callable)
-    {
-        if ($callable instanceof \Closure) {
-            $callable = new SerializableClosure($closure);
-        }
-        return serialize($callable);
     }
 
 }

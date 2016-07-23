@@ -16,6 +16,7 @@ use zaboy\async\Promise\Interfaces\JsonSerialize;
  *
  * @category   async
  * @package    zaboy
+ * @todo useset_error_hadler in jsonEncode()
  */
 class JsonCoder
 {

@@ -32,10 +32,16 @@ use zaboy\async\Promise\PromiseClient;
 class FulfilledPromise extends DeterminedPromise
 {
 
-    public function setPromiseData()
+    /**
+     *
+     * @param MySqlPromiseAdapter $promiseAdapter
+     * @throws PromiseException
+     */
+    public function __construct(Store $promiseAdapter, $promiseData = [], $resalt = null)
     {
-        parent::setPromiseData();
+        parent::__construct($promiseAdapter, $promiseData);
         $this->promiseData[Store::STATE] = PromiseInterface::FULFILLED;
+        $this->promiseData[Store::RESULT] = $this->serializeResult($result);
     }
 
     public function getState()
