@@ -19,6 +19,7 @@ $mySqlPromiseAdapter = $mySqlAdapterFactory->__invoke(
 );
 
 $object = new PromiseClient($mySqlPromiseAdapter);
+var_dump($object->getPromiseId());
 $object->reject(new \stdClass());
 $object->wait(false);
 var_dump(get_class($object->wait(false)));

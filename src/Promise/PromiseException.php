@@ -20,7 +20,7 @@ use zaboy\async\Promise\Interfaces\JsonSerialize;
 class PromiseException extends \Exception implements JsonSerialize
 {
 
-    public function jsonSerialize()
+    public function jsonSerialize(\Exception $exception)
     {
         $arrayObject = new \ArrayObject;
         $arrayObject['class'] = get_class($this);

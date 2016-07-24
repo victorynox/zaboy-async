@@ -20,7 +20,6 @@ use zaboy\async\Promise\Broker\PromiseBroker;
 use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
 use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
 use zaboy\async\Promise\Determined\FulfilledPromise;
-use zaboy\async\Promise\Determined\FulfilledPromise;
 use zaboy\async\Promise\Determined\RejectedPromise;
 
 /**

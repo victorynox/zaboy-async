@@ -20,4 +20,19 @@ use zaboy\async\Promise\PromiseException;
 class RejectedException extends PromiseException
 {
 
+    public static function jsonUnserializeExc($excJsonString)
+    {
+        
+    }
+
+    public static function excSerializeJson(\Exception $exceptiom)
+    {
+
+    }
+
+    public function __construct()
+    {
+        parent::__construct($message, $code, $previous);
+    }
+
 }
