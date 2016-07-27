@@ -175,7 +175,7 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
 
             $db->getDriver()->getConnection()->commit();
             if ($methodName === 'resolve') {
-                $this->resolveDependent($result);
+                $this->resolveDependent($param1);
             }
         } catch (\Exception $e) {
             $db->getDriver()->getConnection()->rollback();

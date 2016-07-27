@@ -37,11 +37,13 @@ class FulfilledPromise extends DeterminedPromise
      * @param MySqlPromiseAdapter $promiseAdapter
      * @throws PromiseException
      */
-    public function __construct(Store $promiseAdapter, $promiseData = [], $resalt = null)
+    public function __construct(Store $promiseAdapter, $promiseData = [], $result = null)
     {
         parent::__construct($promiseAdapter, $promiseData);
         $this->promiseData[Store::STATE] = PromiseInterface::FULFILLED;
-        $this->promiseData[Store::RESULT] = $this->serializeResult($result);
+        if (!isset($this->promiseData[Store::RESULT]) && !is_null($result)) {
+            $this->promiseData[Store::RESULT] = $this->serializeResult($result);
+        }
     }
 
     public function getState()

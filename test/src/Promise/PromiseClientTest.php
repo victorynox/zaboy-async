@@ -95,8 +95,11 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
     public function testPromiseTest__resolveWithObjectAsResult()
     {
         $this->object = new PromiseClient($this->mySqlPromiseAdapter);
-        $this->setExpectedException('\zaboy\async\Promise\PromiseException');
-        $this->object->resolve(new \stdClass());
+        $object = new \stdClass();
+        $this->object->resolve($object);
+        $this->assertEquals(
+                $this->object->wait(), $object
+        );
     }
 
     public function testPromiseTest__reject()
@@ -104,7 +107,7 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
         $this->object = new PromiseClient($this->mySqlPromiseAdapter);
         $this->object->reject('reason');
         $this->assertSame(
-                $this->object->getState(), PromiseInterface::REJECTED
+                PromiseInterface::REJECTED, $this->object->getState()
         );
         $this->assertInstanceOf(
                 'zaboy\async\Promise\Determined\Exception\RejectedException', $this->object->wait(false)
@@ -120,6 +123,7 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
     public function testPromiseTest__rejectWithObjectAsReason()
     {
         $this->object = new PromiseClient($this->mySqlPromiseAdapter);
+        $object = new \stdClass();
         $this->object->reject(new \stdClass());
         $this->assertSame(
                 $this->object->getState(), PromiseInterface::REJECTED
@@ -127,14 +131,11 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(
                 'zaboy\async\Promise\Determined\Exception\RejectedException', $this->object->wait(false)
         );
-        $this->assertInstanceOf(
-                'zaboy\async\Promise\PromiseException', $this->object->wait(false)->getPrevious()
+        $this->assertNull(
+                $this->object->wait(false)->getPrevious()
         );
-        $this->assertSame(
-                'PendingPromise. String: Object of class stdClass could not be converted to string', substr(
-                        $this->object->wait(false)->getPrevious()->getMessage()
-                        , 0
-                        , strlen('PendingPromise. String: Object of class stdClass could not be converted to string'))
+        $this->assertEquals(
+                'Reason can not be converted to string.', $this->object->wait(false)->getMessage()
         );
     }
 

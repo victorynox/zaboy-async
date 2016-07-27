@@ -16,7 +16,7 @@ use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\Determined\DeterminedPromise;
 use zaboy\async\Promise\Pending\PendingPromise;
 use zaboy\async\Promise\PromiseClient;
-use zaboy\async\romise\Interfaces\PromiseInterface;
+use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 use zaboy\async\Promise\PromiseAbstract;
 use zaboy\async\Promise\Broker\PromiseBroker;
@@ -36,40 +36,35 @@ class RejectedPromise extends DeterminedPromise
      * @param MySqlPromiseAdapter $promiseAdapter
      * @throws PromiseException
      */
-    public function __construct(Store $promiseAdapter, $promiseData = [], $reason = null)
+    public function __construct(Store $promiseAdapter, $promiseData = [], $result = null)
     {
         parent::__construct($promiseAdapter, $promiseData);
         $this->promiseData[Store::STATE] = PromiseInterface::REJECTED;
-        if (is_null($reason)) {
+        if (isset($this->promiseData[Store::RESULT]) || is_null($result)) {
             return;
         }
 
-
-        if (
-                $this->isPromiseId($reason) ||
-                is_a($result, '\zaboy\async\Promise\Determined\Exception\RejectedException', true) ||
-                is_a($result, '\zaboy\async\Promise\PromiseClient', true)
-        ) {
-            $this->promiseData[Store::RESULT] = $this->serializeResult($result);
-        } else {
-
+        if ($result instanceof PromiseInterface) {
+            $result = $result->getPromiseId();
+        }
+        if (!PendingPromise::isPromiseId($result)) {
             set_error_handler(function ($number, $string) {
                 throw new PromiseException(
-                "PendingPromise. String: $string,  Number: $number", null, null
+                "RejectedPromise. String: $string,  Number: $number", null, null
                 );
             });
             try {
                 //result can be converted to string
-                $reason = strval($result);
-                $result = new RejectedException($reason);
+                $result = strval($result);
+                $result = new RejectedException($result);
             } catch (\Exception $exc) {
-                //result can not be converted to string
+//result can not be converted to string
                 $reason = 'Reason can not be converted to string.';
                 $result = new RejectedException($reason, 0, $exc);
             }
             restore_error_handler();
-            $this->promiseData[Store::RESULT] = $this->serializeResult($result);
         }
+        $this->promiseData[Store::RESULT] = $this->serializeResult($result);
     }
 
     public function getState()
@@ -88,12 +83,12 @@ class RejectedPromise extends DeterminedPromise
         }
         $result = parent::wait(false);
         if (is_a($result, '\zaboy\async\Promise\Determined\Exception\RejectedException', true)) {
-            //resalt is exception
+//result is exception
             $reason = 'Exception was thrown while Reason was resolving';
             return new ReasonRejectedException($reason, 0, $result);
         }
         if (is_a($result, '\zaboy\async\Promise\Pending\PendingPromise', true)) {
-            /* @var $reason PendingPromise */  //resalt is pending
+            /* @var $result PendingPromise */  //result is pending
             $reason = $result->getPromiseId();
             return new ReasonPendingException($reason);
         }
@@ -104,11 +99,11 @@ class RejectedPromise extends DeterminedPromise
             );
         });
         try {
-            //result can be converted to string
-            $reason = strval($result);
-            return new RejectedException($reason);
+//result can be converted to string
+            $reasonString = strval($result);
+            return new RejectedException($reasonString);
         } catch (\Exception $exc) {
-            //result can not be converted to string
+//result can not be converted to string
             $reason = 'Reason can not be converted to string.';
             return new RejectedException($reason, 0, $exc);
         }
@@ -130,9 +125,9 @@ class RejectedPromise extends DeterminedPromise
         return $promiseData;
     }
 
-    protected function getReason($resalt)
+    protected function getReason($result)
     {
-        if (is_a($resalt, '\zaboy\async\Promise\Determined\Exception\RejectedException', true)) {
+        if (is_a($result, '\zaboy\async\Promise\Determined\Exception\RejectedException', true)) {
             return $reason;
         }
         try {

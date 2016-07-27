@@ -42,8 +42,8 @@ class DependentPromise extends PendingPromise
     public function resolve($value)
     {
         $onFulfilledCallback = unserialize($onFulfilled);
-        $resalt = call_user_func($onFulfilledCallback, $value);
-        return parent::resolve($resalt);
+        $result = call_user_func($onFulfilledCallback, $value);
+        return parent::resolve($result);
     }
 
     protected function serializeCallback($callable)

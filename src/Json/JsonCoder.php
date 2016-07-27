@@ -9,7 +9,7 @@
 
 namespace zaboy\async\Json;
 
-use zaboy\async\Promise\Interfaces\JsonSerialize;
+use mindplay\jsonfreeze\JsonSerializer;
 
 /**
  *
@@ -21,43 +21,18 @@ use zaboy\async\Promise\Interfaces\JsonSerialize;
 class JsonCoder
 {
 
-    public static function jsonSerialize($object)
+    public static function jsonSerialize($value)
     {
-        if (!is_object($object)) {
-            throw new \Exception("Param is non object");
-        }
-        if ($object instanceof JsonSerialize) {
-            $jsonString = $object->jsonSerialize();
-            $objectMarker = '>>JsonCoder. Class:' . get_class($object) . '<<';
-            return $objectMarker . $jsonString;
-        } else {
-            throw new \Exception(get_class($object) . "do not instanceof JsonSerialize Interface");
-        }
+        $serializer = new JsonSerializer();
+        $serializedValue = $serializer->serialize($value);
+        return $serializedValue;
     }
 
-    public static function jsonUnserialize($serializedObject)
+    public static function jsonUnserialize($serializedValue)
     {
-        $className = self::getSerializedClass($serializedObject);
-        $jsonString = substr($serializedObject, strpos($serializedObject, '<<') + 2);
-        $object = $className::jsonUnserialize($jsonString);
-        return $object;
-    }
-
-    public static function getSerializedClass($serializedObject)
-    {
-        if (strpos($serializedObject, '>>JsonCoder. Class:') === 0) {
-            $start = strlen('>>JsonCoder. Class:');
-            $length = strpos($serializedObject, '<<') - $start;
-            $className = substr($serializedObject, $start, $length);
-            return $className;
-        } else {
-            throw new \Exception("Can not unserialize string.");
-        }
-    }
-
-    public static function isSerializedObject($serializedObject)
-    {
-        return strpos($serializedObject, '>>JsonCoder. Class:') === 0;
+        $serializer = new JsonSerializer();
+        $value = $serializer->unserialize($serializedValue);
+        return $value;
     }
 
     public static function jsonDecode($data)

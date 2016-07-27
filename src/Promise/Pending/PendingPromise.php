@@ -53,7 +53,7 @@ class PendingPromise extends PromiseAbstract
         $rejectedPromise = new RejectedPromise($this->promiseAdapter, $this->getPromiseData(), $reason);
 
 
-        return $this->promiseData;
+        return $rejectedPromise->getPromiseData();
     }
 
     public function wait($unwrap = true)

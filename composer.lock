@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "1e349e95c35ae0d41905c5cb29dead5a",
-    "content-hash": "6563f3a5f77e4b91ebc27d77663e9154",
+    "hash": "05ddb17028c0d954568c6c62e2d58d41",
+    "content-hash": "1e048b9ecc4972b9d5f44c363ea82ebc",
     "packages": [
         {
             "name": "avz-cmf/zaboy-rest",
@@ -60,16 +60,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.18.32",
+            "version": "3.18.33",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "84b9927ee116b30babf90a9fc723764672543e29"
+                "reference": "d787cfc514f77f5bee6990a466bc6922c0cf1526"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/84b9927ee116b30babf90a9fc723764672543e29",
-                "reference": "84b9927ee116b30babf90a9fc723764672543e29",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/d787cfc514f77f5bee6990a466bc6922c0cf1526",
+                "reference": "d787cfc514f77f5bee6990a466bc6922c0cf1526",
                 "shasum": ""
             },
             "require": {
@@ -136,7 +136,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2016-07-21 22:30:58"
+            "time": "2016-07-26 18:19:04"
         },
         {
             "name": "container-interop/container-interop",
@@ -337,6 +337,45 @@
             "time": "2016-06-24 23:00:38"
         },
         {
+            "name": "mindplay/jsonfreeze",
+            "version": "1.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mindplay-dk/jsonfreeze.git",
+                "reference": "aaf1d1887cec3d326e4b1eb21f61dc1bbaa009ed"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mindplay-dk/jsonfreeze/zipball/aaf1d1887cec3d326e4b1eb21f61dc1bbaa009ed",
+                "reference": "aaf1d1887cec3d326e4b1eb21f61dc1bbaa009ed",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "mindplay/testies": "dev-master"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "mindplay\\jsonfreeze\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-3.0+"
+            ],
+            "authors": [
+                {
+                    "name": "Rasmus Schultz",
+                    "email": "rasmus@mindplay.dk"
+                }
+            ],
+            "description": "JSON Serialization library",
+            "time": "2016-07-20 19:07:26"
+        },
+        {
             "name": "mtdowling/jmespath.php",
             "version": "2.3.0",
             "source": {
@@ -393,25 +432,31 @@
         },
         {
             "name": "opis/closure",
-            "version": "2.1.0",
+            "version": "2.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opis/closure.git",
-                "reference": "d531fa3e53bd94eae6f0cf14703bdaa4f5737bc0"
+                "reference": "8633065db6b7b22dbdac4431513cbb1ea5b7e2b0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opis/closure/zipball/d531fa3e53bd94eae6f0cf14703bdaa4f5737bc0",
-                "reference": "d531fa3e53bd94eae6f0cf14703bdaa4f5737bc0",
+                "url": "https://api.github.com/repos/opis/closure/zipball/8633065db6b7b22dbdac4431513cbb1ea5b7e2b0",
+                "reference": "8633065db6b7b22dbdac4431513cbb1ea5b7e2b0",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.0"
             },
             "require-dev": {
+                "jeremeamia/superclosure": "^2.0",
                 "phpunit/phpunit": "3.7.*"
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.2.x-dev"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Opis\\Closure\\": "lib/"
@@ -437,7 +482,7 @@
                 "serialization",
                 "serialize"
             ],
-            "time": "2015-09-30 12:11:59"
+            "time": "2016-07-26 07:24:41"
         },
         {
             "name": "psr/http-message",

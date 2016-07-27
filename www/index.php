@@ -8,6 +8,7 @@ chdir(dirname(__DIR__));
 require 'vendor/autoload.php';
 $container = include 'config/container.php';
 
+use mindplay\jsonfreeze\JsonSerializer;
 use zaboy\async\Promise\PromiseClient;
 use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
 
@@ -19,10 +20,13 @@ $mySqlPromiseAdapter = $mySqlAdapterFactory->__invoke(
 );
 
 $object = new PromiseClient($mySqlPromiseAdapter);
-var_dump($object->getPromiseId());
-$object->reject(new \stdClass());
-$object->wait(false);
-var_dump(get_class($object->wait(false)));
+$object2 = new PromiseClient($mySqlPromiseAdapter);
+$object->reject($object2);
+var_dump($state = $object->getState());
+//$object->wait(false);
+var_dump($object->wait(FALSE));
+
+exit();
 
 use zaboy\rest\Pipe\MiddlewarePipeOptions;
 use Zend\Diactoros\Server;

@@ -9,6 +9,7 @@
 
 namespace zaboy\async\Promise;
 
+use zaboy\async\Json\JsonCoder;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
@@ -50,7 +51,7 @@ abstract class PromiseAbstract implements PromiseInterface
         if (!isset($this->promiseData[Store::PROMISE_ID])) {
             $this->promiseData[Store::PROMISE_ID] = $this->makePromiseId();
         }
-        if (!$this->promiseData[Store::TIME_IN_FLIGHT]) {
+        if (!isset($this->promiseData[Store::TIME_IN_FLIGHT])) {
             $this->promiseData[Store::TIME_IN_FLIGHT] = $this->promiseAdapter->getUtcTime();
         }
         $this->promiseData[Store::CLASS_NAME] = get_class($this);
@@ -97,7 +98,7 @@ abstract class PromiseAbstract implements PromiseInterface
             return $this->promiseData;
         } else {
             throw new PromiseException(
-            "Pomise promiseData is not set."
+            "Pomise Data is not set."
             );
         }
     }
