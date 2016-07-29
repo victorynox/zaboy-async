@@ -15,6 +15,7 @@ use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\Determined\Exception\RejectedException;
+use zaboy\async\Promise\PromiseClient;
 use zaboy\async\Promise\PromiseAbstract;
 use zaboy\async\Promise\Broker\PromiseBroker;
 use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
@@ -63,7 +64,7 @@ class PendingPromise extends PromiseAbstract
 
     public function then(callable $onFulfilled = null, callable $onRejected = null)
     {
-        $dependentPromise = new DependentPromiseData($promiseAdapter, $parentPromiseId, $onFulfilled, $onRejected);
+        $dependentPromise = new DependentPromise($this->promiseAdapter, [], $this->getPromiseId(), $onFulfilled, $onRejected);
         $dependentPromiseData = $dependentPromise->getPromiseData();
         return $dependentPromiseData;
     }

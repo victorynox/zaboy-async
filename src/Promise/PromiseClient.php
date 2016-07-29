@@ -64,8 +64,8 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
 
     public function then(callable $onFulfilled = null, callable $onRejected = null)
     {
-        $promiseData = $this->runTransaction('then', $onFulfilled, $onRejected);
-        return $promiseData;
+        $promiseId = $this->runTransaction('then', $onFulfilled, $onRejected);
+        return new static($this->promiseAdapter, $promiseId);
     }
 
     protected function getPromiseData($exceptionIfAbsent = false, $promiseId = null)
@@ -89,14 +89,14 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
 
     public function resolve($value)
     {
-        $promiseData = $this->runTransaction('resolve', $value);
-        return $promiseData;
+        $promiseId = $this->runTransaction('resolve', $value);
+        return $promiseId;
     }
 
     public function reject($value)
     {
-        $promiseData = $this->runTransaction('reject', $value);
-        return $promiseData;
+        $promiseId = $this->runTransaction('reject', $value);
+        return $promiseId;
     }
 
     public function wait($unwrap = true, $waitingTime = 60, $waitingCheckInterval = 1)
@@ -168,32 +168,38 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
                 $errorMsg = "Can not promiseAdapter->update.";
                 $promiseId = $promiseDataReturned[Store::PROMISE_ID];
                 unset($promiseDataReturned[Store::PROMISE_ID]);
-                $this->promiseAdapter->update($promiseDataReturned, [Store::PROMISE_ID => $promiseId]);
+                //or update promise
+                $number = $this->promiseAdapter->update($promiseDataReturned, [Store::PROMISE_ID => $promiseId]);
+                if (!$number) {
+                    //or create new if absent
+                    $promiseDataReturned[Store::PROMISE_ID] = $promiseId;
+                    $this->promiseAdapter->insert($promiseDataReturned);
+                }
             } else {
                 $promiseDataReturned = $promiseData;
             }
 
             $db->getDriver()->getConnection()->commit();
-            if ($methodName === 'resolve') {
-                $this->resolveDependent($param1);
-            }
         } catch (\Exception $e) {
             $db->getDriver()->getConnection()->rollback();
             throw new PromiseException($errorMsg . ' Pomise: ' . $this->promiseId, 0, $e);
         }
 
-        return $promiseDataReturned;
+        if (
+                $promiseData[Store::STATE] === PromiseInterface::PENDING &&
+                $promiseDataReturned[Store::STATE] === PromiseInterface::FULFILLED
+        ) {
+            $this->resolveDependent($param1);
+        }
+        return $promiseId; //$promiseDataReturned;
     }
 
     protected function resolveDependent($result)
     {
         //are dependent promises exist?
         $rowset = $this->promiseAdapter->select(array(Store::PARENT_ID => $this->promiseId));
-        if (is_null($rowset->current())) {
-            return;
-        }
-        foreach ($rowset as $row) {
-            $dependentPromiseData = $row->getArrayCopy();
+        $rowsetArray = $rowset->toArray();
+        foreach ($rowsetArray as $dependentPromiseData) {
             $dependentPromiseId = $dependentPromiseData[Store::PROMISE_ID];
             $dependentPromiseClient = new static($this->promiseAdapter, $dependentPromiseId);
             try {
@@ -208,7 +214,7 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
 
     protected function log($info)
     {
-        var_dump($info);
+        //var_dump($info);
     }
 
 }

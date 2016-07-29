@@ -12,19 +12,28 @@ use mindplay\jsonfreeze\JsonSerializer;
 use zaboy\async\Promise\PromiseClient;
 use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
 
+function callback($value)
+{
+    return $value . ' after callbak';
+}
+
 $mySqlAdapterFactory = new MySqlAdapterFactory();
+
 $mySqlPromiseAdapter = $mySqlAdapterFactory->__invoke(
         $container
         , ''
         , [MySqlAdapterFactory::KEY_PROMISE_TABLE_NAME => 'test_mysqlpromisebroker']
 );
 
-$object = new PromiseClient($mySqlPromiseAdapter);
-$object2 = new PromiseClient($mySqlPromiseAdapter);
-$object->reject($object2);
-var_dump($state = $object->getState());
-//$object->wait(false);
-var_dump($object->wait(FALSE));
+
+
+
+
+
+$promise = new PromiseClient($mySqlPromiseAdapter);
+$promiseNext = $promise->then('callback');
+$promise->resolve('result');
+var_dump($promiseNext->wait(FALSE));
 
 exit();
 

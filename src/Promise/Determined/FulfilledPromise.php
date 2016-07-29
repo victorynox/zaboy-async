@@ -11,6 +11,7 @@ namespace zaboy\async\Promise\Determined;
 
 use zaboy\async\Promise\Determined\DeterminedPromise;
 use zaboy\async\Promise\Pending\PendingPromise;
+use zaboy\async\Promise\Pending\DependentPromise;
 use GuzzleHttp\Promise\PromiseInterface;
 use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 use zaboy\async\Promise\PromiseException;
@@ -79,6 +80,9 @@ class FulfilledPromise extends DeterminedPromise
 
     public function then(callable $onFulfilled = null, callable $onRejected = null)
     {
+        $dependentPromise = new DependentPromise($this->promiseAdapter, [], $this->getPromiseId(), $onFulfilled, $onRejected);
+        $result = $this->wait(false);
+        $promiseData = $dependentPromise->resolve($result);
         return $promiseData;
     }
 

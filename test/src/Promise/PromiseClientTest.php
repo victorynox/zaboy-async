@@ -239,16 +239,83 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-//    /*     * ************* Then()  ******************************* */
-//
-//    public function testPromiseThen__PendingAfterRejecteddWaitUnwrapFalse()
-//    {
-//        $promise = new PromiseClient($this->mySqlPromiseAdapter);
-//        $this->object = $promise->then([self, 'callback']);
-//
-//        $promise->resolve('result');
-//        $this->assertEquals(
-//                $this->object->wait(false), 'result after callbak'
-//        );
-//    }
+    /*     * ************* Then()  ******************************* */
+
+    public function testPromiseThen__ThenFulfilled()
+    {
+        $promise = new PromiseClient($this->mySqlPromiseAdapter);
+        $this->object = $promise->then([get_class($this), 'callback']);
+        $promise->resolve('result');
+        $this->assertEquals(
+                'result after callbak', $this->object->wait(false)
+        );
+    }
+
+    public function testPromiseThen__ThenThenFulfilled()
+    {
+        $promise1 = new PromiseClient($this->mySqlPromiseAdapter);
+        $promise2 = $promise1->then();
+        $this->object = $promise2->then([get_class($this), 'callback']);
+        $promise1->resolve('result');
+        $this->assertEquals(
+                'result after callbak', $this->object->wait(false)
+        );
+    }
+
+    public function testPromiseThen__ThenFulfilledByPromise()
+    {
+        $result = new PromiseClient($this->mySqlPromiseAdapter);
+        $promise1 = new PromiseClient($this->mySqlPromiseAdapter);
+        $this->object = $promise1->then([get_class($this), 'callback']);
+        $promise1->resolve($result);
+
+        $this->assertEquals(
+                $this->object->getPromiseId(), $this->object->wait(false)->getPromiseId()
+        );
+        $this->assertEquals(
+                PromiseInterface::PENDING, $this->object->getState()
+        );
+
+        $result->resolve('result');
+        $this->assertEquals(
+                'result after callbak', $this->object->wait(false)
+        );
+        $this->assertEquals(
+                PromiseInterface::FULFILLED, $this->object->getState()
+        );
+    }
+
+    public function testPromiseThen__ThenFromFulfilled()
+    {
+        $promise = new PromiseClient($this->mySqlPromiseAdapter);
+        $promise->resolve('result');
+        $this->object = $promise->then([get_class($this), 'callback']);
+        $this->assertEquals(
+                'result after callbak', $this->object->wait(false)
+        );
+    }
+
+    public function testPromiseThen__ThenFromFulfilledByPromise()
+    {
+        $result = new PromiseClient($this->mySqlPromiseAdapter);
+        $promise1 = new PromiseClient($this->mySqlPromiseAdapter);
+        $promise1->resolve($result);
+        $this->object = $promise1->then([get_class($this), 'callback']);
+
+        $this->assertEquals(
+                $this->object->getPromiseId(), $this->object->wait(false)->getPromiseId()
+        );
+        $this->assertEquals(
+                PromiseInterface::PENDING, $this->object->getState()
+        );
+
+        $result->resolve('result');
+        $this->assertEquals(
+                'result after callbak', $this->object->wait(false)
+        );
+        $this->assertEquals(
+                PromiseInterface::FULFILLED, $this->object->getState()
+        );
+    }
+
 }
