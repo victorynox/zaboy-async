@@ -44,9 +44,17 @@ class RejectedPromise extends DeterminedPromise
             return;
         }
 
+        if ($result instanceof \Exception) {
+            $reason = "Exception with class '" . get_class($result) . "' was thrown";
+            $result = new RejectedException($reason, 0, $result);
+            $this->promiseData[Store::RESULT] = $this->serializeResult($result);
+            return;
+        }
+
         if ($result instanceof PromiseInterface) {
             $result = $result->getPromiseId();
         }
+
         if (!PendingPromise::isPromiseId($result)) {
             set_error_handler(function ($number, $string) {
                 throw new PromiseException(
@@ -112,16 +120,19 @@ class RejectedPromise extends DeterminedPromise
 
     public function resolve($value)
     {
-        throw new PromiseException('Can not resolve. Pomise already rejected.  Pomise: ' . $this->promiseData[Store::PROMISE_ID]);
+        throw new PromiseException('Can not resolve. Pomise already rejected.  Pomise: ' . $this->promiseData[Store::PROMISE_ID], 0, $this->wait(false));
     }
 
     public function reject($reason)
     {
-        throw new PromiseException('Cannot reject a rejected promise.  Pomise: ' . $this->promiseData[Store::PROMISE_ID]);
+        throw new PromiseException('Cannot reject a rejected promise.  Pomise: ' . $this->promiseData[Store::PROMISE_ID], 0, $this->wait(false));
     }
 
     public function then(callable $onFulfilled = null, callable $onRejected = null)
     {
+        $dependentPromise = new DependentPromise($this->promiseAdapter, [], $this->getPromiseId(), null, $onRejected);
+        $result = $this->wait(false);
+        $promiseData = $dependentPromise->reject($result);
         return $promiseData;
     }
 

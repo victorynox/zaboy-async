@@ -107,8 +107,8 @@ abstract class PromiseAbstract implements PromiseInterface
     {
         return
                 is_string($param) &&
-                0 === strpos($param, static::PROMISE_ID_PREFIX . static::ID_SEPARATOR)
-        ;
+                count(PromiseClient::extractPromiseId($param)) === 1 &&
+                strlen($param) === 49;
     }
 
 }

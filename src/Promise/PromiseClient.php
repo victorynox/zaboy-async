@@ -186,15 +186,18 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
         }
 
         if (
-                $promiseData[Store::STATE] === PromiseInterface::PENDING &&
-                $promiseDataReturned[Store::STATE] === PromiseInterface::FULFILLED
+                $promiseData[Store::STATE] === PromiseInterface::PENDING && (
+                $promiseDataReturned[Store::STATE] === PromiseInterface::FULFILLED ||
+                $promiseDataReturned[Store::STATE] === PromiseInterface::REJECTED)
         ) {
-            $this->resolveDependent($param1);
+            $result = (new static($this->promiseAdapter, $promiseId))->wait(false);
+            $this->resolveDependent($result, $promiseDataReturned[Store::STATE] === PromiseInterface::REJECTED);
         }
+
         return $promiseId; //$promiseDataReturned;
     }
 
-    protected function resolveDependent($result)
+    protected function resolveDependent($result, $isRejected)
     {
         //are dependent promises exist?
         $rowset = $this->promiseAdapter->select(array(Store::PARENT_ID => $this->promiseId));
@@ -203,7 +206,11 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
             $dependentPromiseId = $dependentPromiseData[Store::PROMISE_ID];
             $dependentPromiseClient = new static($this->promiseAdapter, $dependentPromiseId);
             try {
-                $dependentPromiseClient->resolve($result);
+                if (!$isRejected) {
+                    $dependentPromiseClient->resolve($result);
+                } else {
+                    $dependentPromiseClient->reject($result);
+                }
             } catch (\Exception $e) {
                 $exception = new PromiseException('Can not resolve dependent Pomise: ' . $dependentPromiseId, 0, $e);
                 $this->log($exception);
@@ -215,6 +222,24 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
     protected function log($info)
     {
         //var_dump($info);
+    }
+
+    public static function extractPromiseId($stringOrException, $promiseIdArray = [])
+    {
+        if (is_null($stringOrException)) {
+            return $promiseIdArray;
+        }
+        if ($stringOrException instanceof \Exception) {
+            $array = static::extractPromiseId($stringOrException->getPrevious(), $promiseIdArray);
+            $promiseIdArray = static::extractPromiseId($stringOrException->getMessage(), $array);
+            return $promiseIdArray;
+        }
+        $array = [];
+        if (preg_match_all('/(promise__[0-9]{10}_[0-9]{4}__[a-zA-Z0-9_]{23})/', $stringOrException, $array)) {
+            return array_merge(array_reverse($array[0]), $promiseIdArray);
+        } else {
+            return [];
+        }
     }
 
 }

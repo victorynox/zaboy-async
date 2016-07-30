@@ -52,8 +52,6 @@ class PendingPromise extends PromiseAbstract
     public function reject($reason)
     {
         $rejectedPromise = new RejectedPromise($this->promiseAdapter, $this->getPromiseData(), $reason);
-
-
         return $rejectedPromise->getPromiseData();
     }
 

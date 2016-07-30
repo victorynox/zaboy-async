@@ -17,6 +17,17 @@ function callback($value)
     return $value . ' after callbak';
 }
 
+function callException($value)
+{
+    throw new \Exception('Exception ', 0, new \Exception('prev Exception'));
+}
+
+function onRejected($value)
+{
+    /* @var $value \Exception */
+    return $value->getMessage() . ' was resolved';
+}
+
 $mySqlAdapterFactory = new MySqlAdapterFactory();
 
 $mySqlPromiseAdapter = $mySqlAdapterFactory->__invoke(
@@ -26,14 +37,15 @@ $mySqlPromiseAdapter = $mySqlAdapterFactory->__invoke(
 );
 
 
+echo strlen('promise__4449864461_8898__579c843dd93ad1_08516192');
 
-
-
-
-$promise = new PromiseClient($mySqlPromiseAdapter);
-$promiseNext = $promise->then('callback');
-$promise->resolve('result');
-var_dump($promiseNext->wait(FALSE));
+$result = new PromiseClient($mySqlPromiseAdapter);
+$promise1 = new PromiseClient($mySqlPromiseAdapter);
+$object = $promise1->then(null, function ($reason) {
+    return $reason->getMessage() . ' was resolved';
+});
+$promise1->reject($result);
+var_dump($object->wait(FALSE));
 
 exit();
 

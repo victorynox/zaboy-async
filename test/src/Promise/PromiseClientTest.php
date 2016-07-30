@@ -3,6 +3,7 @@
 namespace zaboy\test\async\Promise;
 
 use zaboy\async\Promise\PromiseClient;
+use zaboy\async\Promise\PromiseAbstract;
 use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
 use Interop\Container\ContainerInterface;
 use zaboy\rest\TableGateway\TableManagerMysql;
@@ -67,7 +68,49 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
         return $value . ' after callbak';
     }
 
+    public static function callException($value)
+    {
+        throw new \Exception('Exception ', 0, new \Exception('prev Exception'));
+    }
+
     /* ---------------------------------------------------------------------------------- */
+
+    public function testPromiseTest__extractPromiseIdFromString()
+    {
+        $string = ' jkiuhs iuhis pi siuiughf]l;m74jn &568ihj983438h^&%  ';
+        $this->assertEquals(
+                [], PromiseClient::extractPromiseId($string)
+        );
+        $string = ' jkiuhs iuhis pi siu promise__1469864422_1895__579c84162e43e4_34952052 iughf]l;m74jn &568ihj983438h^&%  ';
+        $this->assertEquals(
+                ['promise__1469864422_1895__579c84162e43e4_34952052'], PromiseClient::extractPromiseId($string)
+        );
+        $string = ' jkiuhs iuhis pi s promise__2229864461_8898__579c843dd93ad1_08516192  AND promise__3339864461_8898__579c843dd93ad1_08516192';
+        $this->assertEquals(
+                [
+            'promise__3339864461_8898__579c843dd93ad1_08516192',
+            'promise__2229864461_8898__579c843dd93ad1_08516192',
+                ]
+                , PromiseClient::extractPromiseId($string)
+        );
+    }
+
+    public function testPromiseTest__extractPromiseIdFromException()
+    {
+        $exc1 = new \Exception('Promise: promise__1119864461_8898__579c843dd93ad1_08516192');
+        $exc2 = new \Exception('promise__2229864461_8898__579c843dd93ad1_08516192  AND promise__3339864461_8898__579c843dd93ad1_08516192', 0, $exc1);
+        $exc3 = new \Exception('promise__4449864461_8898__579c843dd93ad1_08516192 of the end', 0, $exc2);
+
+        $this->assertEquals(
+                [
+            'promise__4449864461_8898__579c843dd93ad1_08516192',
+            'promise__3339864461_8898__579c843dd93ad1_08516192',
+            'promise__2229864461_8898__579c843dd93ad1_08516192',
+            'promise__1119864461_8898__579c843dd93ad1_08516192',
+                ]
+                , PromiseClient::extractPromiseId($exc3)
+        );
+    }
 
     public function testPromiseTest__makePromise()
     {
@@ -185,7 +228,7 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
         $result = new PromiseClient($this->mySqlPromiseAdapter);
         $this->object->reject($result);
         $this->setExpectedException('\zaboy\async\Promise\Determined\Exception\ReasonPendingException');
-        //time is out
+        //ReasonPendingException
         $this->object->wait(true, 0);
     }
 
@@ -237,9 +280,23 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(
                 'zaboy\async\Promise\Determined\Exception\ReasonPendingException', $this->object->wait(false)
         );
+        $this->assertTrue(
+                PromiseAbstract::isPromiseId($this->object->wait(false)->getMessage())
+        );
     }
 
     /*     * ************* Then()  ******************************* */
+
+    public function testPromiseThen__Then()
+    {
+        $promise = new PromiseClient($this->mySqlPromiseAdapter);
+        $this->object = $promise->then([get_class($this), 'callback']);
+        $this->assertInstanceOf(
+                '\zaboy\async\Promise\Pending\DependentPromise', $this->object->wait(false)
+        );
+    }
+
+    /*     * ************* Then() Fulfilled  ******************************* */
 
     public function testPromiseThen__ThenFulfilled()
     {
@@ -301,7 +358,7 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
         $promise1 = new PromiseClient($this->mySqlPromiseAdapter);
         $promise1->resolve($result);
         $this->object = $promise1->then([get_class($this), 'callback']);
-
+        var_dump($this->object);
         $this->assertEquals(
                 $this->object->getPromiseId(), $this->object->wait(false)->getPromiseId()
         );
@@ -312,6 +369,61 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
         $result->resolve('result');
         $this->assertEquals(
                 'result after callbak', $this->object->wait(false)
+        );
+        $this->assertEquals(
+                PromiseInterface::FULFILLED, $this->object->getState()
+        );
+    }
+
+    public function testPromiseThen__ExceptionInOnFulfilled()
+    {
+        $promise = new PromiseClient($this->mySqlPromiseAdapter);
+        $this->object = $promise->then([get_class($this), 'callException']);
+        $promise->resolve('result');
+        $this->assertInstanceOf(
+                '\Exception', $this->object->wait(false)
+        );
+    }
+
+    /*     * ************* Then() Rejected  ******************************* */
+
+    public function testPromiseThen__ThenRejected()
+    {
+        $promise = new PromiseClient($this->mySqlPromiseAdapter);
+        $this->object = $promise->then(null, function ($reason) {
+            return $reason->getMessage() . ' was resolved';
+        });
+        $promise->reject('Error');
+        $this->assertEquals(
+                'Error was resolved', $this->object->wait(false)
+        );
+    }
+
+    public function testPromiseThen__ThenThen_Resolved_onFulfilledException_onRejectedResolved()
+    {
+        $promise1 = new PromiseClient($this->mySqlPromiseAdapter);
+        $promise2 = $promise1->then([get_class($this), 'callException'], null);
+        $message = ' was resolved';
+        $this->object = $promise2->then(null, function ($reason) use ($message) {
+            return $reason->getMessage() . $message;
+        });
+        $promise1->resolve('result');
+        $this->assertEquals(
+                'Exception with class \'Exception\' was thrown was resolved', $this->object->wait(false)
+        );
+    }
+
+    public function testPromiseThen__ThenRejectedByPromiseButResolved()
+    {
+        $result = new PromiseClient($this->mySqlPromiseAdapter);
+        $promise1 = new PromiseClient($this->mySqlPromiseAdapter);
+        $this->object = $promise1->then(null, function ($reason) {
+            return $reason->getMessage() . ' was resolved';
+        });
+        $promise1->reject($result);
+
+        $this->assertEquals(
+                $result->getPromiseId() . ' was resolved', $this->object->wait(false)
         );
         $this->assertEquals(
                 PromiseInterface::FULFILLED, $this->object->getState()
