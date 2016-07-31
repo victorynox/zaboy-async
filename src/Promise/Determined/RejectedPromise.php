@@ -45,7 +45,7 @@ class RejectedPromise extends DeterminedPromise
         }
 
         if ($result instanceof \Exception) {
-            $reason = "Exception with class '" . get_class($result) . "' was thrown";
+            $reason = "Exception with class '" . get_class($result) . "' was thrown. Promise: " . $this->promiseData[Store::PROMISE_ID];
             $result = new RejectedException($reason, 0, $result);
             $this->promiseData[Store::RESULT] = $this->serializeResult($result);
             return;
@@ -67,7 +67,7 @@ class RejectedPromise extends DeterminedPromise
                 $result = new RejectedException($result);
             } catch (\Exception $exc) {
 //result can not be converted to string
-                $reason = 'Reason can not be converted to string.';
+                $reason = 'Reason can not be converted to string.  Promise: ' . $this->promiseData[Store::PROMISE_ID];
                 $result = new RejectedException($reason, 0, $exc);
             }
             restore_error_handler();

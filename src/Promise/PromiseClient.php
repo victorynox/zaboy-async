@@ -235,7 +235,7 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
             return $promiseIdArray;
         }
         $array = [];
-        if (preg_match_all('/(promise__[0-9]{10}_[0-9]{4}__[a-zA-Z0-9_]{23})/', $stringOrException, $array)) {
+        if (preg_match_all('/(promise__[0-9]{10}_[0-9]{6}__[a-zA-Z0-9_]{23})/', $stringOrException, $array)) {
             return array_merge(array_reverse($array[0]), $promiseIdArray);
         } else {
             return [];

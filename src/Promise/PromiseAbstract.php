@@ -59,7 +59,10 @@ abstract class PromiseAbstract implements PromiseInterface
 
     protected function makePromiseId()
     {
-        $time = $this->promiseAdapter->getUtcMicrotime(); //Grivich UTC time in microsec
+        list($microSec, $sec) = explode(" ", microtime());
+        $utcSec = $sec - date('Z');
+        $microSec6digits = substr((1 + round($microSec, 6)) * 1000 * 1000, 1);
+        $time = $utcSec . '.' . $microSec6digits; //Grivich UTC time in microsec
         $idWithDot = uniqid(
                 self::PROMISE_ID_PREFIX . self::ID_SEPARATOR . self::ID_SEPARATOR
                 . $time . self::ID_SEPARATOR . self::ID_SEPARATOR
@@ -105,10 +108,9 @@ abstract class PromiseAbstract implements PromiseInterface
 
     public static function isPromiseId($param)
     {
-        return
-                is_string($param) &&
-                count(PromiseClient::extractPromiseId($param)) === 1 &&
-                strlen($param) === 49;
+        return is_string($param) && isset(PromiseClient::extractPromiseId($param)[0]) ?
+                PromiseClient::extractPromiseId($param)[0] === $param :
+                false;
     }
 
 }

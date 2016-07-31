@@ -12,6 +12,13 @@ use mindplay\jsonfreeze\JsonSerializer;
 use zaboy\async\Promise\PromiseClient;
 use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
 
+list($microSec, $sec) = explode(" ", microtime());
+$utcSec = $sec - date('Z');
+$microSec6digits = substr((1 + round($microSec, 6)) * 1000 * 1000, 1);
+$time = $utcSec . '.' . $microSec6digits; //Grivich UTC time in microsec
+echo $time;
+exit;
+
 function callback($value)
 {
     return $value . ' after callbak';

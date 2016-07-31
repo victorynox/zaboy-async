@@ -81,15 +81,15 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
                 [], PromiseClient::extractPromiseId($string)
         );
-        $string = ' jkiuhs iuhis pi siu promise__1469864422_1895__579c84162e43e4_34952052 iughf]l;m74jn &568ihj983438h^&%  ';
+        $string = ' jkiuhs iuhis pi siu promise__1469864422_189511__579c84162e43e4_34952052 iughf]l;m74jn &568ihj983438h^&%  ';
         $this->assertEquals(
-                ['promise__1469864422_1895__579c84162e43e4_34952052'], PromiseClient::extractPromiseId($string)
+                ['promise__1469864422_189511__579c84162e43e4_34952052'], PromiseClient::extractPromiseId($string)
         );
-        $string = ' jkiuhs iuhis pi s promise__2229864461_8898__579c843dd93ad1_08516192  AND promise__3339864461_8898__579c843dd93ad1_08516192';
+        $string = ' jkiuhs iuhis pi s promise__2229864461_889811__579c843dd93ad1_08516192  AND promise__3339864461_889811__579c843dd93ad1_08516192';
         $this->assertEquals(
                 [
-            'promise__3339864461_8898__579c843dd93ad1_08516192',
-            'promise__2229864461_8898__579c843dd93ad1_08516192',
+            'promise__3339864461_889811__579c843dd93ad1_08516192',
+            'promise__2229864461_889811__579c843dd93ad1_08516192',
                 ]
                 , PromiseClient::extractPromiseId($string)
         );
@@ -97,16 +97,16 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__extractPromiseIdFromException()
     {
-        $exc1 = new \Exception('Promise: promise__1119864461_8898__579c843dd93ad1_08516192');
-        $exc2 = new \Exception('promise__2229864461_8898__579c843dd93ad1_08516192  AND promise__3339864461_8898__579c843dd93ad1_08516192', 0, $exc1);
-        $exc3 = new \Exception('promise__4449864461_8898__579c843dd93ad1_08516192 of the end', 0, $exc2);
+        $exc1 = new \Exception('Promise: promise__1119864461_889811__579c843dd93ad1_08516192');
+        $exc2 = new \Exception('promise__2229864461_889811__579c843dd93ad1_08516192  AND promise__3339864461_889811__579c843dd93ad1_08516192', 0, $exc1);
+        $exc3 = new \Exception('promise__4449864461_889811__579c843dd93ad1_08516192 of the end', 0, $exc2);
 
         $this->assertEquals(
                 [
-            'promise__4449864461_8898__579c843dd93ad1_08516192',
-            'promise__3339864461_8898__579c843dd93ad1_08516192',
-            'promise__2229864461_8898__579c843dd93ad1_08516192',
-            'promise__1119864461_8898__579c843dd93ad1_08516192',
+            'promise__4449864461_889811__579c843dd93ad1_08516192',
+            'promise__3339864461_889811__579c843dd93ad1_08516192',
+            'promise__2229864461_889811__579c843dd93ad1_08516192',
+            'promise__1119864461_889811__579c843dd93ad1_08516192',
                 ]
                 , PromiseClient::extractPromiseId($exc3)
         );
@@ -177,7 +177,7 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
         $this->assertNull(
                 $this->object->wait(false)->getPrevious()
         );
-        $this->assertEquals(
+        $this->assertStringStartsWith(
                 'Reason can not be converted to string.', $this->object->wait(false)->getMessage()
         );
     }
@@ -325,9 +325,10 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
         $promise1 = new PromiseClient($this->mySqlPromiseAdapter);
         $this->object = $promise1->then([get_class($this), 'callback']);
         $promise1->resolve($result);
+        $promise = $this->object->wait(false);
 
         $this->assertEquals(
-                $this->object->getPromiseId(), $this->object->wait(false)->getPromiseId()
+                $this->object->getPromiseId(), $promise->getPromiseId()
         );
         $this->assertEquals(
                 PromiseInterface::PENDING, $this->object->getState()
@@ -358,7 +359,6 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
         $promise1 = new PromiseClient($this->mySqlPromiseAdapter);
         $promise1->resolve($result);
         $this->object = $promise1->then([get_class($this), 'callback']);
-        var_dump($this->object);
         $this->assertEquals(
                 $this->object->getPromiseId(), $this->object->wait(false)->getPromiseId()
         );
@@ -408,8 +408,8 @@ class PromiseClientTest extends \PHPUnit_Framework_TestCase
             return $reason->getMessage() . $message;
         });
         $promise1->resolve('result');
-        $this->assertEquals(
-                'Exception with class \'Exception\' was thrown was resolved', $this->object->wait(false)
+        $this->assertStringEndsWith(
+                ' was resolved', $this->object->wait(false)
         );
     }
 
