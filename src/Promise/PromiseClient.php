@@ -10,7 +10,6 @@
 namespace zaboy\async\Promise;
 
 use zaboy\async\Promise\PromiseException;
-use zaboy\async\Promise\Determined\Exception\RejectedException;
 use zaboy\async\Promise\Pending\TimeIsOutException;
 use zaboy\async\Promise\Pending\PendingPromise;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
@@ -50,6 +49,24 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
         }
     }
 
+    public static function extractPromiseId($stringOrException, $promiseIdArray = [])
+    {
+        if (is_null($stringOrException)) {
+            return $promiseIdArray;
+        }
+        if ($stringOrException instanceof \Exception) {
+            $array = static::extractPromiseId($stringOrException->getPrevious(), $promiseIdArray);
+            $promiseIdArray = static::extractPromiseId($stringOrException->getMessage(), $array);
+            return $promiseIdArray;
+        }
+        $array = [];
+        if (preg_match_all('/(promise__[0-9]{10}_[0-9]{6}__[a-zA-Z0-9_]{23})/', $stringOrException, $array)) {
+            return array_merge(array_reverse($array[0]), $promiseIdArray);
+        } else {
+            return [];
+        }
+    }
+
     public function getPromiseId()
     {
         return $this->promiseId;
@@ -57,7 +74,7 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
 
     public function getState()
     {
-        $promiseData = $this->getPromiseData(true);
+        $promiseData = $this->getStoredPromiseData();
         $state = $promiseData[Store::STATE];
         return $state;
     }
@@ -66,25 +83,6 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
     {
         $promiseId = $this->runTransaction('then', $onFulfilled, $onRejected);
         return new static($this->promiseAdapter, $promiseId);
-    }
-
-    protected function getPromiseData($exceptionIfAbsent = false, $promiseId = null)
-    {
-        $promiseId = !$promiseId ? $this->promiseId : $promiseId;
-        $where = [Store::PROMISE_ID => $promiseId];
-        $rowset = $this->promiseAdapter->select($where);
-        $promiseData = $rowset->current();
-        if (!isset($promiseData)) {
-            if ($exceptionIfAbsent) {
-                throw new PromiseException(
-                "There is  not data in store  for promiseId: $promiseId"
-                );
-            } else {
-                return null;
-            }
-        } else {
-            return $promiseData->getArrayCopy();
-        }
     }
 
     public function resolve($value)
@@ -103,8 +101,8 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
     {
         if (!$unwrap) {
             $promiseId = $this->getPromiseId();
-            $promiseData = $this->getPromiseData(true, $promiseId);
-            $promiseClass = $promiseData[Store::CLASS_NAME];
+            $promiseData = $this->getStoredPromiseData($promiseId);
+            $promiseClass = $this->getPromiseClass();
             $promise = new $promiseClass($this->promiseAdapter, $promiseData);
             return $promise->wait(false);
         }
@@ -129,16 +127,16 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
         throw $e;
     }
 
-    public function insertPromise(PromiseAbstract $promise)
+    protected function insertPromise(PromiseAbstract $promise)
     {
         try {
             $promiseData = $promise->getPromiseData();
             $rowsCount = $this->promiseAdapter->insert($promiseData);
         } catch (\Exception $e) {
-            throw new PromiseException('Can\'t insert promiseData', 0, $e);
+            throw new PromiseException('Can\'t insert promiseData. Promise: ' . $promise->getPromiseId(), 0, $e);
         }
         if (!$rowsCount) {
-            throw new PromiseException('Can\'t insert promiseData', 0, $e);
+            throw new PromiseException('Can\'t insert promiseData. Promise: ' . $promise->getPromiseId());
         }
     }
 
@@ -160,7 +158,7 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
                 throw new PromiseException( );
             }
             $promiseData = $rowset->current()->getArrayCopy();
-            $promiseClass = $promiseData[Store::CLASS_NAME];
+            $promiseClass = $this->getPromiseClass();
             $promise = new $promiseClass($this->promiseAdapter, $promiseData);
             $errorMsg = "Can not execute $methodName. Class: $promiseClass";
             $promiseDataReturned = call_user_func([$promise, $methodName], $param1, $params2);
@@ -219,27 +217,39 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
         return;
     }
 
+    protected function getStoredPromiseData($promiseId = null)
+    {
+        $promiseId = !$promiseId ? $this->getPromiseId() : $promiseId;
+        $where = [Store::PROMISE_ID => $promiseId];
+        $rowset = $this->promiseAdapter->select($where);
+        $promiseData = $rowset->current();
+        if (!isset($promiseData)) {
+            throw new PromiseException(
+            "There is  not data in store  for promiseId: $promiseId"
+            );
+        } else {
+            return $promiseData->getArrayCopy();
+        }
+    }
+
+    protected function getPromiseClass($promiseId = null)
+    {
+        $promiseData = $this->getStoredPromiseData($promiseId);
+        switch (true) {
+            case $promiseData[Store::STATE] === PromiseInterface::FULFILLED:
+                return '\zaboy\async\Promise\Determined\FulfilledPromise';
+            case $promiseData[Store::STATE] === PromiseInterface::REJECTED:
+                return '\zaboy\async\Promise\Determined\RejectedPromise';
+            case $promiseData[Store::PARENT_ID] === null:
+                return '\zaboy\async\Promise\Pending\PendingPromise';
+            default:
+                return '\zaboy\async\Promise\Pending\DependentPromise';
+        }
+    }
+
     protected function log($info)
     {
         //var_dump($info);
-    }
-
-    public static function extractPromiseId($stringOrException, $promiseIdArray = [])
-    {
-        if (is_null($stringOrException)) {
-            return $promiseIdArray;
-        }
-        if ($stringOrException instanceof \Exception) {
-            $array = static::extractPromiseId($stringOrException->getPrevious(), $promiseIdArray);
-            $promiseIdArray = static::extractPromiseId($stringOrException->getMessage(), $array);
-            return $promiseIdArray;
-        }
-        $array = [];
-        if (preg_match_all('/(promise__[0-9]{10}_[0-9]{6}__[a-zA-Z0-9_]{23})/', $stringOrException, $array)) {
-            return array_merge(array_reverse($array[0]), $promiseIdArray);
-        } else {
-            return [];
-        }
     }
 
 }

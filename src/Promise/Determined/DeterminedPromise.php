@@ -11,7 +11,6 @@ namespace zaboy\async\Promise\Determined;
 
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Json\JsonCoder;
-use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\PromiseClient;
 use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
@@ -64,8 +63,11 @@ abstract class DeterminedPromise extends PromiseAbstract
         }
     }
 
-    public function wait($unwrap = true, $waitingTime = 60, $waitingCheckInterval = 1)
+    public function wait($unwrap = true)
     {
+        if ($unwrap) {
+            return new PromiseException('Do not try call wait(true)');
+        }
         $result = $this->unserializeResult($this->promiseData[Store::RESULT]);
         if (PendingPromise::isPromiseId($result)) {
             $nextPromise = new PromiseClient($this->promiseAdapter, $result);

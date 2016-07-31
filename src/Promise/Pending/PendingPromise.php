@@ -9,17 +9,10 @@
 
 namespace zaboy\async\Promise\Pending;
 
-use zaboy\async\Json\JsonCoder;
-use zaboy\async\Promise\Interfaces\JsonSerialize;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
-use zaboy\rest\DataStore\Interfaces\DataStoresInterface;
 use zaboy\async\Promise\PromiseException;
-use zaboy\async\Promise\Determined\Exception\RejectedException;
-use zaboy\async\Promise\PromiseClient;
 use zaboy\async\Promise\PromiseAbstract;
-use zaboy\async\Promise\Broker\PromiseBroker;
 use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
-use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
 use zaboy\async\Promise\Determined\FulfilledPromise;
 use zaboy\async\Promise\Determined\RejectedPromise;
 

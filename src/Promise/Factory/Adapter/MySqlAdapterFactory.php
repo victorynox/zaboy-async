@@ -12,10 +12,8 @@ namespace zaboy\async\Promise\Factory\Adapter;
 use Interop\Container\ContainerInterface;
 use zaboy\rest\DataStore\DataStoreException;
 use zaboy\rest\FactoryAbstract;
-use Zend\Db\TableGateway\TableGateway;
 use zaboy\rest\TableGateway\TableManagerMysql;
 use zaboy\async\Promise\Adapter\MySqlPromiseAdapter;
-use zaboy\rest\DataStore\DataStoreAbstract as RestDataStore;
 
 /**
  * Creates if can and returns an instance of class Queue\Adapter\DataStoresAbstract - Adapter for Promis
@@ -35,11 +33,7 @@ use zaboy\rest\DataStore\DataStoreAbstract as RestDataStore;
  * id => promise_id_123456789qwerty
  * state => pending || fulfilled || rejected;
  * result => mix;
- * cancel_fn => string, php callable or callback service name;
- * wait_fn => string, php callable or callback service name;
- * wait_list =>  json array of promise_id;
- * handlers = json array of arrays [string promise_id, string - callable $onFulfilled, string - callable $onRejected];
- * time_in_flight = 2216125; UTC time when promise has sarted
+ * creation_time = 2216125; UTC time when promise has sarted
  * parent_id => promise_id_123456789qwerty2 - promise that gave birth to it
  * on_fulfilled => string, php callable or callback service name;
  * on_rejected => string, php callable or callback service name;
@@ -73,13 +67,6 @@ class MySqlAdapterFactory extends FactoryAbstract
                 'nullable' => false
             ]
         ],
-        MySqlPromiseAdapter::CLASS_NAME => [
-            'field_type' => 'Varchar',
-            'field_params' => [
-                'length' => 256,
-                'nullable' => false
-            ]
-        ],
         MySqlPromiseAdapter::STATE => [
             'field_type' => 'Varchar',
             'field_params' => [
@@ -88,13 +75,6 @@ class MySqlAdapterFactory extends FactoryAbstract
             ]
         ],
         MySqlPromiseAdapter::RESULT => [
-            'field_type' => 'Varchar',
-            'field_params' => [
-                'length' => 65535,
-                'nullable' => true
-            ]
-        ],
-        MySqlPromiseAdapter::CANCEL_FN => [
             'field_type' => 'Varchar',
             'field_params' => [
                 'length' => 65535,
@@ -115,7 +95,7 @@ class MySqlAdapterFactory extends FactoryAbstract
                 'nullable' => true
             ]
         ],
-        MySqlPromiseAdapter::TIME_IN_FLIGHT => [
+        MySqlPromiseAdapter::CREATION_TIME => [
             'field_type' => 'Integer',
             'field_params' => [
                 'nullable' => false

@@ -8,15 +8,24 @@ chdir(dirname(__DIR__));
 require 'vendor/autoload.php';
 $container = include 'config/container.php';
 
-use mindplay\jsonfreeze\JsonSerializer;
 use zaboy\async\Promise\PromiseClient;
 use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
+use zaboy\async\Promise\PromiseException;
+use zaboy\async\Json\JsonCoder;
 
-list($microSec, $sec) = explode(" ", microtime());
-$utcSec = $sec - date('Z');
-$microSec6digits = substr((1 + round($microSec, 6)) * 1000 * 1000, 1);
-$time = $utcSec . '.' . $microSec6digits; //Grivich UTC time in microsec
-echo $time;
+$e1 = new PromiseException('Exception1', 1);
+$e11 = new \DomainException('Exception11', 11, $e1);
+
+//$ue11 = JsonCoder::jsonUnserialize(JsonCoder::jsonSerialize($e11));
+
+/* @var $ue11 \Exception */
+//var_dump($ue11->getPrevious());
+$d = JsonCoder::jsonSerialize($e11);
+
+var_dump(JsonCoder::jsonUnserialize($d));
+//var_dump(JsonCoder::jsonSerialize($e11));
+
+
 exit;
 
 function callback($value)

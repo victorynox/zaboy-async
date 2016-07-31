@@ -10,6 +10,7 @@
 namespace zaboy\async\Json;
 
 use mindplay\jsonfreeze\JsonSerializer;
+use zaboy\async\Promise\PromiseException;
 
 /**
  *
@@ -24,6 +25,9 @@ class JsonCoder
     public static function jsonSerialize($value)
     {
         $serializer = new JsonSerializer();
+        if (is_object($value) && static::isClassException(get_class($value))) {
+            $serializer->defineSerialization(get_class($value), [get_class(), 'serializeException'], [get_class(), 'unserializeException']);
+        }
         $serializedValue = $serializer->serialize($value);
         return $serializedValue;
     }
@@ -31,6 +35,11 @@ class JsonCoder
     public static function jsonUnserialize($serializedValue)
     {
         $serializer = new JsonSerializer();
+        $jsonDecoded = static::jsonDecode($serializedValue);
+
+        if (isset($jsonDecoded[JsonSerializer::TYPE]) && static::isClassException($jsonDecoded[JsonSerializer::TYPE])) {
+            $serializer->defineSerialization($jsonDecoded[JsonSerializer::TYPE], [get_class(), 'serializeException'], [get_class(), 'unserializeException']);
+        }
         $value = $serializer->unserialize($serializedValue);
         return $value;
     }
@@ -42,8 +51,7 @@ class JsonCoder
         if (JSON_ERROR_NONE !== json_last_error()) {
             $jsonErrorMsg = json_last_error_msg();
             json_encode(null);  // Clear json_last_error()
-            $decode = json_decode($encodedValue, $objectDecodeType);
-            throw new DataStoreException(
+            throw new \Exception(
             'Unable to decode data from JSON - ' . $jsonErrorMsg
             );
         }
@@ -57,11 +65,67 @@ class JsonCoder
         if (JSON_ERROR_NONE !== json_last_error()) {
             $jsonErrorMsg = json_last_error_msg();
             json_encode(null);  // Clear json_last_error()
-            throw new DataStoreException(
+            throw new \Exception(
             'Unable to encode data to JSON - ' . $jsonErrorMsg
             );
         }
         return $result;
+    }
+
+    /**
+     * @param DateTime|DateTimeImmutable $datetime
+     *
+     * @return array
+     */
+    public static function serializeException(\Exception $exception)
+    {
+        $data = array(
+            JsonSerializer::TYPE => get_class($exception),
+            "message" => $exception->getMessage(),
+            "code" => $exception->getCode(),
+            "line" => $exception->getLine(),
+            "file" => $exception->getFile(),
+            "prev" => $exception->getPrevious(),
+        );
+        //var_dump('public static function serializeException($exception)');
+        //var_dump($data);
+        return $data;
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return DateTime|DateTimeImmutable
+     */
+    public static function unserializeException($data)
+    {
+        //var_dump('public static function unserializeException($data)');
+        //var_dump($data);
+
+        if (is_null($data["prev"])) {
+            $exc = new $data[JsonSerializer::TYPE]($data["message"], $data["code"], null);
+        } else {
+            $prev = static::unserializeException($data["prev"]);
+            $exc = new $data[JsonSerializer::TYPE]($data["message"], $data["code"], $prev);
+        }
+        $class = new \ReflectionClass($data[JsonSerializer::TYPE]);
+
+        $properties = $class->getProperties();
+
+        foreach ($properties as $prop) {
+
+            if ($prop->getName() === "line" || $prop->getName() === "file") {
+                $prop->setAccessible(true);
+                $prop->setValue($exc, $data[$prop->getName()]);
+                $prop->setAccessible(false);
+            }
+        }
+        return $exc;
+    }
+
+    protected static function isClassException($className)
+    {
+        return strpos($className, 'Exception') === strlen($className) - strlen('Exception');
     }
 
 }

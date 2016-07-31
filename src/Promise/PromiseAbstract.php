@@ -9,7 +9,6 @@
 
 namespace zaboy\async\Promise;
 
-use zaboy\async\Json\JsonCoder;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
@@ -51,26 +50,9 @@ abstract class PromiseAbstract implements PromiseInterface
         if (!isset($this->promiseData[Store::PROMISE_ID])) {
             $this->promiseData[Store::PROMISE_ID] = $this->makePromiseId();
         }
-        if (!isset($this->promiseData[Store::TIME_IN_FLIGHT])) {
-            $this->promiseData[Store::TIME_IN_FLIGHT] = $this->promiseAdapter->getUtcTime();
+        if (!isset($this->promiseData[Store::CREATION_TIME])) {
+            $this->promiseData[Store::CREATION_TIME] = $this->promiseAdapter->getUtcTime();
         }
-        $this->promiseData[Store::CLASS_NAME] = get_class($this);
-    }
-
-    protected function makePromiseId()
-    {
-        list($microSec, $sec) = explode(" ", microtime());
-        $utcSec = $sec - date('Z');
-        $microSec6digits = substr((1 + round($microSec, 6)) * 1000 * 1000, 1);
-        $time = $utcSec . '.' . $microSec6digits; //Grivich UTC time in microsec
-        $idWithDot = uniqid(
-                self::PROMISE_ID_PREFIX . self::ID_SEPARATOR . self::ID_SEPARATOR
-                . $time . self::ID_SEPARATOR . self::ID_SEPARATOR
-                , true
-        );
-        $promiseId = str_replace('.', self::ID_SEPARATOR, $idWithDot);
-
-        return $promiseId;
     }
 
     public function getPromiseId()
@@ -111,6 +93,22 @@ abstract class PromiseAbstract implements PromiseInterface
         return is_string($param) && isset(PromiseClient::extractPromiseId($param)[0]) ?
                 PromiseClient::extractPromiseId($param)[0] === $param :
                 false;
+    }
+
+    protected function makePromiseId()
+    {
+        list($microSec, $sec) = explode(" ", microtime());
+        $utcSec = $sec - date('Z');
+        $microSec6digits = substr((1 + round($microSec, 6)) * 1000 * 1000, 1);
+        $time = $utcSec . '.' . $microSec6digits; //Grivich UTC time in microsec
+        $idWithDot = uniqid(
+                self::PROMISE_ID_PREFIX . self::ID_SEPARATOR . self::ID_SEPARATOR
+                . $time . self::ID_SEPARATOR . self::ID_SEPARATOR
+                , true
+        );
+        $promiseId = str_replace('.', self::ID_SEPARATOR, $idWithDot);
+
+        return $promiseId;
     }
 
 }

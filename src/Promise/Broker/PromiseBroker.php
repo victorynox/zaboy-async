@@ -7,7 +7,7 @@ use zaboy\async\Promise\Interfaces\PromiseBrokerInterface;
 use zaboy\async\Promise\Adapter\MySqlPromiseAdapter;
 use zaboy\async\Promise\PromiseException;
 
-class PromiseBroker implements PromiseBrokerInterface
+class PromiseBroker
 {
 
     const SERVICE_NAME = 'promise_broker';
