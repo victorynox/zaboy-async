@@ -9,7 +9,8 @@ return [
             'TableManagerMysql' => 'zaboy\rest\TableGateway\Factory\TableManagerMysqlFactory',
             'QueueBroker' => 'zaboy\async\Queue\Factory\QueueBrokerFactory',
             'MySqlPromiseAdapter' => 'zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory',
-            'PromiseBroker' => 'zaboy\async\Promise\Factory\Broker\PromiseBrokerFactory'
+            'PromiseBroker' => 'zaboy\async\Promise\Factory\Broker\PromiseBrokerFactory',
+            zaboy\async\Promise\Factory\Middleware\CrudPromiseFactory::KEY_MIDDLEWARE_CRUD_PROMISE => 'zaboy\async\Promise\Factory\Middleware\CrudPromiseFactory'
         ],
         'abstract_factories' => [
             'zaboy\rest\DataStore\Factory\DbTableAbstractFactory',

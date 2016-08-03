@@ -63,5 +63,9 @@ return [
         'test_worker_datastore' => [
             'class' => 'zaboy\rest\DataStore\Memory',
         ],
+        'test_rest_middleware_datastore' => [
+            'class' => 'zaboy\rest\DataStore\HttpClient',
+            'url' => 'http://zaboy-async.loc/api/rest/MiddlewareCrudPromise/',
+        ],
     ]
 ];

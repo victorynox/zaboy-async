@@ -33,8 +33,8 @@ class JsonCoderTest extends \PHPUnit_Framework_TestCase
 
     public function testJsonCoder_ExceptionJsonSerialize()
     {
-        $e1 = new \Exception('Exception1', 1);
-        $e11 = new \Exception('Exception11', 11, $e1);
+        $e1 = new PromiseException('Exception1', 1);
+        $e11 = new PromiseException('Exception11', 11, $e1);
         $this->assertEquals(
                 $e11, JsonCoder::jsonUnserialize(JsonCoder::jsonSerialize($e11))
         );

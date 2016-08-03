@@ -25,6 +25,7 @@ class JsonCoder
     public static function jsonSerialize($value)
     {
         $serializer = new JsonSerializer();
+        //if (is_object($value) && is_a(get_class($value), '\Exception', true)) {
         if (is_object($value) && static::isClassException(get_class($value))) {
             $serializer->defineSerialization(get_class($value), [get_class(), 'serializeException'], [get_class(), 'unserializeException']);
         }
@@ -37,6 +38,7 @@ class JsonCoder
         $serializer = new JsonSerializer();
         $jsonDecoded = static::jsonDecode($serializedValue);
 
+        //if (isset($jsonDecoded[JsonSerializer::TYPE]) && is_a($jsonDecoded[JsonSerializer::TYPE], '\Exception', true)) {
         if (isset($jsonDecoded[JsonSerializer::TYPE]) && static::isClassException($jsonDecoded[JsonSerializer::TYPE])) {
             $serializer->defineSerialization($jsonDecoded[JsonSerializer::TYPE], [get_class(), 'serializeException'], [get_class(), 'unserializeException']);
         }
@@ -87,8 +89,6 @@ class JsonCoder
             "file" => $exception->getFile(),
             "prev" => $exception->getPrevious(),
         );
-        //var_dump('public static function serializeException($exception)');
-        //var_dump($data);
         return $data;
     }
 
@@ -99,9 +99,6 @@ class JsonCoder
      */
     public static function unserializeException($data)
     {
-        //var_dump('public static function unserializeException($data)');
-        //var_dump($data);
-
         if (is_null($data["prev"])) {
             $exc = new $data[JsonSerializer::TYPE]($data["message"], $data["code"], null);
         } else {
@@ -125,6 +122,8 @@ class JsonCoder
 
     protected static function isClassException($className)
     {
+
+        // return (is_object($value) && is_a($className, '\Exception', true));
         return strpos($className, 'Exception') === strlen($className) - strlen('Exception');
     }
 

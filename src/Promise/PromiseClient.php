@@ -12,6 +12,7 @@ namespace zaboy\async\Promise;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\Pending\TimeIsOutException;
 use zaboy\async\Promise\Pending\PendingPromise;
+use zaboy\async\Promise\PromiseAbstract;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
 use Zend\Db\Sql\Select;
@@ -195,6 +196,11 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
         return $promiseId; //$promiseDataReturned;
     }
 
+    public function toArray()
+    {
+        return $this->getStoredPromiseData();
+    }
+
     protected function resolveDependent($result, $isRejected)
     {
         //are dependent promises exist?
@@ -250,6 +256,11 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
     protected function log($info)
     {
         //var_dump($info);
+    }
+
+    public static function isPromiseId($param)
+    {
+        return PromiseAbstract::isPromiseId($param);
     }
 
 }
