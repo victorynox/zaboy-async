@@ -1,12 +1,12 @@
 <?php
 
-namespace zaboy\async\Promise\Adapter;
+namespace zaboy\async\Promise;
 
 use Zend\Db\TableGateway\TableGateway;
 use zaboy\rest\DataStore\Interfaces\ReadInterface;
 
 /**
- *
+ * Store for states of  promises
  *
  * id => promise_id_123456789qwerty
  * state => pending || fulfilled || rejected;
@@ -19,7 +19,7 @@ use zaboy\rest\DataStore\Interfaces\ReadInterface;
  * @category   async
  * @package    zaboy
  */
-class MySqlPromiseAdapter extends TableGateway
+class Store extends TableGateway
 {
 
     //PROMISE_ADAPTER_DATA_STORE
@@ -33,23 +33,5 @@ class MySqlPromiseAdapter extends TableGateway
     const PARENT_ID = 'parent_id';
     const ON_FULFILLED = 'on_fulfilled';
     const ON_REJECTED = 'on_rejected';
-
-    /**
-     *
-     * @return int Grivich UTC time in seconds
-     */
-    public function getUtcTime()
-    {
-        return (int) (time() - date('Z'));
-    }
-
-    /**
-     *
-     * @return int Grivich UTC time in microseconds
-     */
-    public function getUtcMicrotime()
-    {
-        return round(microtime(1) - date('Z'), 6);
-    }
 
 }

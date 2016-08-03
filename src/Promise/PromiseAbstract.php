@@ -11,7 +11,7 @@ namespace zaboy\async\Promise;
 
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Promise\PromiseException;
-use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
+use zaboy\async\Promise\Store;
 
 /**
  * PromiseAbstract
@@ -33,25 +33,25 @@ abstract class PromiseAbstract implements PromiseInterface
 
     /**
      *
-     * @var MySqlPromiseAdapter
+     * @var Storer
      */
-    public $promiseAdapter;
+    public $store;
 
     /**
      *
-     * @param MySqlPromiseAdapter $promiseAdapter
+     * @param Storer $store
      * @throws PromiseException
      */
-    public function __construct(Store $promiseAdapter, $promiseData = [])
+    public function __construct(Store $store, $promiseData = [])
     {
-        $this->promiseAdapter = $promiseAdapter;
+        $this->store = $store;
         $this->promiseData = $promiseData;
 
         if (!isset($this->promiseData[Store::PROMISE_ID])) {
             $this->promiseData[Store::PROMISE_ID] = $this->makePromiseId();
         }
         if (!isset($this->promiseData[Store::CREATION_TIME])) {
-            $this->promiseData[Store::CREATION_TIME] = $this->promiseAdapter->getUtcTime();
+            $this->promiseData[Store::CREATION_TIME] = (int) (time() - date('Z'));
         }
     }
 
@@ -90,8 +90,8 @@ abstract class PromiseAbstract implements PromiseInterface
 
     public static function isPromiseId($param)
     {
-        return is_string($param) && isset(PromiseClient::extractPromiseId($param)[0]) ?
-                PromiseClient::extractPromiseId($param)[0] === $param :
+        return is_string($param) && isset(Promise::extractPromiseId($param)[0]) ?
+                Promise::extractPromiseId($param)[0] === $param :
                 false;
     }
 

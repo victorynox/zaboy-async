@@ -14,8 +14,8 @@ use zaboy\async\Promise\Pending\PendingPromise;
 use zaboy\async\Promise\Pending\DependentPromise;
 use GuzzleHttp\Promise\PromiseInterface;
 use zaboy\async\Promise\PromiseException;
-use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
-use zaboy\async\Promise\PromiseClient;
+use zaboy\async\Promise\Store;
+use zaboy\async\Promise\Promise;
 
 /**
  * FulfilledPromise
@@ -28,12 +28,12 @@ class FulfilledPromise extends DeterminedPromise
 
     /**
      *
-     * @param MySqlPromiseAdapter $promiseAdapter
+     * @param Storer $store
      * @throws PromiseException
      */
-    public function __construct(Store $promiseAdapter, $promiseData = [], $result = null)
+    public function __construct(Store $store, $promiseData = [], $result = null)
     {
-        parent::__construct($promiseAdapter, $promiseData);
+        parent::__construct($store, $promiseData);
         $this->promiseData[Store::STATE] = PromiseInterface::FULFILLED;
         if (!isset($this->promiseData[Store::RESULT]) && !is_null($result)) {
             $this->promiseData[Store::RESULT] = $this->serializeResult($result);
@@ -60,7 +60,7 @@ class FulfilledPromise extends DeterminedPromise
 
     public function then(callable $onFulfilled = null, callable $onRejected = null)
     {
-        $dependentPromise = new DependentPromise($this->promiseAdapter, [], $this->getPromiseId(), $onFulfilled, $onRejected);
+        $dependentPromise = new DependentPromise($this->store, [], $this->getPromiseId(), $onFulfilled, $onRejected);
         $result = $this->wait(false);
         $promiseData = $dependentPromise->resolve($result);
         return $promiseData;

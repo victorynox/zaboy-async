@@ -7,28 +7,37 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace zaboy\async\Promise\Factory\Adapter;
+namespace zaboy\async\Promise\Factory;
 
 use Interop\Container\ContainerInterface;
-use zaboy\rest\DataStore\DataStoreException;
 use zaboy\rest\FactoryAbstract;
 use zaboy\rest\TableGateway\TableManagerMysql;
-use zaboy\async\Promise\Adapter\MySqlPromiseAdapter;
+use zaboy\async\Promise\PromiseException;
+use zaboy\async\Promise\Store;
 
 /**
- * Creates if can and returns an instance of class Queue\Adapter\DataStoresAbstract - Adapter for Promis
+ * Creates if can and returns an instance of class Storer - Adapter for Promis
  *
- * Class MySqlAdapterFactory
- *
- * Any comgig needs for this factory, but ypu have to connect this factory:
- *
+ * You have to connect this factory:
  * <code>
  * 'services' => [
  *      'factories' => [
- *          'MySqlPromiseAdapter' => 'zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory'
+ *          zaboy\async\Promise\Store::KEY => StoreFactory::class
  *      ]
  * ]
  * </code>
+ *
+ * If table is not exist - it will be make.
+ * Default name for table is TABLE_NAME = 'promises';
+ *
+ * You can change it in config:
+ * <code>
+ * 'PromisesStore' => [
+ *      'tableName' => 'another_name'
+ * ]
+ * </code>
+ *
+ * Filds in table are:
  *
  * id => promise_id_123456789qwerty
  * state => pending || fulfilled || rejected;
@@ -41,12 +50,14 @@ use zaboy\async\Promise\Adapter\MySqlPromiseAdapter;
  * @category   async
  * @package    zaboy
  */
-class MySqlAdapterFactory extends FactoryAbstract
+class StoreFactory extends FactoryAbstract
 {
 
-    const KEY_PROMISE_ADAPTER = 'MySqlPromiseAdapter';
-    const PROMISE_TABLE_NAME = 'promises';
-    const KEY_PROMISE_TABLE_NAME = 'tableName';
+    // Service name in config
+    const KEY = 'PromisesStore';
+    //
+    const TABLE_NAME = 'promises';
+    const KEY_TABLE_NAME = '#table-name';
 
     /**
      *
@@ -56,52 +67,49 @@ class MySqlAdapterFactory extends FactoryAbstract
 
     /** @var \Zend\Db\Adapter\Adapter $db */
     protected $db;
-
-    /** @var  \zaboy\rest\DataStore\DbTable */
-    protected $dataStore;
     protected $promiseTableData = [
-        MySqlPromiseAdapter::PROMISE_ID => [
+        Store::PROMISE_ID => [
             'field_type' => 'Varchar',
             'field_params' => [
                 'length' => 128,
                 'nullable' => false
             ]
         ],
-        MySqlPromiseAdapter::STATE => [
+        Store::STATE => [
             'field_type' => 'Varchar',
             'field_params' => [
                 'length' => 128,
                 'nullable' => false
             ]
         ],
-        MySqlPromiseAdapter::RESULT => [
+        Store::RESULT => [
             'field_type' => 'Varchar',
             'field_params' => [
                 'length' => 65535,
                 'nullable' => true
             ]
         ],
-        MySqlPromiseAdapter::ON_FULFILLED => [
+        Store::ON_FULFILLED => [
             'field_type' => 'Blob',
             'field_params' => [
                 'length' => 65535,
                 'nullable' => true
             ]
         ],
-        MySqlPromiseAdapter::ON_REJECTED => [
+        Store::ON_REJECTED => [
             'field_type' => 'Blob',
             'field_params' => [
                 'length' => 65535,
                 'nullable' => true
             ]
         ],
-        MySqlPromiseAdapter::CREATION_TIME => [
+        Store::CREATION_TIME => [
             'field_type' => 'Integer',
             'field_params' => [
                 'nullable' => false
             ]
         ],
-        MySqlPromiseAdapter::PARENT_ID => [
+        Store::PARENT_ID => [
             'field_type' => 'Varchar',
             'field_params' => [
                 'length' => 128,
@@ -117,29 +125,34 @@ class MySqlAdapterFactory extends FactoryAbstract
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $this->tableName = isset($options[self::KEY_PROMISE_TABLE_NAME]) ? $options[self::KEY_PROMISE_TABLE_NAME] : self::PROMISE_TABLE_NAME;
+
+        $config = $container->get('config');
+
+        $this->tableName = isset($config[self::KEY][self::KEY_TABLE_NAME]) ?
+                $config[self::KEY][self::KEY_TABLE_NAME] :
+                (isset($options[self::KEY_TABLE_NAME]) ?
+                        $options[self::KEY_TABLE_NAME] :
+                        self::TABLE_NAME)
+        ;
+
         $this->db = $container->has('db') ? $container->get('db') : null;
         if (is_null($this->db)) {
-            throw new DataStoreException(
-            'Can\'t create DbTableAdapter for Promise'
+            throw new PromiseException(
+            'Can\'t create db Adapter'
             );
         }
-
-        if ($container->has('TableManagerMysql')) {
-            $tableManager = $container->get('TableManagerMysql');
+        if ($container->has(TableManagerMysql::KEY_IN_CONFIG)) {
+            $tableManager = $container->get(TableManagerMysql::KEY_IN_CONFIG);
         } else {
             $tableManager = new TableManagerMysql($this->db);
         }
 
-        $hasPromiseTableData = $tableManager->hasTable($this->tableName);
-
-        if (!$hasPromiseTableData) {
+        $hasPromiseStoreTable = $tableManager->hasTable($this->tableName);
+        if (!$hasPromiseStoreTable) {
             $tableManager->rewriteTable($this->tableName, $this->promiseTableData);
         }
 
-        $mySqlPromiseAdapter = new MySqlPromiseAdapter($this->tableName, $this->db);
-
-        return $mySqlPromiseAdapter;
+        return new Store($this->tableName, $this->db);
     }
 
 }

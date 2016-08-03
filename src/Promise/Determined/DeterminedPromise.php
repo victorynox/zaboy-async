@@ -12,8 +12,8 @@ namespace zaboy\async\Promise\Determined;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Json\JsonCoder;
 use zaboy\async\Promise\PromiseException;
-use zaboy\async\Promise\PromiseClient;
-use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
+use zaboy\async\Promise\Promise;
+use zaboy\async\Promise\Store;
 use zaboy\async\Promise\Pending\PendingPromise;
 use zaboy\async\Promise\PromiseAbstract;
 
@@ -28,12 +28,12 @@ abstract class DeterminedPromise extends PromiseAbstract
 
     /**
      *
-     * @param MySqlPromiseAdapter $promiseAdapter
+     * @param Storer $store
      * @throws PromiseException
      */
-    public function __construct(Store $promiseAdapter, $promiseData = [])
+    public function __construct(Store $store, $promiseData = [])
     {
-        parent::__construct($promiseAdapter, $promiseData);
+        parent::__construct($store, $promiseData);
         $this->promiseData[Store::PARENT_ID] = null;
         $this->promiseData[Store::ON_FULFILLED] = null;
         $this->promiseData[Store::ON_REJECTED] = null;
@@ -70,7 +70,7 @@ abstract class DeterminedPromise extends PromiseAbstract
         }
         $result = $this->unserializeResult($this->promiseData[Store::RESULT]);
         if (PendingPromise::isPromiseId($result)) {
-            $nextPromise = new PromiseClient($this->promiseAdapter, $result);
+            $nextPromise = new Promise($this->store, $result);
             $result = $nextPromise->wait(false);
         }
         return $result;

@@ -12,7 +12,7 @@ namespace zaboy\async\Promise\Pending;
 use Opis\Closure\SerializableClosure;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Promise\PromiseException;
-use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
+use zaboy\async\Promise\Store;
 
 /**
  * DependentPromise
@@ -25,12 +25,12 @@ class DependentPromise extends PendingPromise
 
     /**
      *
-     * @param MySqlPromiseAdapter $promiseAdapter
+     * @param Storer $store
      * @throws PromiseException
      */
-    public function __construct(Store $promiseAdapter, $promiseData, $parentPromiseId = null, callable $onFulfilled = null, callable $onRejected = null)
+    public function __construct(Store $store, $promiseData, $parentPromiseId = null, callable $onFulfilled = null, callable $onRejected = null)
     {
-        parent::__construct($promiseAdapter, $promiseData);
+        parent::__construct($store, $promiseData);
         $this->promiseData[Store::PARENT_ID] = $parentPromiseId ? $parentPromiseId : $this->promiseData[Store::PARENT_ID];
         $this->promiseData[Store::ON_FULFILLED] = !isset($promiseData[Store::ON_FULFILLED]) ? $this->serializeCallback($onFulfilled) : $promiseData[Store::ON_FULFILLED];
         $this->promiseData[Store::ON_REJECTED] = !isset($promiseData[Store::ON_REJECTED]) ? $this->serializeCallback($onRejected) : $promiseData[Store::ON_REJECTED];

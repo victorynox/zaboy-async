@@ -3,12 +3,12 @@
 namespace zaboy\test\async\Promise;
 
 use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
-use zaboy\async\Promise\Factory\Broker\PromiseBrokerFactory;
-use zaboy\async\Promise\PromiseBroker;
+use zaboy\async\Promise\Factory\BrokerFactory;
+use zaboy\async\Promise\Broker;
 use Interop\Container\ContainerInterface;
 use zaboy\rest\TableGateway\TableManagerMysql;
 
-class PromiseBrokerTest extends \PHPUnit_Framework_TestCase
+class BrokerTest extends \PHPUnit_Framework_TestCase
 {
 
     const TEST_TABLE_NAME = 'test_mysqlpromisebroker';
@@ -19,7 +19,7 @@ class PromiseBrokerTest extends \PHPUnit_Framework_TestCase
     protected $adapter;
 
     /**
-     * @var PromiseBroker
+     * @var Broker
      */
     protected $object;
 
@@ -36,11 +36,11 @@ class PromiseBrokerTest extends \PHPUnit_Framework_TestCase
     {
         $this->container = include './config/container.php';
         $this->adapter = $this->container->get('db');
-        $promiseBrokerFactory = new PromiseBrokerFactory();
-        $this->object = $promiseBrokerFactory->__invoke(
+        $BrokerFactory = new BrokerFactory();
+        $this->object = $BrokerFactory->__invoke(
                 $this->container
                 , ''
-                , [MySqlAdapterFactory::KEY_PROMISE_TABLE_NAME => self::TEST_TABLE_NAME]
+                , [MySqlAdapterFactory::KEY_TABLE_NAME => self::TEST_TABLE_NAME]
         );
     }
 
@@ -54,14 +54,14 @@ class PromiseBrokerTest extends \PHPUnit_Framework_TestCase
         $tableManagerMysql->deleteTable(self::TEST_TABLE_NAME);
     }
 
-    public function testPromiseBrokerTest__makePromise()
+    public function testBrokerTest__makePromise()
     {
         $promise = $this->object->makePromise();
         $promiseId = $promise->getPromiseId();
         $promise = $this->object->getPromise($promiseId);
 
         $this->assertInstanceOf(
-                'zaboy\async\Promise\PromiseClient', $promise
+                'zaboy\async\Promise\Promise', $promise
         );
 
         $this->assertEquals(
@@ -76,14 +76,14 @@ class PromiseBrokerTest extends \PHPUnit_Framework_TestCase
 //        );
     }
 
-    public function testPromiseBrokerTest__getPromise()
+    public function testBrokerTest__getPromise()
     {
         $promiseId = $this->object->makePromise();
         $this->assertSame(
-                get_class($this->object->getPromise($promiseId)), 'zaboy\async\Promise\PromiseClient'
+                get_class($this->object->getPromise($promiseId)), 'zaboy\async\Promise\Promise'
         );
         $this->assertEquals(
-                get_class($this->object->getPromise($promiseId)), 'zaboy\async\Promise\PromiseClient'
+                get_class($this->object->getPromise($promiseId)), 'zaboy\async\Promise\Promise'
         );
     }
 

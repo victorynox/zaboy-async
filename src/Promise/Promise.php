@@ -14,23 +14,23 @@ use zaboy\async\Promise\Pending\TimeIsOutException;
 use zaboy\async\Promise\Pending\PendingPromise;
 use zaboy\async\Promise\PromiseAbstract;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
-use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
+use zaboy\async\Promise\Store;
 use Zend\Db\Sql\Select;
 
 /**
- * PromiseClient
+ * Promise
  *
  * @category   async
  * @package    zaboy
  */
-class PromiseClient implements PromiseInterface//extends PromiseAbstract//implements PromiseInterface
+class Promise implements PromiseInterface//extends PromiseAbstract//implements PromiseInterface
 {
 
     /**
      *
-     * @var \zaboy\async\Promise\Adapter\MySqlPromiseAdapter
+     * @var \zaboy\async\Promise\Storer
      */
-    public $promiseAdapter;
+    public $store;
 
     /**
      *
@@ -38,11 +38,14 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
      */
     public $promiseId;
 
-    public function __construct(Store $promiseAdapter, $promiseId = null)
+    public function __construct(Store $store, $promiseId = null)
     {
-        $this->promiseAdapter = $promiseAdapter;
+        if (!is_null($promiseId) && !PromiseAbstract::isPromiseId($promiseId)) {
+            throw new PromiseException('Wrong format $promiseId');
+        }
+        $this->store = $store;
         if (!isset($promiseId)) {
-            $promise = new PendingPromise($promiseAdapter);
+            $promise = new PendingPromise($store);
             $this->insertPromise($promise);
             $this->promiseId = $promise->getPromiseId();
         } else {
@@ -83,7 +86,7 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
     public function then(callable $onFulfilled = null, callable $onRejected = null)
     {
         $promiseId = $this->runTransaction('then', $onFulfilled, $onRejected);
-        return new static($this->promiseAdapter, $promiseId);
+        return new static($this->store, $promiseId);
     }
 
     public function resolve($value)
@@ -104,7 +107,7 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
             $promiseId = $this->getPromiseId();
             $promiseData = $this->getStoredPromiseData($promiseId);
             $promiseClass = $this->getPromiseClass();
-            $promise = new $promiseClass($this->promiseAdapter, $promiseData);
+            $promise = new $promiseClass($this->store, $promiseData);
             return $promise->wait(false);
         }
         $stepsNumber = $waitingTime / $waitingCheckInterval;
@@ -132,7 +135,7 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
     {
         try {
             $promiseData = $promise->getPromiseData();
-            $rowsCount = $this->promiseAdapter->insert($promiseData);
+            $rowsCount = $this->store->insert($promiseData);
         } catch (\Exception $e) {
             throw new PromiseException('Can\'t insert promiseData. Promise: ' . $promise->getPromiseId(), 0, $e);
         }
@@ -144,9 +147,9 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
     protected function runTransaction($methodName, $param1 = null, $params2 = null)
     {
         $identifier = Store::PROMISE_ID;
-        $db = $this->promiseAdapter->getAdapter();
+        $db = $this->store->getAdapter();
         $queryStrPromise = 'SELECT ' . Select::SQL_STAR
-                . ' FROM ' . $db->platform->quoteIdentifier($this->promiseAdapter->getTable())
+                . ' FROM ' . $db->platform->quoteIdentifier($this->store->getTable())
                 . ' WHERE ' . $db->platform->quoteIdentifier($identifier) . ' = ?'
                 . ' FOR UPDATE';
         try {
@@ -160,19 +163,19 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
             }
             $promiseData = $rowset->current()->getArrayCopy();
             $promiseClass = $this->getPromiseClass();
-            $promise = new $promiseClass($this->promiseAdapter, $promiseData);
+            $promise = new $promiseClass($this->store, $promiseData);
             $errorMsg = "Can not execute $methodName. Class: $promiseClass";
             $promiseDataReturned = call_user_func([$promise, $methodName], $param1, $params2);
             if (!is_null($promiseDataReturned)) {
-                $errorMsg = "Can not promiseAdapter->update.";
+                $errorMsg = "Can not store->update.";
                 $promiseId = $promiseDataReturned[Store::PROMISE_ID];
                 unset($promiseDataReturned[Store::PROMISE_ID]);
                 //or update promise
-                $number = $this->promiseAdapter->update($promiseDataReturned, [Store::PROMISE_ID => $promiseId]);
+                $number = $this->store->update($promiseDataReturned, [Store::PROMISE_ID => $promiseId]);
                 if (!$number) {
                     //or create new if absent
                     $promiseDataReturned[Store::PROMISE_ID] = $promiseId;
-                    $this->promiseAdapter->insert($promiseDataReturned);
+                    $this->store->insert($promiseDataReturned);
                 }
             } else {
                 $promiseDataReturned = $promiseData;
@@ -189,7 +192,7 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
                 $promiseDataReturned[Store::STATE] === PromiseInterface::FULFILLED ||
                 $promiseDataReturned[Store::STATE] === PromiseInterface::REJECTED)
         ) {
-            $result = (new static($this->promiseAdapter, $promiseId))->wait(false);
+            $result = (new static($this->store, $promiseId))->wait(false);
             $this->resolveDependent($result, $promiseDataReturned[Store::STATE] === PromiseInterface::REJECTED);
         }
 
@@ -204,16 +207,16 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
     protected function resolveDependent($result, $isRejected)
     {
         //are dependent promises exist?
-        $rowset = $this->promiseAdapter->select(array(Store::PARENT_ID => $this->promiseId));
+        $rowset = $this->store->select(array(Store::PARENT_ID => $this->promiseId));
         $rowsetArray = $rowset->toArray();
         foreach ($rowsetArray as $dependentPromiseData) {
             $dependentPromiseId = $dependentPromiseData[Store::PROMISE_ID];
-            $dependentPromiseClient = new static($this->promiseAdapter, $dependentPromiseId);
+            $dependentPromise = new static($this->store, $dependentPromiseId);
             try {
                 if (!$isRejected) {
-                    $dependentPromiseClient->resolve($result);
+                    $dependentPromise->resolve($result);
                 } else {
-                    $dependentPromiseClient->reject($result);
+                    $dependentPromise->reject($result);
                 }
             } catch (\Exception $e) {
                 $exception = new PromiseException('Can not resolve dependent Pomise: ' . $dependentPromiseId, 0, $e);
@@ -227,7 +230,7 @@ class PromiseClient implements PromiseInterface//extends PromiseAbstract//implem
     {
         $promiseId = !$promiseId ? $this->getPromiseId() : $promiseId;
         $where = [Store::PROMISE_ID => $promiseId];
-        $rowset = $this->promiseAdapter->select($where);
+        $rowset = $this->store->select($where);
         $promiseData = $rowset->current();
         if (!isset($promiseData)) {
             throw new PromiseException(

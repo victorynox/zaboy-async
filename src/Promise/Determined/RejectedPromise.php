@@ -16,7 +16,7 @@ use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\Determined\DeterminedPromise;
 use zaboy\async\Promise\Pending\PendingPromise;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
-use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
+use zaboy\async\Promise\Store;
 
 /**
  * RejectedPromise
@@ -29,12 +29,12 @@ class RejectedPromise extends DeterminedPromise
 
     /**
      *
-     * @param MySqlPromiseAdapter $promiseAdapter
+     * @param Storer $store
      * @throws PromiseException
      */
-    public function __construct(Store $promiseAdapter, $promiseData = [], $result = null)
+    public function __construct(Store $store, $promiseData = [], $result = null)
     {
-        parent::__construct($promiseAdapter, $promiseData);
+        parent::__construct($store, $promiseData);
         $this->promiseData[Store::STATE] = PromiseInterface::REJECTED;
         if (isset($this->promiseData[Store::RESULT]) || is_null($result)) {
             return;
@@ -130,7 +130,7 @@ class RejectedPromise extends DeterminedPromise
 
     public function then(callable $onFulfilled = null, callable $onRejected = null)
     {
-        $dependentPromise = new DependentPromise($this->promiseAdapter, [], $this->getPromiseId(), null, $onRejected);
+        $dependentPromise = new DependentPromise($this->store, [], $this->getPromiseId(), null, $onRejected);
         $result = $this->wait(false);
         $promiseData = $dependentPromise->reject($result);
         return $promiseData;

@@ -8,7 +8,7 @@ chdir(dirname(__DIR__));
 require 'vendor/autoload.php';
 $container = include 'config/container.php';
 
-//use zaboy\async\Promise\PromiseClient;
+//use zaboy\async\Promise\Promise;
 //use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
 //use zaboy\async\Promise\PromiseException;
 //use zaboy\async\Json\JsonCoder;
@@ -34,12 +34,12 @@ $container = include 'config/container.php';
 //$mySqlPromiseAdapter = $mySqlAdapterFactory->__invoke(
 //        $container
 //        , ''
-//        , [MySqlAdapterFactory::KEY_PROMISE_TABLE_NAME => 'test_mysqlpromisebroker']
+//        , [MySqlAdapterFactory::KEY_TABLE_NAME => 'test_mysqlpromisebroker']
 //);
 //
 //
-//$result = new PromiseClient($mySqlPromiseAdapter);
-//$promise1 = new PromiseClient($mySqlPromiseAdapter);
+//$result = new Promise($mySqlPromiseAdapter);
+//$promise1 = new Promise($mySqlPromiseAdapter);
 //$object = $promise1->then('callback');
 //$promise1->resolve($result);
 //$promise = $object->wait(FALSE);
@@ -61,7 +61,11 @@ use zaboy\rest\DataStore\HttpClient;
 //$queue->addMessage('ManagedQueue11', '$value[0]');
 //$queuecreate([Client::MESSAGE_ID => 'ManagedQueue11', Client::BODY => 'test_create_delete()__1']);
 
-$app = new MiddlewarePipeOptions(['env' => 'develop']); //'env' => 'develop'
+putenv("APP_ENV=dev"); //putenv("APP_ENV=pro"); - it is for compose autoload config cache
+
+$env = getenv('APP_ENV') === 'dev' ? 'develop' : null; // - it is for MiddlewarePipe debug information
+$app = new MiddlewarePipeOptions(['env' => $env]); //'env' => 'develop' (error ifor show)) or 'env' => 'any another' (do not show))
+
 $RestRqlFactory = new RestRqlFactory();
 $rest = $RestRqlFactory($container, '');
 $app->pipe('/api/rest', $rest);

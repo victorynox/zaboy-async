@@ -16,9 +16,9 @@ use Zend\Db\TableGateway\TableGateway;
 use zaboy\rest\FactoryAbstract;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Promise\PromiseException;
-use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
-use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
-use zaboy\async\Promise\PromiseClient;
+use zaboy\async\Promise\Store;
+use zaboy\async\Promise\Factory\StoreFactory;
+use zaboy\async\Promise\Promise;
 use zaboy\async\Promise\Middleware\CrudPromise;
 
 /**
@@ -67,13 +67,13 @@ class CrudPromiseFactory extends FactoryAbstract
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $promiseAdapter = $container->get(MySqlAdapterFactory::KEY_PROMISE_ADAPTER);
+        $store = $container->get(StoreFactory::KEY);
 
-        if (null !== $promiseAdapter) {
-            $middlewareCrudPromise = new CrudPromise($promiseAdapter);
+        if (null !== $store) {
+            $middlewareCrudPromise = new CrudPromise($store);
         } else {
             throw new DataStoreException(
-            'Can\'t create MySqlAdapterFactory as service with name: ' . MySqlAdapterFactory::KEY_PROMISE_ADAPTER
+            'Can\'t create StoreFactory as service with name: ' . StoreFactory::KEY
             );
         }
 

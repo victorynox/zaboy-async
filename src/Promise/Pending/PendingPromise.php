@@ -12,7 +12,7 @@ namespace zaboy\async\Promise\Pending;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\PromiseAbstract;
-use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
+use zaboy\async\Promise\Store;
 use zaboy\async\Promise\Determined\FulfilledPromise;
 use zaboy\async\Promise\Determined\RejectedPromise;
 
@@ -27,24 +27,24 @@ class PendingPromise extends PromiseAbstract
 
     /**
      *
-     * @param MySqlPromiseAdapter $promiseAdapter
+     * @param Storer $store
      * @throws PromiseException
      */
-    public function __construct(Store $promiseAdapter, $promiseData = [])
+    public function __construct(Store $store, $promiseData = [])
     {
-        parent::__construct($promiseAdapter, $promiseData);
+        parent::__construct($store, $promiseData);
         $this->promiseData[Store::STATE] = PromiseInterface::PENDING;
     }
 
     public function resolve($value)
     {
-        $fulfilledPromise = new FulfilledPromise($this->promiseAdapter, $this->getPromiseData(), $value);
+        $fulfilledPromise = new FulfilledPromise($this->store, $this->getPromiseData(), $value);
         return $fulfilledPromise->getPromiseData();
     }
 
     public function reject($reason)
     {
-        $rejectedPromise = new RejectedPromise($this->promiseAdapter, $this->getPromiseData(), $reason);
+        $rejectedPromise = new RejectedPromise($this->store, $this->getPromiseData(), $reason);
         return $rejectedPromise->getPromiseData();
     }
 
@@ -55,7 +55,7 @@ class PendingPromise extends PromiseAbstract
 
     public function then(callable $onFulfilled = null, callable $onRejected = null)
     {
-        $dependentPromise = new DependentPromise($this->promiseAdapter, [], $this->getPromiseId(), $onFulfilled, $onRejected);
+        $dependentPromise = new DependentPromise($this->store, [], $this->getPromiseId(), $onFulfilled, $onRejected);
         $dependentPromiseData = $dependentPromise->getPromiseData();
         return $dependentPromiseData;
     }

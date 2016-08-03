@@ -15,8 +15,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Zend\Diactoros\Response\JsonResponse;
 use Zend\Stratigility\MiddlewareInterface;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
-use zaboy\async\Promise\Adapter\MySqlPromiseAdapter as Store;
-use zaboy\async\Promise\PromiseClient;
+use zaboy\async\Promise\Store;
+use zaboy\async\Promise\Promise;
 use zaboy\async\Promise\PromiseException;
 
 /**
@@ -34,7 +34,7 @@ class CrudPromise implements MiddlewareInterface
      *
      * @var Store
      */
-    public $promiseAdapter;
+    public $store;
 
     /**
      *
@@ -44,12 +44,12 @@ class CrudPromise implements MiddlewareInterface
 
     /**
      *
-     * @param MySqlPromiseAdapter $promiseAdapter
+     * @param Storer $store
      * @throws PromiseException
      */
-    public function __construct(Store $promiseAdapter)
+    public function __construct(Store $store)
     {
-        $this->promiseAdapter = $promiseAdapter;
+        $this->store = $store;
     }
 
     /**
@@ -112,8 +112,8 @@ class CrudPromise implements MiddlewareInterface
     public function methodGetWithId(ServerRequestInterface $request, ResponseInterface $response)
     {
         $primaryId = $request->getAttribute('Primary-Key-Value');
-        if (PromiseClient::isPromiseId($primaryId)) {
-            $promise = new PromiseClient($this->promiseAdapter, $primaryId);
+        if (Promise::isPromiseId($primaryId)) {
+            $promise = new Promise($this->store, $primaryId);
             $promiseData = $promise->toArray();
             $this->request = $request->withAttribute('Response-Body', $promiseData);
             $response = $response->withStatus(200);
@@ -133,10 +133,10 @@ class CrudPromise implements MiddlewareInterface
     public function methodPutWithId(ServerRequestInterface $request, ResponseInterface $response)
     {
         $primaryId = $request->getAttribute('Primary-Key-Value');
-        if (!PromiseClient::isPromiseId($primaryId)) {
+        if (!Promise::isPromiseId($primaryId)) {
             throw new PromiseException('There is not promise. PromiseId: ' . $primaryId);
         }
-        $promise = new PromiseClient($this->promiseAdapter, $primaryId);
+        $promise = new Promise($this->store, $primaryId);
         $promiseData = $request->getParsedBody();
         if (!isset($promiseData[Store::STATE])) {
             throw new PromiseException('There is not key STATE in Body. PromiseId: ' . $primaryId);
@@ -174,7 +174,7 @@ class CrudPromise implements MiddlewareInterface
      */
     public function methodPostWithoutId(ServerRequestInterface $request, ResponseInterface $response)
     {
-        $promise = new PromiseClient($this->promiseAdapter);
+        $promise = new Promise($this->store);
         $responseBody = $promise->toArray();
         $this->request = $request->withAttribute('Response-Body', $responseBody);
         $response = $response->withStatus(201);
