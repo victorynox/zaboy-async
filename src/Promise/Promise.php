@@ -10,8 +10,8 @@
 namespace zaboy\async\Promise;
 
 use zaboy\async\Promise\PromiseException;
-use zaboy\async\Promise\Pending\TimeIsOutException;
-use zaboy\async\Promise\Pending\PendingPromise;
+use zaboy\async\Promise\Exception\TimeIsOutException;
+use zaboy\async\Promise\Promise\PendingPromise;
 use zaboy\async\Promise\PromiseAbstract;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Promise\Store;
@@ -28,7 +28,7 @@ class Promise implements PromiseInterface//extends PromiseAbstract//implements P
 
     /**
      *
-     * @var \zaboy\async\Promise\Storer
+     * @var \zaboy\async\Promise\Store
      */
     public $store;
 
@@ -114,10 +114,10 @@ class Promise implements PromiseInterface//extends PromiseAbstract//implements P
         $step = 0;
         do {
             $result = $this->wait(false);
-            if (is_a($result, '\zaboy\async\Promise\Determined\Exception\RejectedException', true)) {
+            if (is_a($result, '\zaboy\async\Promise\Exception\RejectedException', true)) {
                 throw $result;
             }
-            if (!is_a($result, '\zaboy\async\Promise\Pending\PendingPromise', true)) {
+            if (!is_a($result, '\zaboy\async\Promise\Promise\PendingPromise', true)) {
                 return $result;
             }
             //$result is pending promise in the end of the chain - we wait
@@ -246,13 +246,13 @@ class Promise implements PromiseInterface//extends PromiseAbstract//implements P
         $promiseData = $this->getStoredPromiseData($promiseId);
         switch (true) {
             case $promiseData[Store::STATE] === PromiseInterface::FULFILLED:
-                return '\zaboy\async\Promise\Determined\FulfilledPromise';
+                return '\zaboy\async\Promise\Promise\FulfilledPromise';
             case $promiseData[Store::STATE] === PromiseInterface::REJECTED:
-                return '\zaboy\async\Promise\Determined\RejectedPromise';
+                return '\zaboy\async\Promise\Promise\RejectedPromise';
             case $promiseData[Store::PARENT_ID] === null:
-                return '\zaboy\async\Promise\Pending\PendingPromise';
+                return '\zaboy\async\Promise\Promise\PendingPromise';
             default:
-                return '\zaboy\async\Promise\Pending\DependentPromise';
+                return '\zaboy\async\Promise\Promise\DependentPromise';
         }
     }
 

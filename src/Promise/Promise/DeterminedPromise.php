@@ -7,14 +7,14 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace zaboy\async\Promise\Determined;
+namespace zaboy\async\Promise\Promise;
 
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Json\JsonCoder;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\Promise;
 use zaboy\async\Promise\Store;
-use zaboy\async\Promise\Pending\PendingPromise;
+use zaboy\async\Promise\Promise\PendingPromise;
 use zaboy\async\Promise\PromiseAbstract;
 
 /**
@@ -28,7 +28,7 @@ abstract class DeterminedPromise extends PromiseAbstract
 
     /**
      *
-     * @param Storer $store
+     * @param Store $store
      * @throws PromiseException
      */
     public function __construct(Store $store, $promiseData = [])

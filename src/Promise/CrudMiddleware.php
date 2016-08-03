@@ -8,7 +8,7 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace zaboy\async\Promise\Middleware;
+namespace zaboy\async\Promise;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -20,14 +20,12 @@ use zaboy\async\Promise\Promise;
 use zaboy\async\Promise\PromiseException;
 
 /**
- * Send GET POST PUT DELETE request
+ * Resolve GET POST PUT DELETE request
  *
- * @todo to make correct 'Content-Range'
- * @todo if primary key exist but not in url
  * @category   rest
  * @package    zaboy
  */
-class CrudPromise implements MiddlewareInterface
+class CrudMiddleware implements MiddlewareInterface
 {
 
     /**
@@ -44,7 +42,7 @@ class CrudPromise implements MiddlewareInterface
 
     /**
      *
-     * @param Storer $store
+     * @param Store $store
      * @throws PromiseException
      */
     public function __construct(Store $store)
@@ -68,7 +66,7 @@ class CrudPromise implements MiddlewareInterface
                     $response = $this->methodGetWithId($request, $response);
                     break;
                 case $httpMethod === 'GET' && !($isPrimaryKeyValue):
-                    throw new \zaboy\rest\RestException($httpMethod . ' method without Primary Key is not supported.11');
+                    throw new \zaboy\rest\RestException($httpMethod . ' method without Primary Key is not supported.');
                 case $httpMethod === 'PUT' && $isPrimaryKeyValue:
                     $response = $this->methodPutWithId($request, $response);
                     break;
@@ -163,7 +161,9 @@ class CrudPromise implements MiddlewareInterface
         return $response;
     }
 
-    /**                                              Location: http://www.example.com/users/4/
+    /**
+     *
+     * Location: http://www.example.com/users/4/
      * http://www.restapitutorial.com/lessons/httpmethods.html
      *
      * @param ServerRequestInterface $request
@@ -178,7 +178,6 @@ class CrudPromise implements MiddlewareInterface
         $responseBody = $promise->toArray();
         $this->request = $request->withAttribute('Response-Body', $responseBody);
         $response = $response->withStatus(201);
-        $primaryKeyIdentifier = Store::PROMISE_ID;
         $insertedPrimaryKeyValue = $promise->getPromiseId();
         $location = $request->getUri()->getPath();
         $response = $response->withHeader('Location', rtrim($location, '/') . '/' . $insertedPrimaryKeyValue);

@@ -33,13 +33,13 @@ abstract class PromiseAbstract implements PromiseInterface
 
     /**
      *
-     * @var Storer
+     * @var Store
      */
     public $store;
 
     /**
      *
-     * @param Storer $store
+     * @param Store $store
      * @throws PromiseException
      */
     public function __construct(Store $store, $promiseData = [])

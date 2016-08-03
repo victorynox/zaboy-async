@@ -12,7 +12,7 @@ namespace zaboy\async\Promise\Factory;
 use Interop\Container\ContainerInterface;
 use zaboy\rest\FactoryAbstract;
 use zaboy\async\Promise\Broker;
-use zaboy\async\Promise\Storer;
+use zaboy\async\Promise\Store;
 use zaboy\async\Promise\Factory\StoreFactory;
 use zaboy\async\Promise\Exception;
 
@@ -26,7 +26,9 @@ use zaboy\async\Promise\Exception;
  * 'services' => [
  *      'factories' => [
  *          'Broker' => 'zaboy\async\Promise\Factory\BrokerFactory'
- *      ]
+ *      ],
+ * '#Promise Broker' => [
+ *      #Life Time => 600
  * ]
  * </code>
  *
@@ -37,7 +39,11 @@ class BrokerFactory extends FactoryAbstract
 {
 
     const KEY = '#Promise Broker';
-    const KEY_TIME_LIFE = '#Time Life';
+
+    /**
+     * max time Promise in Store  (in sec)
+     */
+    const KEY_LIFE_TIME = '#Life Time';
 
     /**
      * Create and return an instance of the Promise Broker.
@@ -49,8 +55,8 @@ class BrokerFactory extends FactoryAbstract
     {
         $config = $container->get('config');
 
-        $this->tableName = isset($config[self::KEY][self::KEY_TIME_LIFE]) ?
-                $config[self::KEY][self::KEY_TIME_LIFE] : null
+        $lifeTime = isset($config[self::KEY][self::KEY_LIFE_TIME]) ?
+                $config[self::KEY][self::KEY_LIFE_TIME] : null
         ;
 
         // $tableName by default
@@ -59,7 +65,7 @@ class BrokerFactory extends FactoryAbstract
             'Can\'t create Store for Promise witout StoreFactory'
             );
         }
-        /* @var $store Storer */
+        /* @var $store Store */
         $store = $container->get(StoreFactory::KEY); //'mySqlPromiseAdapter'
 
         return new Broker($store);

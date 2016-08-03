@@ -7,17 +7,17 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace zaboy\async\Promise\Determined\Exception;
+namespace zaboy\async\Promise\Exception;
 
-use zaboy\async\Promise\PromiseException;
+use zaboy\async\Promise\Exception\RejectedException;
 
 /**
- * Exception class for RejectedException
+ * Exception class for ReasonRejectedException
  *
  * @category   async
  * @package    zaboy
  */
-class RejectedException extends PromiseException
+class ReasonRejectedException extends RejectedException
 {
 
 }

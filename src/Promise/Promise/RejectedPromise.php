@@ -7,14 +7,14 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace zaboy\async\Promise\Determined;
+namespace zaboy\async\Promise\Promise;
 
-use zaboy\async\Promise\Determined\Exception\RejectedException;
-use zaboy\async\Promise\Determined\Exception\ReasonPendingException;
-use zaboy\async\Promise\Determined\Exception\ReasonRejectedException;
+use zaboy\async\Promise\Exception\RejectedException;
+use zaboy\async\Promise\Exception\ReasonPendingException;
+use zaboy\async\Promise\Exception\ReasonRejectedException;
 use zaboy\async\Promise\PromiseException;
-use zaboy\async\Promise\Determined\DeterminedPromise;
-use zaboy\async\Promise\Pending\PendingPromise;
+use zaboy\async\Promise\Promise\DeterminedPromise;
+use zaboy\async\Promise\Promise\PendingPromise;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Promise\Store;
 
@@ -29,7 +29,7 @@ class RejectedPromise extends DeterminedPromise
 
     /**
      *
-     * @param Storer $store
+     * @param Store $store
      * @throws PromiseException
      */
     public function __construct(Store $store, $promiseData = [], $result = null)
@@ -85,12 +85,12 @@ class RejectedPromise extends DeterminedPromise
             return $result;
         }
         $result = parent::wait(false);
-        if (is_a($result, '\zaboy\async\Promise\Determined\Exception\RejectedException', true)) {
+        if (is_a($result, '\zaboy\async\Promise\Exception\RejectedException', true)) {
             //result is exception
             $reason = 'Exception was thrown while Reason was resolving';
             return new ReasonRejectedException($reason, 0, $result);
         }
-        if (is_a($result, '\zaboy\async\Promise\Pending\PendingPromise', true)) {
+        if (is_a($result, '\zaboy\async\Promise\Promise\PendingPromise', true)) {
             /* @var $result PendingPromise */  //result is pending
             $reason = $result->getPromiseId();
             return new ReasonPendingException($reason);

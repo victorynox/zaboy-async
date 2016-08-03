@@ -12,7 +12,7 @@ return [
             'QueueBroker' => 'zaboy\async\Queue\Factory\QueueBrokerFactory',
             Promise\Factory\StoreFactory::KEY => Promise\Factory\StoreFactory::class,
             Promise\Factory\BrokerFactory::KEY => Promise\Factory\BrokerFactory::class,
-            Promise\Factory\Middleware\CrudPromiseFactory::KEY_MIDDLEWARE_CRUD_PROMISE => Promise\Factory\Middleware\CrudPromiseFactory::class
+            Promise\Factory\CrudMiddlewareFactory::KEY => Promise\Factory\CrudMiddlewareFactory::class
         ],
         'abstract_factories' => [
             'zaboy\rest\DataStore\Factory\DbTableAbstractFactory',

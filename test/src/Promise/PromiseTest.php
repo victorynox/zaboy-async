@@ -7,9 +7,11 @@ use zaboy\async\Promise\PromiseAbstract;
 use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
 use Interop\Container\ContainerInterface;
 use zaboy\rest\TableGateway\TableManagerMysql;
-use zaboy\async\Promise\Storer;
+use zaboy\async\Promise\Store;
+use zaboy\async\Promise\Factory\StoreFactory;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
-use zaboy\async\Promise\Determined\Exception\RejectedException;
+use zaboy\async\Promise\Exception\RejectedException;
+use Zend\Db\Adapter\Adapter;
 
 class PromiseTest extends \PHPUnit_Framework_TestCase
 {
@@ -17,15 +19,9 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
     const TEST_TABLE_NAME = 'test_mysqlpromisebroker';
 
     /**
-     * @var \Zend\Db\Adapter\Adapter
+     * @var Store
      */
-    protected $adapter;
-
-    /**
-     *
-     * @var Storer
-     */
-    protected $mySqlPromiseAdapter;
+    protected $store;
 
     /**
      * @var Promise
@@ -38,19 +34,22 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
     protected $container;
 
     /**
+     * @var string
+     */
+    protected $tableName;
+
+    /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
     protected function setUp()
     {
+        global $testCase;
+        $testCase = 'table for test';
+        $this->tableName = StoreFactory::TABLE_NAME . '_test';
+
         $this->container = include './config/container.php';
-        $this->adapter = $this->container->get('db');
-        $mySqlAdapterFactory = new MySqlAdapterFactory();
-        $this->mySqlPromiseAdapter = $mySqlAdapterFactory->__invoke(
-                $this->container
-                , ''
-                , [MySqlAdapterFactory::KEY_TABLE_NAME => self::TEST_TABLE_NAME]
-        );
+        $this->store = $this->container->get(StoreFactory::KEY);
     }
 
     /**
@@ -59,8 +58,9 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
-        $tableManagerMysql = new TableManagerMysql($this->adapter);
-        $tableManagerMysql->deleteTable(self::TEST_TABLE_NAME);
+        $adapter = $this->container->get('db');
+        $tableManagerMysql = new TableManagerMysql($adapter);
+        $tableManagerMysql->deleteTable($this->tableName);
     }
 
     public static function callback($value)
@@ -114,7 +114,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__makePromise()
     {
-        $this->object = new Promise($this->mySqlPromiseAdapter);
+        $this->object = new Promise($this->store);
         $this->assertInstanceOf(
                 'zaboy\async\Promise\Promise', $this->object
         );
@@ -125,7 +125,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__resolve()
     {
-        $this->object = new Promise($this->mySqlPromiseAdapter);
+        $this->object = new Promise($this->store);
         $this->object->resolve(1);
         $this->assertSame(
                 $this->object->getState(), PromiseInterface::FULFILLED
@@ -137,7 +137,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__resolveWithObjectAsResult()
     {
-        $this->object = new Promise($this->mySqlPromiseAdapter);
+        $this->object = new Promise($this->store);
         $object = new \stdClass();
         $this->object->resolve($object);
         $this->assertEquals(
@@ -147,13 +147,13 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__reject()
     {
-        $this->object = new Promise($this->mySqlPromiseAdapter);
+        $this->object = new Promise($this->store);
         $this->object->reject('reason');
         $this->assertSame(
                 PromiseInterface::REJECTED, $this->object->getState()
         );
         $this->assertInstanceOf(
-                'zaboy\async\Promise\Determined\Exception\RejectedException', $this->object->wait(false)
+                'zaboy\async\Promise\Exception\RejectedException', $this->object->wait(false)
         );
         $this->assertNull(
                 $this->object->wait(false)->getPrevious()
@@ -165,14 +165,14 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__rejectWithObjectAsReason()
     {
-        $this->object = new Promise($this->mySqlPromiseAdapter);
+        $this->object = new Promise($this->store);
         $object = new \stdClass();
         $this->object->reject(new \stdClass());
         $this->assertSame(
                 $this->object->getState(), PromiseInterface::REJECTED
         );
         $this->assertInstanceOf(
-                'zaboy\async\Promise\Determined\Exception\RejectedException', $this->object->wait(false)
+                'zaboy\async\Promise\Exception\RejectedException', $this->object->wait(false)
         );
         $this->assertNull(
                 $this->object->wait(false)->getPrevious()
@@ -186,32 +186,32 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__PendingWait()
     {
-        $this->object = new Promise($this->mySqlPromiseAdapter);
-        $this->setExpectedException('\zaboy\async\Promise\Pending\TimeIsOutException');
+        $this->object = new Promise($this->store);
+        $this->setExpectedException('\zaboy\async\Promise\Exception\TimeIsOutException');
         $this->object->wait(true, 0);
     }
 
     public function testPromiseTest__RejectedWait()
     {
-        $this->object = new Promise($this->mySqlPromiseAdapter);
+        $this->object = new Promise($this->store);
         $this->object->reject('reason');
-        $this->setExpectedException('\zaboy\async\Promise\Determined\Exception\RejectedException');
+        $this->setExpectedException('\zaboy\async\Promise\Exception\RejectedException');
         $this->object->wait(true, 0);
     }
 
     public function testPromiseTest__PendingAfterPendingWait()
     {
-        $this->object = new Promise($this->mySqlPromiseAdapter);
-        $result = new Promise($this->mySqlPromiseAdapter);
+        $this->object = new Promise($this->store);
+        $result = new Promise($this->store);
         $this->object->resolve($result);
-        $this->setExpectedException('\zaboy\async\Promise\Pending\TimeIsOutException');
+        $this->setExpectedException('\zaboy\async\Promise\Exception\TimeIsOutException');
         $this->object->wait(true, 1);
     }
 
     public function testPromiseTest__PendingAfterFulfilledWait()
     {
-        $this->object = new Promise($this->mySqlPromiseAdapter);
-        $result = new Promise($this->mySqlPromiseAdapter);
+        $this->object = new Promise($this->store);
+        $result = new Promise($this->store);
         $this->object->resolve($result);
         $result->resolve('result');
         $this->assertEquals(
@@ -224,10 +224,10 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__PendingAfterRejecteddWait()
     {
-        $this->object = new Promise($this->mySqlPromiseAdapter);
-        $result = new Promise($this->mySqlPromiseAdapter);
+        $this->object = new Promise($this->store);
+        $result = new Promise($this->store);
         $this->object->reject($result);
-        $this->setExpectedException('\zaboy\async\Promise\Determined\Exception\ReasonPendingException');
+        $this->setExpectedException('\zaboy\async\Promise\Exception\ReasonPendingException');
         //ReasonPendingException
         $this->object->wait(true, 0);
     }
@@ -236,7 +236,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__PendingWaitUnwrapFalse()
     {
-        $this->object = new Promise($this->mySqlPromiseAdapter);
+        $this->object = new Promise($this->store);
         $this->assertEquals(
                 $this->object->wait(false)->getState(), PromiseInterface::PENDING
         );
@@ -244,17 +244,17 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__RejectedWaitUnwrapFalse()
     {
-        $this->object = new Promise($this->mySqlPromiseAdapter);
+        $this->object = new Promise($this->store);
         $this->object->reject('reason');
         $this->assertInstanceOf(
-                'zaboy\async\Promise\Determined\Exception\RejectedException', $this->object->wait(false)
+                'zaboy\async\Promise\Exception\RejectedException', $this->object->wait(false)
         );
     }
 
     public function testPromiseTest__PendingAfterPendingWaitUnwrapFalse()
     {
-        $this->object = new Promise($this->mySqlPromiseAdapter);
-        $result = new Promise($this->mySqlPromiseAdapter);
+        $this->object = new Promise($this->store);
+        $result = new Promise($this->store);
         $this->object->resolve($result);
         $this->assertEquals(
                 $this->object->wait(false)->getState(), PromiseInterface::PENDING
@@ -263,8 +263,8 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__PendingAfterFulfilledWaitUnwrapFalse()
     {
-        $this->object = new Promise($this->mySqlPromiseAdapter);
-        $result = new Promise($this->mySqlPromiseAdapter);
+        $this->object = new Promise($this->store);
+        $result = new Promise($this->store);
         $this->object->resolve($result);
         $result->resolve('result');
         $this->assertEquals(
@@ -274,11 +274,11 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__PendingAfterRejecteddWaitUnwrapFalse()
     {
-        $this->object = new Promise($this->mySqlPromiseAdapter);
-        $result = new Promise($this->mySqlPromiseAdapter);
+        $this->object = new Promise($this->store);
+        $result = new Promise($this->store);
         $this->object->reject($result);
         $this->assertInstanceOf(
-                'zaboy\async\Promise\Determined\Exception\ReasonPendingException', $this->object->wait(false)
+                'zaboy\async\Promise\Exception\ReasonPendingException', $this->object->wait(false)
         );
         $this->assertTrue(
                 PromiseAbstract::isPromiseId($this->object->wait(false)->getMessage())
@@ -289,10 +289,10 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__Then()
     {
-        $promise = new Promise($this->mySqlPromiseAdapter);
+        $promise = new Promise($this->store);
         $this->object = $promise->then([get_class($this), 'callback']);
         $this->assertInstanceOf(
-                '\zaboy\async\Promise\Pending\DependentPromise', $this->object->wait(false)
+                '\zaboy\async\Promise\Promise\DependentPromise', $this->object->wait(false)
         );
     }
 
@@ -300,7 +300,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__ThenFulfilled()
     {
-        $promise = new Promise($this->mySqlPromiseAdapter);
+        $promise = new Promise($this->store);
         $this->object = $promise->then([get_class($this), 'callback']);
         $promise->resolve('result');
         $this->assertEquals(
@@ -310,7 +310,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__ThenThenFulfilled()
     {
-        $promise1 = new Promise($this->mySqlPromiseAdapter);
+        $promise1 = new Promise($this->store);
         $promise2 = $promise1->then();
         $this->object = $promise2->then([get_class($this), 'callback']);
         $promise1->resolve('result');
@@ -321,8 +321,8 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__ThenFulfilledByPromise()
     {
-        $result = new Promise($this->mySqlPromiseAdapter);
-        $promise1 = new Promise($this->mySqlPromiseAdapter);
+        $result = new Promise($this->store);
+        $promise1 = new Promise($this->store);
         $this->object = $promise1->then([get_class($this), 'callback']);
         $promise1->resolve($result);
         $promise = $this->object->wait(false);
@@ -345,7 +345,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__ThenFromFulfilled()
     {
-        $promise = new Promise($this->mySqlPromiseAdapter);
+        $promise = new Promise($this->store);
         $promise->resolve('result');
         $this->object = $promise->then([get_class($this), 'callback']);
         $this->assertEquals(
@@ -355,8 +355,8 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__ThenFromFulfilledByPromise()
     {
-        $result = new Promise($this->mySqlPromiseAdapter);
-        $promise1 = new Promise($this->mySqlPromiseAdapter);
+        $result = new Promise($this->store);
+        $promise1 = new Promise($this->store);
         $promise1->resolve($result);
         $this->object = $promise1->then([get_class($this), 'callback']);
         $this->assertEquals(
@@ -377,7 +377,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__ExceptionInOnFulfilled()
     {
-        $promise = new Promise($this->mySqlPromiseAdapter);
+        $promise = new Promise($this->store);
         $this->object = $promise->then([get_class($this), 'callException']);
         $promise->resolve('result');
         $this->assertInstanceOf(
@@ -389,7 +389,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__ThenRejected()
     {
-        $promise = new Promise($this->mySqlPromiseAdapter);
+        $promise = new Promise($this->store);
         $this->object = $promise->then(null, function ($reason) {
             return $reason->getMessage() . ' was resolved';
         });
@@ -401,7 +401,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__ThenThen_Resolved_onFulfilledException_onRejectedResolved()
     {
-        $promise1 = new Promise($this->mySqlPromiseAdapter);
+        $promise1 = new Promise($this->store);
         $promise2 = $promise1->then([get_class($this), 'callException'], null);
         $message = ' was resolved';
         $this->object = $promise2->then(null, function ($reason) use ($message) {
@@ -415,8 +415,8 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__ThenRejectedByPromiseButResolved()
     {
-        $result = new Promise($this->mySqlPromiseAdapter);
-        $promise1 = new Promise($this->mySqlPromiseAdapter);
+        $result = new Promise($this->store);
+        $promise1 = new Promise($this->store);
         $this->object = $promise1->then(null, function ($reason) {
             return $reason->getMessage() . ' was resolved';
         });

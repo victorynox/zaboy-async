@@ -7,11 +7,11 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace zaboy\async\Promise\Determined;
+namespace zaboy\async\Promise\Promise;
 
-use zaboy\async\Promise\Determined\DeterminedPromise;
-use zaboy\async\Promise\Pending\PendingPromise;
-use zaboy\async\Promise\Pending\DependentPromise;
+use zaboy\async\Promise\Promise\DeterminedPromise;
+use zaboy\async\Promise\Promise\PendingPromise;
+use zaboy\async\Promise\Promise\DependentPromise;
 use GuzzleHttp\Promise\PromiseInterface;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\Store;
@@ -28,7 +28,7 @@ class FulfilledPromise extends DeterminedPromise
 
     /**
      *
-     * @param Storer $store
+     * @param Store $store
      * @throws PromiseException
      */
     public function __construct(Store $store, $promiseData = [], $result = null)

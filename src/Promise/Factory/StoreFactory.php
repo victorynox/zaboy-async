@@ -16,7 +16,7 @@ use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\Store;
 
 /**
- * Creates if can and returns an instance of class Storer - Adapter for Promis
+ * Creates if can and returns an instance of class Store - Adapter for Promis
  *
  * You have to connect this factory:
  * <code>
@@ -54,7 +54,7 @@ class StoreFactory extends FactoryAbstract
 {
 
     // Service name in config
-    const KEY = 'PromisesStore';
+    const KEY = '#Promises Store';
     //
     const TABLE_NAME = 'promises';
     const KEY_TABLE_NAME = '#table-name';

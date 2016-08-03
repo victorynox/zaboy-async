@@ -7,7 +7,7 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace zaboy\async\Promise\Pending;
+namespace zaboy\async\Promise\Promise;
 
 use Opis\Closure\SerializableClosure;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
@@ -25,7 +25,7 @@ class DependentPromise extends PendingPromise
 
     /**
      *
-     * @param Storer $store
+     * @param Store $store
      * @throws PromiseException
      */
     public function __construct(Store $store, $promiseData, $parentPromiseId = null, callable $onFulfilled = null, callable $onRejected = null)

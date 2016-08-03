@@ -7,14 +7,14 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace zaboy\async\Promise\Pending;
+namespace zaboy\async\Promise\Promise;
 
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\PromiseAbstract;
 use zaboy\async\Promise\Store;
-use zaboy\async\Promise\Determined\FulfilledPromise;
-use zaboy\async\Promise\Determined\RejectedPromise;
+use zaboy\async\Promise\Promise\FulfilledPromise;
+use zaboy\async\Promise\Promise\RejectedPromise;
 
 /**
  * PromiseAbstract
@@ -27,7 +27,7 @@ class PendingPromise extends PromiseAbstract
 
     /**
      *
-     * @param Storer $store
+     * @param Store $store
      * @throws PromiseException
      */
     public function __construct(Store $store, $promiseData = [])

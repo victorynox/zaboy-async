@@ -7,17 +7,17 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace zaboy\async\Promise\Pending;
+namespace zaboy\async\Promise\Exception;
 
-use zaboy\async\Promise\PromiseException;
+use zaboy\async\Promise\Exception\RejectedException;
 
 /**
- * Exception class for PromiseException
+ * Exception class for ReasonPendingException
  *
  * @category   async
  * @package    zaboy
  */
-class TimeIsOutException extends PromiseException
+class ReasonPendingException extends RejectedException
 {
 
 }

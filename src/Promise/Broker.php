@@ -9,25 +9,32 @@ use zaboy\async\Promise\PromiseException;
 class Broker
 {
 
-    const DEFAULT_TIME_LIFE = 3600;
-
-    protected $timeLife;
+    /**
+     * default max time Promise in Store  (in sec)
+     */
+    const DEFAULT_LIFE_TIME = 3600;
 
     /**
      *
-     * @var Storer
+     * @var int max time Promise in Store  (in sec)
+     */
+    protected $lifeTime;
+
+    /**
+     *
+     * @var Store
      */
     protected $store;
 
     /**
      *
      *
-     * @param Storer $store
+     * @param Store $store
      */
-    public function __construct(Store $store, $timeLife = null)
+    public function __construct(Store $store, $lifeTime = null)
     {
         $this->store = $store;
-        $this->setTimeLife($timeLife);
+        $this->setTimeLife($lifeTime);
     }
 
     public function makePromise()
@@ -54,9 +61,9 @@ class Broker
         return (bool) $number;
     }
 
-    protected function setTimeLife($timeLife = null)
+    protected function setTimeLife($lifeTime = null)
     {
-        $this->timeLife = !$timeLife ? static::DEFAULT_TIME_LIFE : $timeLife;
+        $this->lifeTime = !$lifeTime ? static::DEFAULT_LIFE_TIME : $lifeTime;
     }
 
     /**
@@ -65,7 +72,7 @@ class Broker
      */
     protected function getTimeLife()
     {
-        return $this->timeLife;
+        return $this->lifeTime;
     }
 
 }
