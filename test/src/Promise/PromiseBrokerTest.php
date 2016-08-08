@@ -29,7 +29,7 @@ class BrokerTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         global $testCase;
-        $testCase = 'table for test';
+        $testCase = 'table_for_test';
 
         $this->container = include './config/container.php';
         $this->object = $this->container->get(BrokerFactory::KEY);

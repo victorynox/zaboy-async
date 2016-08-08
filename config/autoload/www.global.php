@@ -4,8 +4,8 @@ return [
     'services' => [
         'abstract_factories' => [
             'zaboy\rest\DataStore\Factory\HttpClientAbstractFactory',
-            'zaboy\async\Queue\Factory\DataStore\ClientDataStoreAbstractFactory',
-            'zaboy\async\Queue\Factory\DataStore\QueueDataStoreAbstractFactory'
+        //'zaboy\async\Queue\Factory\DataStore\ClientDataStoreAbstractFactory',
+        //'zaboy\async\Queue\Factory\DataStore\QueueDataStoreAbstractFactory'
         ]
     ],
     'dataStore' => [

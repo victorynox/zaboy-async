@@ -52,6 +52,8 @@ use zaboy\rest\Pipe\MiddlewarePipeOptions;
 use Zend\Diactoros\Server;
 use zaboy\rest\Pipe\Factory\RestRqlFactory;
 use zaboy\rest\DataStore\HttpClient;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /* @var $httpClientQueue HttpClient */
 
@@ -69,6 +71,19 @@ $app = new MiddlewarePipeOptions(['env' => $env]); //'env' => 'develop' (error i
 $RestRqlFactory = new RestRqlFactory();
 $rest = $RestRqlFactory($container, '');
 $app->pipe('/api/rest', $rest);
+
+$app->pipe('/test', function (
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        callable $next = null
+        ) {
+    global $testCase;
+    $uri = $request->getUri();
+    var_dump($uri);
+    $testCase = '/table_for_test';
+    return $next($request, $response);
+});
+$app->pipe('/test', $rest);
 
 $server = Server::createServer($app, $_SERVER, $_GET, $_POST, $_COOKIE, $_FILES
 );

@@ -32,8 +32,10 @@ class BrokerFactoryTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $this->container = include './config/container.php';
+        global $testCase;
+        $testCase = 'table_for_test';
 
+        $this->container = include './config/container.php';
         $this->object = new BrokerFactory();
     }
 
@@ -49,6 +51,9 @@ class BrokerFactoryTest extends \PHPUnit_Framework_TestCase
         /* @var $tableManagerMysql TableManagerMysql */
         $tableManagerMysql = $this->container->get(TableManagerMysql::KEY_IN_CONFIG);
         $tableManagerMysql->deleteTable($tableName);
+
+        global $testCase;
+        $testCase = 'default';
     }
 
     public function test__invoke()

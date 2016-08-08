@@ -22,7 +22,7 @@ return [
     ],
     //
     Promise\Factory\StoreFactory::KEY => [
-        Promise\Factory\StoreFactory::KEY_TABLE_NAME => $testCase === 'table for test' ? Promise\Factory\StoreFactory::TABLE_NAME . '_test' : null
+        Promise\Factory\StoreFactory::KEY_TABLE_NAME => $testCase === 'table_for_test' ? Promise\Factory\StoreFactory::TABLE_NAME . '_test' : null
     ],
     //
     'dataStore' => [

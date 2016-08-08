@@ -39,9 +39,7 @@ class StoreFactoryTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $this->container = include './config/container.php';
-        $this->tableManagerMysql = $this->container->get(TableManagerMysql::KEY_IN_CONFIG);
-        $this->object = new StoreFactory();
+
     }
 
     /**
@@ -50,11 +48,18 @@ class StoreFactoryTest extends \PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
-        $this->tableManagerMysql->deleteTable($this->tableName);
+
     }
 
     public function test__invoke__DefaultTableName()
     {
+        global $testCase;
+        $testCase = 'default';
+
+        $this->container = include './config/container.php';
+        $this->object = new StoreFactory();
+        $this->tableManagerMysql = $this->container->get(TableManagerMysql::KEY_IN_CONFIG);
+
 // if tables is absent or present
         $this->tableName = StoreFactory::TABLE_NAME;
 
@@ -74,11 +79,21 @@ class StoreFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function test__invoke__TableNameAsConstructParam()
     {
+        global $testCase;
+        $testCase = 'default';
+
+        $this->container = include './config/container.php';
+        $this->object = new StoreFactory();
+        $this->tableManagerMysql = $this->container->get(TableManagerMysql::KEY_IN_CONFIG);
+
         // if tables is absent
         $this->tableName = 'promises_test_construct_param';
+        $this->tableManagerMysql->deleteTable($this->tableName);
+
         $this->assertFalse(
                 $this->tableManagerMysql->hasTable($this->tableName)
         );
+
         $store = $this->object->__invoke($this->container, '', [StoreFactory::KEY_TABLE_NAME => $this->tableName]);
         $this->assertInstanceOf(
                 Store::class, $store
@@ -91,22 +106,25 @@ class StoreFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(
                 Store::class, $store
         );
+        $this->tableManagerMysql->deleteTable($this->tableName);
     }
 
     public function testStoreFactory__invoke__TableNameFromConfig()
     {
         global $testCase;
-        $testCase = 'table for test';
+        $testCase = 'table_for_test';
+
         $this->container = include './config/container.php';
-        $this->tableManagerMysql = $this->container->get(TableManagerMysql::KEY_IN_CONFIG);
         $this->object = new StoreFactory();
+        $this->tableManagerMysql = $this->container->get(TableManagerMysql::KEY_IN_CONFIG);
 
 // if tables is absent
         $this->tableName = StoreFactory::TABLE_NAME . '_test';
-
+        $this->tableManagerMysql->deleteTable($this->tableName);
         $this->assertFalse(
                 $this->tableManagerMysql->hasTable($this->tableName)
         );
+        /* @var $store Store */
         $store = $this->container->get(StoreFactory::KEY);
         $this->assertInstanceOf(
                 Store::class, $store
@@ -119,6 +137,8 @@ class StoreFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(
                 Store::class, $store
         );
+        $this->tableManagerMysql->deleteTable($this->tableName);
+        $testCase = 'default';
     }
 
 }
