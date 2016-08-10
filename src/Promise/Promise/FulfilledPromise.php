@@ -60,7 +60,7 @@ class FulfilledPromise extends DeterminedPromise
 
     public function then(callable $onFulfilled = null, callable $onRejected = null)
     {
-        $dependentPromise = new DependentPromise($this->store, [], $this->getPromiseId(), $onFulfilled, $onRejected);
+        $dependentPromise = new DependentPromise($this->store, [], $this->getId(), $onFulfilled, $onRejected);
         $result = $this->wait(false);
         $promiseData = $dependentPromise->resolve($result);
         return $promiseData;

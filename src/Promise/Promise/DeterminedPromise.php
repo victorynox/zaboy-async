@@ -42,7 +42,7 @@ abstract class DeterminedPromise extends PromiseAbstract
     protected function serializeResult($result)
     {
         if ($result instanceof PromiseInterface) {
-            $result = $result->getPromiseId();
+            $result = $result->getId();
         }
         try {
             $resultJson = JsonCoder::jsonSerialize($result);
@@ -69,7 +69,7 @@ abstract class DeterminedPromise extends PromiseAbstract
             return new PromiseException('Do not try call wait(true)');
         }
         $result = $this->unserializeResult($this->promiseData[Store::RESULT]);
-        if (PendingPromise::isPromiseId($result)) {
+        if (Promise::isId($result)) {
             $nextPromise = new Promise($this->store, $result);
             $result = $nextPromise->wait(false);
         }

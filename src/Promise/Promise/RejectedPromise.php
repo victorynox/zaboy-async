@@ -17,6 +17,7 @@ use zaboy\async\Promise\Promise\DeterminedPromise;
 use zaboy\async\Promise\Promise\PendingPromise;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Promise\Store;
+use zaboy\async\Promise\Promise;
 
 /**
  * RejectedPromise
@@ -48,10 +49,10 @@ class RejectedPromise extends DeterminedPromise
         }
 
         if ($result instanceof PromiseInterface) {
-            $result = $result->getPromiseId();
+            $result = $result->getId();
         }
 
-        if (!PendingPromise::isPromiseId($result)) {
+        if (!Promise::isId($result)) {
             set_error_handler(function ($number, $string) {
                 throw new PromiseException(
                 "RejectedPromise. String: $string,  Number: $number", null, null
@@ -81,7 +82,7 @@ class RejectedPromise extends DeterminedPromise
             return new PromiseException('Do not try call wait(true)');
         }
         $result = $this->unserializeResult($this->promiseData[Store::RESULT]);
-        if (!PendingPromise::isPromiseId($result)) {
+        if (!Promise::isId($result)) {
             return $result;
         }
         $result = parent::wait(false);
@@ -92,7 +93,7 @@ class RejectedPromise extends DeterminedPromise
         }
         if (is_a($result, '\zaboy\async\Promise\Promise\PendingPromise', true)) {
             /* @var $result PendingPromise */  //result is pending
-            $reason = $result->getPromiseId();
+            $reason = $result->getId();
             return new ReasonPendingException($reason);
         }
 
@@ -130,7 +131,7 @@ class RejectedPromise extends DeterminedPromise
 
     public function then(callable $onFulfilled = null, callable $onRejected = null)
     {
-        $dependentPromise = new DependentPromise($this->store, [], $this->getPromiseId(), null, $onRejected);
+        $dependentPromise = new DependentPromise($this->store, [], $this->getId(), null, $onRejected);
         $result = $this->wait(false);
         $promiseData = $dependentPromise->reject($result);
         return $promiseData;

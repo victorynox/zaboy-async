@@ -75,15 +75,15 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     /* ---------------------------------------------------------------------------------- */
 
-    public function testPromiseTest__extractPromiseIdFromString()
+    public function testPromiseTest__extractIdFromString()
     {
         $string = ' jkiuhs iuhis pi siuiughf]l;m74jn &568ihj983438h^&%  ';
         $this->assertEquals(
-                [], Promise::extractPromiseId($string)
+                [], Promise::extractId($string)
         );
         $string = ' jkiuhs iuhis pi siu promise__1469864422_189511__579c84162e43e4_34952052 iughf]l;m74jn &568ihj983438h^&%  ';
         $this->assertEquals(
-                ['promise__1469864422_189511__579c84162e43e4_34952052'], Promise::extractPromiseId($string)
+                ['promise__1469864422_189511__579c84162e43e4_34952052'], Promise::extractId($string)
         );
         $string = ' jkiuhs iuhis pi s promise__2229864461_889811__579c843dd93ad1_08516192  AND promise__3339864461_889811__579c843dd93ad1_08516192';
         $this->assertEquals(
@@ -91,11 +91,11 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
             'promise__3339864461_889811__579c843dd93ad1_08516192',
             'promise__2229864461_889811__579c843dd93ad1_08516192',
                 ]
-                , Promise::extractPromiseId($string)
+                , Promise::extractId($string)
         );
     }
 
-    public function testPromiseTest__extractPromiseIdFromException()
+    public function testPromiseTest__extractIdFromException()
     {
         $exc1 = new \Exception('Promise: promise__1119864461_889811__579c843dd93ad1_08516192');
         $exc2 = new \Exception('promise__2229864461_889811__579c843dd93ad1_08516192  AND promise__3339864461_889811__579c843dd93ad1_08516192', 0, $exc1);
@@ -108,7 +108,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
             'promise__2229864461_889811__579c843dd93ad1_08516192',
             'promise__1119864461_889811__579c843dd93ad1_08516192',
                 ]
-                , Promise::extractPromiseId($exc3)
+                , Promise::extractId($exc3)
         );
     }
 
@@ -281,7 +281,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
                 'zaboy\async\Promise\Exception\ReasonPendingException', $this->object->wait(false)
         );
         $this->assertTrue(
-                PromiseAbstract::isPromiseId($this->object->wait(false)->getMessage())
+                Promise::isId($this->object->wait(false)->getMessage())
         );
     }
 
@@ -328,7 +328,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
         $promise = $this->object->wait(false);
 
         $this->assertEquals(
-                $this->object->getPromiseId(), $promise->getPromiseId()
+                $this->object->getId(), $promise->getId()
         );
         $this->assertEquals(
                 PromiseInterface::PENDING, $this->object->getState()
@@ -360,7 +360,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
         $promise1->resolve($result);
         $this->object = $promise1->then([get_class($this), 'callback']);
         $this->assertEquals(
-                $this->object->getPromiseId(), $this->object->wait(false)->getPromiseId()
+                $this->object->getId(), $this->object->wait(false)->getId()
         );
         $this->assertEquals(
                 PromiseInterface::PENDING, $this->object->getState()
@@ -423,7 +423,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
         $promise1->reject($result);
 
         $this->assertEquals(
-                $result->getPromiseId() . ' was resolved', $this->object->wait(false)
+                $result->getId() . ' was resolved', $this->object->wait(false)
         );
         $this->assertEquals(
                 PromiseInterface::FULFILLED, $this->object->getState()

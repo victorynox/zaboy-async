@@ -44,9 +44,9 @@ class DependentPromise extends PendingPromise
         }
         //parent promise is fulfilled by promise - we has new parent promise
         if ($value instanceof PromiseInterface) {
-            $promiseIdOfResult = $value->getPromiseId();
+            $promiseIdOfResult = $value->getId();
             $this->promiseData[Store::PARENT_ID] = $promiseIdOfResult;
-            return $this->getPromiseData();
+            return $this->getData();
         }
         //parent promise is fulfilled by value - we try run ON_FULFILLED callback
         $onFulfilledCallback = unserialize($this->promiseData[Store::ON_FULFILLED]);
@@ -66,10 +66,10 @@ class DependentPromise extends PendingPromise
         }
         //parent promise is rejected by promise - we has new parent promise
         if ($reason instanceof PromiseInterface) {
-            $promiseIdOfResult = $reason->getPromiseId();
+            $promiseIdOfResult = $reason->getId();
             $this->promiseData[Store::PARENT_ID] = $promiseIdOfResult;
             $this->promiseData[Store::ON_FULFILLED] = $this->promiseData[Store::ON_REJECTED];
-            return $this->getPromiseData();
+            return $this->getData();
         }
         //parent promise is rejected by value - we try run ON_REJECTED callback
         $onRejectedCallback = unserialize($this->promiseData[Store::ON_REJECTED]);

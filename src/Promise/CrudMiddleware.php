@@ -110,7 +110,7 @@ class CrudMiddleware implements MiddlewareInterface
     public function methodGetWithId(ServerRequestInterface $request, ResponseInterface $response)
     {
         $primaryId = $request->getAttribute('Primary-Key-Value');
-        if (Promise::isPromiseId($primaryId)) {
+        if (Promise::isId($primaryId)) {
             $promise = new Promise($this->store, $primaryId);
             $promiseData = $promise->toArray();
             $this->request = $request->withAttribute('Response-Body', $promiseData);
@@ -131,7 +131,7 @@ class CrudMiddleware implements MiddlewareInterface
     public function methodPutWithId(ServerRequestInterface $request, ResponseInterface $response)
     {
         $primaryId = $request->getAttribute('Primary-Key-Value');
-        if (!Promise::isPromiseId($primaryId)) {
+        if (!Promise::isId($primaryId)) {
             throw new PromiseException('There is not promise. PromiseId: ' . $primaryId);
         }
         $promise = new Promise($this->store, $primaryId);
@@ -178,7 +178,7 @@ class CrudMiddleware implements MiddlewareInterface
         $responseBody = $promise->toArray();
         $this->request = $request->withAttribute('Response-Body', $responseBody);
         $response = $response->withStatus(201);
-        $insertedPrimaryKeyValue = $promise->getPromiseId();
+        $insertedPrimaryKeyValue = $promise->getId();
         $location = $request->getUri()->getPath();
         $response = $response->withHeader('Location', rtrim($location, '/') . '/' . $insertedPrimaryKeyValue);
         return $response;

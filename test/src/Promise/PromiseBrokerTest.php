@@ -64,10 +64,10 @@ class BrokerTest extends \PHPUnit_Framework_TestCase
     public function test__getPromise()
     {
         $promise = $this->object->makePromise();
-        $promiseId = $promise->getPromiseId();
+        $promiseId = $promise->getId();
         $promise = $this->object->getPromise($promiseId);
         $this->assertEquals(
-                $promiseId, $promise->getPromiseId()
+                $promiseId, $promise->getId()
         );
         $this->assertInstanceOf(
                 Promise::class, $promise
@@ -81,7 +81,7 @@ class BrokerTest extends \PHPUnit_Framework_TestCase
     public function test__deletePromise()
     {
         $promise = $this->object->makePromise();
-        $promiseId = $promise->getPromiseId();
+        $promiseId = $promise->getId();
         $result = $this->object->deletePromise($promiseId);
         $this->assertTrue(
                 $result

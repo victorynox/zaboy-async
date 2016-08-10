@@ -48,14 +48,14 @@ abstract class PromiseAbstract implements PromiseInterface
         $this->promiseData = $promiseData;
 
         if (!isset($this->promiseData[Store::PROMISE_ID])) {
-            $this->promiseData[Store::PROMISE_ID] = $this->makePromiseId();
+            $this->promiseData[Store::PROMISE_ID] = $this->makeId();
         }
         if (!isset($this->promiseData[Store::CREATION_TIME])) {
             $this->promiseData[Store::CREATION_TIME] = (int) (time() - date('Z'));
         }
     }
 
-    public function getPromiseId()
+    public function getId()
     {
         if (isset($this->promiseData[Store::PROMISE_ID])) {
             return $this->promiseData[Store::PROMISE_ID];
@@ -77,7 +77,7 @@ abstract class PromiseAbstract implements PromiseInterface
         }
     }
 
-    public function getPromiseData()
+    public function getData()
     {
         if (isset($this->promiseData)) {
             return $this->promiseData;
@@ -88,14 +88,7 @@ abstract class PromiseAbstract implements PromiseInterface
         }
     }
 
-    public static function isPromiseId($param)
-    {
-        return is_string($param) && isset(Promise::extractPromiseId($param)[0]) ?
-                Promise::extractPromiseId($param)[0] === $param :
-                false;
-    }
-
-    protected function makePromiseId()
+    protected function makeId()
     {
         list($microSec, $sec) = explode(" ", microtime());
         $utcSec = $sec - date('Z');

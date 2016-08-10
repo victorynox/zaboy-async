@@ -97,5 +97,5 @@ interface PromiseInterface
      */
     public function wait($unwrap = true);
 
-    public function getPromiseId();
+    public function getId();
 }

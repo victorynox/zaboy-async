@@ -15,6 +15,7 @@ use zaboy\async\Promise\Promise\PendingPromise;
 use zaboy\async\Promise\PromiseAbstract;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Promise\Store;
+use zaboy\async\ClientAbstract;
 use Zend\Db\Sql\Select;
 
 /**
@@ -23,44 +24,32 @@ use Zend\Db\Sql\Select;
  * @category   async
  * @package    zaboy
  */
-class Promise implements PromiseInterface//extends PromiseAbstract//implements PromiseInterface
+class Promise extends ClientAbstract implements PromiseInterface
 {
-
-    /**
-     *
-     * @var \zaboy\async\Promise\Store
-     */
-    public $store;
-
-    /**
-     *
-     * @var string
-     */
-    public $promiseId;
 
     public function __construct(Store $store, $promiseId = null)
     {
-        if (!is_null($promiseId) && !PromiseAbstract::isPromiseId($promiseId)) {
+        if (!is_null($promiseId) && !static::isId($promiseId)) {
             throw new PromiseException('Wrong format $promiseId');
         }
         $this->store = $store;
         if (!isset($promiseId)) {
             $promise = new PendingPromise($store);
             $this->insertPromise($promise);
-            $this->promiseId = $promise->getPromiseId();
+            $this->id = $promise->getId();
         } else {
-            $this->promiseId = $promiseId;
+            $this->id = $promiseId;
         }
     }
 
-    public static function extractPromiseId($stringOrException, $promiseIdArray = [])
+    public static function extractId($stringOrException, $promiseIdArray = [])
     {
         if (is_null($stringOrException)) {
             return $promiseIdArray;
         }
         if ($stringOrException instanceof \Exception) {
-            $array = static::extractPromiseId($stringOrException->getPrevious(), $promiseIdArray);
-            $promiseIdArray = static::extractPromiseId($stringOrException->getMessage(), $array);
+            $array = static::extractId($stringOrException->getPrevious(), $promiseIdArray);
+            $promiseIdArray = static::extractId($stringOrException->getMessage(), $array);
             return $promiseIdArray;
         }
         $array = [];
@@ -69,11 +58,6 @@ class Promise implements PromiseInterface//extends PromiseAbstract//implements P
         } else {
             return [];
         }
-    }
-
-    public function getPromiseId()
-    {
-        return $this->promiseId;
     }
 
     public function getState()
@@ -104,9 +88,9 @@ class Promise implements PromiseInterface//extends PromiseAbstract//implements P
     public function wait($unwrap = true, $waitingTime = 60, $waitingCheckInterval = 1)
     {
         if (!$unwrap) {
-            $promiseId = $this->getPromiseId();
+            $promiseId = $this->getId();
             $promiseData = $this->getStoredPromiseData($promiseId);
-            $promiseClass = $this->getPromiseClass();
+            $promiseClass = $this->getClass();
             $promise = new $promiseClass($this->store, $promiseData);
             return $promise->wait(false);
         }
@@ -126,7 +110,7 @@ class Promise implements PromiseInterface//extends PromiseAbstract//implements P
                 sleep($waitingCheckInterval); // if not last step
             }
         } while ($step <= $stepsNumber);
-        $e = new TimeIsOutException($this->promiseId);
+        $e = new TimeIsOutException($this->id);
         $result->reject($e);
         throw $e;
     }
@@ -134,13 +118,13 @@ class Promise implements PromiseInterface//extends PromiseAbstract//implements P
     protected function insertPromise(PromiseAbstract $promise)
     {
         try {
-            $promiseData = $promise->getPromiseData();
+            $promiseData = $promise->getData();
             $rowsCount = $this->store->insert($promiseData);
         } catch (\Exception $e) {
-            throw new PromiseException('Can\'t insert promiseData. Promise: ' . $promise->getPromiseId(), 0, $e);
+            throw new PromiseException('Can\'t insert promiseData. Promise: ' . $promise->getId(), 0, $e);
         }
         if (!$rowsCount) {
-            throw new PromiseException('Can\'t insert promiseData. Promise: ' . $promise->getPromiseId());
+            throw new PromiseException('Can\'t insert promiseData. Promise: ' . $promise->getId());
         }
     }
 
@@ -156,13 +140,13 @@ class Promise implements PromiseInterface//extends PromiseAbstract//implements P
             $errorMsg = "Can\'t start transaction for $methodName";
             $db->getDriver()->getConnection()->beginTransaction();
             //is row with this index exist?
-            $rowset = $db->query($queryStrPromise, array($this->promiseId));
+            $rowset = $db->query($queryStrPromise, array($this->id));
             $errorMsg = "Can not execute $methodName. Pomise is not exist.";
             if (is_null($rowset->current())) {
                 throw new PromiseException( );
             }
             $promiseData = $rowset->current()->getArrayCopy();
-            $promiseClass = $this->getPromiseClass();
+            $promiseClass = $this->getClass();
             $promise = new $promiseClass($this->store, $promiseData);
             $errorMsg = "Can not execute $methodName. Class: $promiseClass";
             $promiseDataReturned = call_user_func([$promise, $methodName], $param1, $params2);
@@ -184,7 +168,7 @@ class Promise implements PromiseInterface//extends PromiseAbstract//implements P
             $db->getDriver()->getConnection()->commit();
         } catch (\Exception $e) {
             $db->getDriver()->getConnection()->rollback();
-            throw new PromiseException($errorMsg . ' Pomise: ' . $this->promiseId, 0, $e);
+            throw new PromiseException($errorMsg . ' Pomise: ' . $this->id, 0, $e);
         }
 
         if (
@@ -207,7 +191,7 @@ class Promise implements PromiseInterface//extends PromiseAbstract//implements P
     protected function resolveDependent($result, $isRejected)
     {
         //are dependent promises exist?
-        $rowset = $this->store->select(array(Store::PARENT_ID => $this->promiseId));
+        $rowset = $this->store->select(array(Store::PARENT_ID => $this->id));
         $rowsetArray = $rowset->toArray();
         foreach ($rowsetArray as $dependentPromiseData) {
             $dependentPromiseId = $dependentPromiseData[Store::PROMISE_ID];
@@ -228,7 +212,7 @@ class Promise implements PromiseInterface//extends PromiseAbstract//implements P
 
     protected function getStoredPromiseData($promiseId = null)
     {
-        $promiseId = !$promiseId ? $this->getPromiseId() : $promiseId;
+        $promiseId = !$promiseId ? $this->getId() : $promiseId;
         $where = [Store::PROMISE_ID => $promiseId];
         $rowset = $this->store->select($where);
         $promiseData = $rowset->current();
@@ -241,7 +225,7 @@ class Promise implements PromiseInterface//extends PromiseAbstract//implements P
         }
     }
 
-    protected function getPromiseClass($promiseId = null)
+    protected function getClass($promiseId = null)
     {
         $promiseData = $this->getStoredPromiseData($promiseId);
         switch (true) {
@@ -261,9 +245,14 @@ class Promise implements PromiseInterface//extends PromiseAbstract//implements P
         //var_dump($info);
     }
 
-    public static function isPromiseId($param)
+    /**
+     * Returns the Prefix for Id
+     *
+     * @return string
+     */
+    protected static function getPrefix()
     {
-        return PromiseAbstract::isPromiseId($param);
+        return strtolower(substr(__CLASS__, strlen(__NAMESPACE__) + 1));
     }
 
 }
