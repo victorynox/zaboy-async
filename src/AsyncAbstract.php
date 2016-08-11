@@ -48,9 +48,9 @@ abstract class AsyncAbstract
                 . $time . self::ID_SEPARATOR . self::ID_SEPARATOR
                 , true
         );
-        $promiseId = str_replace('.', self::ID_SEPARATOR, $idWithDot);
+        $id = str_replace('.', self::ID_SEPARATOR, $idWithDot);
 
-        return $promiseId;
+        return $id;
     }
 
     /**

@@ -43,21 +43,21 @@ class Broker
         return $promise;
     }
 
-    public function getPromise($promiseId)
+    public function getPromise($id)
     {
-        if (!isset($promiseId)) {
+        if (!isset($id)) {
             throw new PromiseException('Can not run  "Broker::getPromise(NULL)"');
         }
-        $promise = new Promise($this->store, $promiseId);
+        $promise = new Promise($this->store, $id);
         return $promise;
     }
 
-    public function deletePromise($promiseId)
+    public function deletePromise($id)
     {
-        if (!isset($promiseId)) {
+        if (!isset($id)) {
             throw new PromiseException('Can not run  "Broker::deletePromise(NULL)"');
         }
-        $number = $this->store->delete([Store::ID => $promiseId]);
+        $number = $this->store->delete([Store::ID => $id]);
         return (bool) $number;
     }
 

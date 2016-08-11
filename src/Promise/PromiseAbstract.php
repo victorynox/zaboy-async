@@ -38,15 +38,8 @@ abstract class PromiseAbstract extends EntityAbstract implements PromiseInterfac
      */
     public function __construct(Store $store, $promiseData = [])
     {
+        parent::__construct($promiseData);
         $this->store = $store;
-        $this->data = $promiseData;
-
-        if (!isset($this->data[Store::ID])) {
-            $this->data[Store::ID] = $this->makeId();
-        }
-        if (!isset($this->data[Store::CREATION_TIME])) {
-            $this->data[Store::CREATION_TIME] = (int) (time() - date('Z'));
-        }
     }
 
     public function getState()

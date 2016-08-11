@@ -33,6 +33,24 @@ abstract class EntityAbstract extends AsyncAbstract
      */
     public $data;
 
+    /**
+     *
+     * @param Store $store
+     * @throws PromiseException
+     */
+    public function __construct($data = [])
+    {
+        $this->data = $data;
+
+        if (!isset($this->data[StoreAbstract::ID])) {
+            $this->data[StoreAbstract::ID] = $this->makeId();
+        }
+
+        if (!isset($this->data[StoreAbstract::CREATION_TIME])) {
+            $this->data[StoreAbstract::CREATION_TIME] = (int) (time() - date('Z'));
+        }
+    }
+
     public function getId()
     {
 

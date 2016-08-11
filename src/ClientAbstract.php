@@ -76,6 +76,47 @@ abstract class ClientAbstract extends AsyncAbstract
         }
     }
 
+    protected function runTransaction($methodName, $param1 = null, $params2 = null)
+    {
+        $store = $this->store;
+        try {
+            $errorMsg = "Can\'t start transaction for $methodName";
+            $this->store->beginTransaction();
+            //is row with this index exist?
+            $errorMsg = "Can\'t readAndLock for $this->id";
+            $data = $this->store->readAndLock($this->id);
+            $errorMsg = "Can not execute $methodName. Pomise is not exist.";
+            if (is_null($data)) {
+                throw new \Exception("Pomise is not exist in Store.");
+            }
+            $entityClass = $this->getClass();
+            $entity = new $entityClass($this->store, $data);
+            $errorMsg = "Can not execute $methodName. Class: $entityClass";
+            $dataReturned = call_user_func([$entity, $methodName], $param1, $params2);
+            if (!is_null($dataReturned)) {
+                $errorMsg = "Can not store->update.";
+                $id = $dataReturned[StoreAbstract::ID];
+                unset($dataReturned[StoreAbstract::ID]);
+                //or update
+                $number = $this->store->update($dataReturned, [StoreAbstract::ID => $id]);
+                if (!$number) {
+                    //or create new if absent
+                    $dataReturned[StoreAbstract::ID] = $id;
+                    $this->store->insert($dataReturned);
+                }
+            } else {
+                $dataReturned = $data;
+            }
+
+            $this->store->commit();
+        } catch (\Exception $e) {
+            $this->store->rollback();
+            $exceptionClass = $this::EXCEPTION_CLASS;
+            throw new $exceptionClass($errorMsg . ' Id: ' . $this->id, 0, $e);
+        }
+        return $id;
+    }
+
     /**
      * Returns the class name of Entity
      *
@@ -92,6 +133,11 @@ abstract class ClientAbstract extends AsyncAbstract
     {
         return $this->id;
     }
+
+    /*
+     * Returns the Entity as array with unserialized properties
+     *
+     */
 
     abstract public function toArray();
 }

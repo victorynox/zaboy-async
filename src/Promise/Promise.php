@@ -32,42 +32,50 @@ class Promise extends ClientAbstract implements PromiseInterface
     protected function makeEntity($data = null)
     {
         $promise = new PendingPromise($this->store);
-        $this->insertPromise($promise);
+        try {
+            $data = $promise->getData();
+            $rowsCount = $this->store->insert($data);
+        } catch (\Exception $e) {
+            throw new PromiseException('Can\'t insert promiseData. Promise: ' . $promise->getId(), 0, $e);
+        }
+        if (!$rowsCount) {
+            throw new PromiseException('Can\'t insert promiseData. Promise: ' . $promise->getId());
+        }
         return $promise;
     }
 
     public function getState()
     {
-        $promiseData = $this->getStoredData();
-        $state = $promiseData[Store::STATE];
+        $data = $this->getStoredData();
+        $state = $data[Store::STATE];
         return $state;
     }
 
     public function then(callable $onFulfilled = null, callable $onRejected = null)
     {
-        $promiseId = $this->runTransaction('then', $onFulfilled, $onRejected);
-        return new static($this->store, $promiseId);
+        $id = $this->runTransaction('then', $onFulfilled, $onRejected);
+        return new static($this->store, $id);
     }
 
     public function resolve($value)
     {
-        $promiseId = $this->runTransaction('resolve', $value);
-        return $promiseId;
+        $id = $this->runTransaction('resolve', $value);
+        return $id;
     }
 
     public function reject($value)
     {
-        $promiseId = $this->runTransaction('reject', $value);
-        return $promiseId;
+        $id = $this->runTransaction('reject', $value);
+        return $id;
     }
 
     public function wait($unwrap = true, $waitingTime = 60, $waitingCheckInterval = 1)
     {
         if (!$unwrap) {
-            $promiseId = $this->getId();
-            $promiseData = $this->getStoredData($promiseId);
-            $promiseClass = $this->getClass();
-            $promise = new $promiseClass($this->store, $promiseData);
+            $id = $this->getId();
+            $data = $this->getStoredData($id);
+            $entityClass = $this->getClass();
+            $promise = new $entityClass($this->store, $data);
             return $promise->wait(false);
         }
         $stepsNumber = $waitingTime / $waitingCheckInterval;
@@ -91,72 +99,21 @@ class Promise extends ClientAbstract implements PromiseInterface
         throw $e;
     }
 
-    protected function insertPromise(PromiseAbstract $promise)
-    {
-        try {
-            $promiseData = $promise->getData();
-            $rowsCount = $this->store->insert($promiseData);
-        } catch (\Exception $e) {
-            throw new PromiseException('Can\'t insert promiseData. Promise: ' . $promise->getId(), 0, $e);
-        }
-        if (!$rowsCount) {
-            throw new PromiseException('Can\'t insert promiseData. Promise: ' . $promise->getId());
-        }
-    }
-
     protected function runTransaction($methodName, $param1 = null, $params2 = null)
     {
-        $identifier = Store::ID;
-        $db = $this->store->getAdapter();
-        $queryStrPromise = 'SELECT ' . Select::SQL_STAR
-                . ' FROM ' . $db->platform->quoteIdentifier($this->store->getTable())
-                . ' WHERE ' . $db->platform->quoteIdentifier($identifier) . ' = ?'
-                . ' FOR UPDATE';
-        try {
-            $errorMsg = "Can\'t start transaction for $methodName";
-            $db->getDriver()->getConnection()->beginTransaction();
-            //is row with this index exist?
-            $rowset = $db->query($queryStrPromise, array($this->id));
-            $errorMsg = "Can not execute $methodName. Pomise is not exist.";
-            if (is_null($rowset->current())) {
-                throw new PromiseException( );
-            }
-            $promiseData = $rowset->current()->getArrayCopy();
-            $promiseClass = $this->getClass();
-            $promise = new $promiseClass($this->store, $promiseData);
-            $errorMsg = "Can not execute $methodName. Class: $promiseClass";
-            $promiseDataReturned = call_user_func([$promise, $methodName], $param1, $params2);
-            if (!is_null($promiseDataReturned)) {
-                $errorMsg = "Can not store->update.";
-                $promiseId = $promiseDataReturned[Store::ID];
-                unset($promiseDataReturned[Store::ID]);
-                //or update promise
-                $number = $this->store->update($promiseDataReturned, [Store::ID => $promiseId]);
-                if (!$number) {
-                    //or create new if absent
-                    $promiseDataReturned[Store::ID] = $promiseId;
-                    $this->store->insert($promiseDataReturned);
-                }
-            } else {
-                $promiseDataReturned = $promiseData;
-            }
-
-            $db->getDriver()->getConnection()->commit();
-        } catch (\Exception $e) {
-            $db->getDriver()->getConnection()->rollback();
-            throw new PromiseException($errorMsg . ' Pomise: ' . $this->id, 0, $e);
-        }
-
+        $data = $this->getStoredData();
+        $id = parent::runTransaction($methodName, $param1, $params2);
+        $dataReturned = $this->getStoredData($id);
         if (
-                $promiseData[Store::STATE] === PromiseInterface::PENDING && (
-                $promiseDataReturned[Store::STATE] === PromiseInterface::FULFILLED ||
-                $promiseDataReturned[Store::STATE] === PromiseInterface::REJECTED)
+                $data[Store::STATE] === PromiseInterface::PENDING && (
+                $dataReturned[Store::STATE] === PromiseInterface::FULFILLED ||
+                $dataReturned[Store::STATE] === PromiseInterface::REJECTED)
         ) {
-            $result = (new static($this->store, $promiseId))->wait(false);
-            $this->resolveDependent($result, $promiseDataReturned[Store::STATE] === PromiseInterface::REJECTED);
+            $result = (new static($this->store, $id))->wait(false);
+            $this->resolveDependent($result, $dataReturned[Store::STATE] === PromiseInterface::REJECTED);
         }
 
-        return $promiseId; //$promiseDataReturned;
+        return $id; //$dataReturned;
     }
 
     public function toArray()
@@ -186,15 +143,15 @@ class Promise extends ClientAbstract implements PromiseInterface
         return;
     }
 
-    protected function getClass($promiseId = null)
+    protected function getClass($id = null)
     {
-        $promiseData = $this->getStoredData($promiseId);
+        $data = $this->getStoredData($id);
         switch (true) {
-            case $promiseData[Store::STATE] === PromiseInterface::FULFILLED:
+            case $data[Store::STATE] === PromiseInterface::FULFILLED:
                 return '\zaboy\async\Promise\Promise\FulfilledPromise';
-            case $promiseData[Store::STATE] === PromiseInterface::REJECTED:
+            case $data[Store::STATE] === PromiseInterface::REJECTED:
                 return '\zaboy\async\Promise\Promise\RejectedPromise';
-            case $promiseData[Store::PARENT_ID] === null:
+            case $data[Store::PARENT_ID] === null:
                 return '\zaboy\async\Promise\Promise\PendingPromise';
             default:
                 return '\zaboy\async\Promise\Promise\DependentPromise';

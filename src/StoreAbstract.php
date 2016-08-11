@@ -49,10 +49,10 @@ class StoreAbstract extends TableGateway
 
     public function readAndLock($id)
     {
-        $identifier = static::ID;
+        $identifier = self::ID;
         $db = $this->getAdapter();
         $queryStr = 'SELECT ' . Select::SQL_STAR
-                . ' FROM ' . $db->platform->quoteIdentifier($this->store->getTable())
+                . ' FROM ' . $db->platform->quoteIdentifier($this->getTable())
                 . ' WHERE ' . $db->platform->quoteIdentifier($identifier) . ' = ?'
                 . ' FOR UPDATE';
 
@@ -67,7 +67,7 @@ class StoreAbstract extends TableGateway
 
     public function read($id)
     {
-        $where = [static::ID => $id];
+        $where = [self::ID => $id];
         $rowset = $this->select($where);
         $data = $rowset->current();
         if (!isset($data)) {
@@ -75,6 +75,16 @@ class StoreAbstract extends TableGateway
         } else {
             return $data->getArrayCopy();
         }
+    }
+
+    public function insert($data)
+    {
+        return parent::insert($data);
+    }
+
+    public function update($data, $where = null)
+    {
+        return parent::update($data, $where);
     }
 
 }
