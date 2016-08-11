@@ -29,7 +29,7 @@ class Promise extends ClientAbstract implements PromiseInterface
 
     const EXCEPTION_CLASS = '\zaboy\async\Promise\PromiseException';
 
-    protected function makeNewEntity($data = null)
+    protected function makeEntity($data = null)
     {
         $promise = new PendingPromise($this->store);
         $this->insertPromise($promise);

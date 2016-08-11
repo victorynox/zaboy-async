@@ -38,22 +38,25 @@ abstract class ClientAbstract extends AsyncAbstract
      */
     protected $id;
 
-    public function __construct(StoreAbstract $store, $id = null, $data = null)
+    public function __construct(StoreAbstract $store, $data = null)
     {
         $this->store = $store;
-        if (!is_null($id) && !$this->isId($id)) {
+
+        if (!is_array($data) && !empty($data) && !$this->isId($data)) {
             $exceptionClass = $this::EXCEPTION_CLASS;
-            throw new $exceptionClass('Wrong format $id');
+            throw new $exceptionClass('Wrong format $data');
         }
-        if (!isset($id)) {
-            $entity = $this->makeNewEntity($data);
+        if ($this->isId($data)) {
+            $this->id = $data;
+            return;
+        }
+        if (is_array($data) || empty($data)) {
+            $entity = $this->makeEntity($data);
             $this->id = $entity->getId();
-        } else {
-            $this->id = $id;
         }
     }
 
-    abstract protected function makeNewEntity($data = null);
+    abstract protected function makeEntity($data = null);
 
     /**
      * Returns an array created from stored in Store data of entity.
@@ -62,18 +65,14 @@ abstract class ClientAbstract extends AsyncAbstract
      */
     protected function getStoredData($id = null)
     {
-        $storeClass = get_class($this->store);
         $id = !$id ? $this->getId() : $id;
-        $where = [$storeClass::ID => $id];
-        $rowset = $this->store->select($where);
-        $data = $rowset->current();
-        if (!isset($data)) {
-            $exceptionClass = $this::EXCEPTION_CLASS;
-            throw new $exceptionClass(
-            "There is  not data in store  for promiseId: $id"
+        $data = $this->store->read($id);
+        if (empty($data)) {
+            throw new PromiseException(
+            "There is  not data in store  for id: $id"
             );
         } else {
-            return $data->getArrayCopy();
+            return $data;
         }
     }
 
