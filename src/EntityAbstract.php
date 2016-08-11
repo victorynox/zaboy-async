@@ -14,7 +14,7 @@ use zaboy\async\Promise\Exception\TimeIsOutException;
 use zaboy\async\Promise\Promise\PendingPromise;
 use zaboy\async\Promise\PromiseAbstract;
 use zaboy\async\ClientInterface;
-use zaboy\async\Store;
+use zaboy\async\StoreAbstract;
 use Zend\Db\Sql\Select;
 use zaboy\async\ClientAbstract;
 
@@ -26,5 +26,36 @@ use zaboy\async\ClientAbstract;
  */
 abstract class EntityAbstract extends AsyncAbstract
 {
+
+    /**
+     *
+     * @var array
+     */
+    public $data;
+
+    public function getId()
+    {
+
+        if (isset($this->data[StoreAbstract::ID])) {
+            return $this->data[StoreAbstract::ID];
+        } else {
+            $exceptionClass = $this::EXCEPTION_CLASS;
+            throw new $exceptionClass(
+            "id is not set."
+            );
+        }
+    }
+
+    public function getData()
+    {
+        if (isset($this->data)) {
+            return $this->data;
+        } else {
+            $exceptionClass = $this::EXCEPTION_CLASS;
+            throw new $exceptionClass(
+            "Data is not set."
+            );
+        }
+    }
 
 }

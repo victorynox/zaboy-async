@@ -77,13 +77,14 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__extractIdFromString()
     {
+        $this->object = new Promise($this->store);
         $string = ' jkiuhs iuhis pi siuiughf]l;m74jn &568ihj983438h^&%  ';
         $this->assertEquals(
-                [], Promise::extractId($string)
+                [], $this->object->extractId($string)
         );
         $string = ' jkiuhs iuhis pi siu promise__1469864422_189511__579c84162e43e4_34952052 iughf]l;m74jn &568ihj983438h^&%  ';
         $this->assertEquals(
-                ['promise__1469864422_189511__579c84162e43e4_34952052'], Promise::extractId($string)
+                ['promise__1469864422_189511__579c84162e43e4_34952052'], $this->object->extractId($string)
         );
         $string = ' jkiuhs iuhis pi s promise__2229864461_889811__579c843dd93ad1_08516192  AND promise__3339864461_889811__579c843dd93ad1_08516192';
         $this->assertEquals(
@@ -91,12 +92,13 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
             'promise__3339864461_889811__579c843dd93ad1_08516192',
             'promise__2229864461_889811__579c843dd93ad1_08516192',
                 ]
-                , Promise::extractId($string)
+                , $this->object->extractId($string)
         );
     }
 
     public function testPromiseTest__extractIdFromException()
     {
+        $this->object = new Promise($this->store);
         $exc1 = new \Exception('Promise: promise__1119864461_889811__579c843dd93ad1_08516192');
         $exc2 = new \Exception('promise__2229864461_889811__579c843dd93ad1_08516192  AND promise__3339864461_889811__579c843dd93ad1_08516192', 0, $exc1);
         $exc3 = new \Exception('promise__4449864461_889811__579c843dd93ad1_08516192 of the end', 0, $exc2);
@@ -108,7 +110,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
             'promise__2229864461_889811__579c843dd93ad1_08516192',
             'promise__1119864461_889811__579c843dd93ad1_08516192',
                 ]
-                , Promise::extractId($exc3)
+                , $this->object->extractId($exc3)
         );
     }
 

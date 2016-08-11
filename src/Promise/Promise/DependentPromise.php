@@ -31,25 +31,25 @@ class DependentPromise extends PendingPromise
     public function __construct(Store $store, $promiseData, $parentPromiseId = null, callable $onFulfilled = null, callable $onRejected = null)
     {
         parent::__construct($store, $promiseData);
-        $this->promiseData[Store::PARENT_ID] = $parentPromiseId ? $parentPromiseId : $this->promiseData[Store::PARENT_ID];
-        $this->promiseData[Store::ON_FULFILLED] = !isset($promiseData[Store::ON_FULFILLED]) ? $this->serializeCallback($onFulfilled) : $promiseData[Store::ON_FULFILLED];
-        $this->promiseData[Store::ON_REJECTED] = !isset($promiseData[Store::ON_REJECTED]) ? $this->serializeCallback($onRejected) : $promiseData[Store::ON_REJECTED];
+        $this->data[Store::PARENT_ID] = $parentPromiseId ? $parentPromiseId : $this->data[Store::PARENT_ID];
+        $this->data[Store::ON_FULFILLED] = !isset($promiseData[Store::ON_FULFILLED]) ? $this->serializeCallback($onFulfilled) : $promiseData[Store::ON_FULFILLED];
+        $this->data[Store::ON_REJECTED] = !isset($promiseData[Store::ON_REJECTED]) ? $this->serializeCallback($onRejected) : $promiseData[Store::ON_REJECTED];
     }
 
     public function resolve($value)
     {
         //parent promise is fulfilled - we just resolve (there is not ON_FULFILLED)
-        if (is_null($this->promiseData[Store::ON_FULFILLED])) {
+        if (is_null($this->data[Store::ON_FULFILLED])) {
             return parent::resolve($value);
         }
         //parent promise is fulfilled by promise - we has new parent promise
         if ($value instanceof PromiseInterface) {
             $promiseIdOfResult = $value->getId();
-            $this->promiseData[Store::PARENT_ID] = $promiseIdOfResult;
+            $this->data[Store::PARENT_ID] = $promiseIdOfResult;
             return $this->getData();
         }
         //parent promise is fulfilled by value - we try run ON_FULFILLED callback
-        $onFulfilledCallback = unserialize($this->promiseData[Store::ON_FULFILLED]);
+        $onFulfilledCallback = unserialize($this->data[Store::ON_FULFILLED]);
         try {
             $result = call_user_func($onFulfilledCallback, $value);
         } catch (\Exception $ex) {
@@ -61,18 +61,18 @@ class DependentPromise extends PendingPromise
     public function reject($reason)
     {
         //parent promise is rejected - we just reject (there is not ON_REJECTED)
-        if (is_null($this->promiseData[Store::ON_REJECTED])) {
+        if (is_null($this->data[Store::ON_REJECTED])) {
             return parent::reject($reason);
         }
         //parent promise is rejected by promise - we has new parent promise
         if ($reason instanceof PromiseInterface) {
             $promiseIdOfResult = $reason->getId();
-            $this->promiseData[Store::PARENT_ID] = $promiseIdOfResult;
-            $this->promiseData[Store::ON_FULFILLED] = $this->promiseData[Store::ON_REJECTED];
+            $this->data[Store::PARENT_ID] = $promiseIdOfResult;
+            $this->data[Store::ON_FULFILLED] = $this->data[Store::ON_REJECTED];
             return $this->getData();
         }
         //parent promise is rejected by value - we try run ON_REJECTED callback
-        $onRejectedCallback = unserialize($this->promiseData[Store::ON_REJECTED]);
+        $onRejectedCallback = unserialize($this->data[Store::ON_REJECTED]);
         try {
             $result = call_user_func($onRejectedCallback, $reason);
             // if $onRejectedCallback can not resolve problem it must throw exception

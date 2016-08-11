@@ -30,13 +30,30 @@ abstract class ClientAbstract extends AsyncAbstract
      *
      * @var StoreAbstract
      */
-    public $store;
+    protected $store;
 
     /**
      *
      * @var string
      */
-    public $id;
+    protected $id;
+
+    public function __construct(StoreAbstract $store, $id = null, $data = null)
+    {
+        $this->store = $store;
+        if (!is_null($id) && !$this->isId($id)) {
+            $exceptionClass = $this::EXCEPTION_CLASS;
+            throw new $exceptionClass('Wrong format $id');
+        }
+        if (!isset($id)) {
+            $entity = $this->makeNewEntity($data);
+            $this->id = $entity->getId();
+        } else {
+            $this->id = $id;
+        }
+    }
+
+    abstract protected function makeNewEntity($data = null);
 
     /**
      * Returns an array created from stored in Store data of entity.
@@ -50,8 +67,8 @@ abstract class ClientAbstract extends AsyncAbstract
         $where = [$storeClass::ID => $id];
         $rowset = $this->store->select($where);
         $data = $rowset->current();
-        $exceptionClass = $this::EXCEPTION_CLASS;
         if (!isset($data)) {
+            $exceptionClass = $this::EXCEPTION_CLASS;
             throw new $exceptionClass(
             "There is  not data in store  for promiseId: $id"
             );
@@ -77,4 +94,5 @@ abstract class ClientAbstract extends AsyncAbstract
         return $this->id;
     }
 
+    abstract public function toArray();
 }

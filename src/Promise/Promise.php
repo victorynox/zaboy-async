@@ -29,37 +29,11 @@ class Promise extends ClientAbstract implements PromiseInterface
 
     const EXCEPTION_CLASS = '\zaboy\async\Promise\PromiseException';
 
-    public function __construct(Store $store, $id = null)
+    protected function makeNewEntity($data = null)
     {
-        if (!is_null($id) && !$this->isId($id)) {
-            throw new PromiseException('Wrong format $promiseId');
-        }
-        $this->store = $store;
-        if (!isset($id)) {
-            $promise = new PendingPromise($store);
-            $this->insertPromise($promise);
-            $this->id = $promise->getId();
-        } else {
-            $this->id = $id;
-        }
-    }
-
-    public static function extractId($stringOrException, $promiseIdArray = [])
-    {
-        if (is_null($stringOrException)) {
-            return $promiseIdArray;
-        }
-        if ($stringOrException instanceof \Exception) {
-            $array = static::extractId($stringOrException->getPrevious(), $promiseIdArray);
-            $promiseIdArray = static::extractId($stringOrException->getMessage(), $array);
-            return $promiseIdArray;
-        }
-        $array = [];
-        if (preg_match_all('/(promise__[0-9]{10}_[0-9]{6}__[a-zA-Z0-9_]{23})/', $stringOrException, $array)) {
-            return array_merge(array_reverse($array[0]), $promiseIdArray);
-        } else {
-            return [];
-        }
+        $promise = new PendingPromise($this->store);
+        $this->insertPromise($promise);
+        return $promise;
     }
 
     public function getState()

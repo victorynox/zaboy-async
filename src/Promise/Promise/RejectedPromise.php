@@ -36,15 +36,15 @@ class RejectedPromise extends DeterminedPromise
     public function __construct(Store $store, $promiseData = [], $result = null)
     {
         parent::__construct($store, $promiseData);
-        $this->promiseData[Store::STATE] = PromiseInterface::REJECTED;
-        if (isset($this->promiseData[Store::RESULT]) || is_null($result)) {
+        $this->data[Store::STATE] = PromiseInterface::REJECTED;
+        if (isset($this->data[Store::RESULT]) || is_null($result)) {
             return;
         }
 
         if ($result instanceof \Exception) {
-            $reason = "Exception with class '" . get_class($result) . "' was thrown. Promise: " . $this->promiseData[Store::ID];
+            $reason = "Exception with class '" . get_class($result) . "' was thrown. Promise: " . $this->data[Store::ID];
             $result = new RejectedException($reason, 0, $result);
-            $this->promiseData[Store::RESULT] = $this->serializeResult($result);
+            $this->data[Store::RESULT] = $this->serializeResult($result);
             return;
         }
 
@@ -63,12 +63,12 @@ class RejectedPromise extends DeterminedPromise
                 $result = new RejectedException(strval($result));
             } catch (\Exception $exc) {
                 //result can not be converted to string
-                $reason = 'Reason can not be converted to string.  Promise: ' . $this->promiseData[Store::ID];
+                $reason = 'Reason can not be converted to string.  Promise: ' . $this->data[Store::ID];
                 $result = new RejectedException($reason, 0, $exc);
             }
             restore_error_handler();
         }
-        $this->promiseData[Store::RESULT] = $this->serializeResult($result);
+        $this->data[Store::RESULT] = $this->serializeResult($result);
     }
 
     public function getState()
@@ -81,7 +81,7 @@ class RejectedPromise extends DeterminedPromise
         if ($unwrap) {
             return new PromiseException('Do not try call wait(true)');
         }
-        $result = $this->unserializeResult($this->promiseData[Store::RESULT]);
+        $result = $this->unserializeResult($this->data[Store::RESULT]);
         if (!$this->isId($result)) {
             return $result;
         }
@@ -117,7 +117,7 @@ class RejectedPromise extends DeterminedPromise
     {
         throw new PromiseException(
         'Can not resolve. Pomise already rejected.  Pomise: ' .
-        $this->promiseData[Store::ID], 0, $this->wait(false)
+        $this->data[Store::ID], 0, $this->wait(false)
         );
     }
 
@@ -125,7 +125,7 @@ class RejectedPromise extends DeterminedPromise
     {
         throw new PromiseException(
         'Cannot reject a rejected promise.  Pomise: ' .
-        $this->promiseData[Store::ID], 0, $this->wait(false)
+        $this->data[Store::ID], 0, $this->wait(false)
         );
     }
 

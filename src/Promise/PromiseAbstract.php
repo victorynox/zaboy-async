@@ -23,11 +23,7 @@ use zaboy\async\EntityAbstract;
 abstract class PromiseAbstract extends EntityAbstract implements PromiseInterface
 {
 
-    /**
-     *
-     * @var array
-     */
-    public $promiseData;
+    const EXCEPTION_CLASS = '\zaboy\async\Promise\PromiseException';
 
     /**
      *
@@ -43,45 +39,23 @@ abstract class PromiseAbstract extends EntityAbstract implements PromiseInterfac
     public function __construct(Store $store, $promiseData = [])
     {
         $this->store = $store;
-        $this->promiseData = $promiseData;
+        $this->data = $promiseData;
 
-        if (!isset($this->promiseData[Store::ID])) {
-            $this->promiseData[Store::ID] = $this->makeId();
+        if (!isset($this->data[Store::ID])) {
+            $this->data[Store::ID] = $this->makeId();
         }
-        if (!isset($this->promiseData[Store::CREATION_TIME])) {
-            $this->promiseData[Store::CREATION_TIME] = (int) (time() - date('Z'));
-        }
-    }
-
-    public function getId()
-    {
-        if (isset($this->promiseData[Store::ID])) {
-            return $this->promiseData[Store::ID];
-        } else {
-            throw new PromiseException(
-            "PomiseId is not set."
-            );
+        if (!isset($this->data[Store::CREATION_TIME])) {
+            $this->data[Store::CREATION_TIME] = (int) (time() - date('Z'));
         }
     }
 
     public function getState()
     {
-        if (isset($this->promiseData[Store::STATE])) {
-            return $this->promiseData[Store::STATE];
+        if (isset($this->data[Store::STATE])) {
+            return $this->data[Store::STATE];
         } else {
             throw new PromiseException(
             "Pomise State is not set."
-            );
-        }
-    }
-
-    public function getData()
-    {
-        if (isset($this->promiseData)) {
-            return $this->promiseData;
-        } else {
-            throw new PromiseException(
-            "Pomise Data is not set."
             );
         }
     }

@@ -79,4 +79,22 @@ abstract class AsyncAbstract
         return strtolower(explode('\\', get_class($this))[2]);
     }
 
+    public function extractId($stringOrException, $idArray = [])
+    {
+        if (is_null($stringOrException)) {
+            return $idArray;
+        }
+        if ($stringOrException instanceof \Exception) {
+            $array = $this->extractId($stringOrException->getPrevious(), $idArray);
+            $idArray = $this->extractId($stringOrException->getMessage(), $array);
+            return $idArray;
+        }
+        $array = [];
+        if (preg_match_all('/(' . $this->getPrefix() . '__[0-9]{10}_[0-9]{6}__[a-zA-Z0-9_]{23})/', $stringOrException, $array)) {
+            return array_merge(array_reverse($array[0]), $idArray);
+        } else {
+            return [];
+        }
+    }
+
 }

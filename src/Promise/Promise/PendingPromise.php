@@ -33,7 +33,7 @@ class PendingPromise extends PromiseAbstract
     public function __construct(Store $store, $promiseData = [])
     {
         parent::__construct($store, $promiseData);
-        $this->promiseData[Store::STATE] = PromiseInterface::PENDING;
+        $this->data[Store::STATE] = PromiseInterface::PENDING;
     }
 
     public function resolve($value)

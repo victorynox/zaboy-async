@@ -34,9 +34,9 @@ abstract class DeterminedPromise extends PromiseAbstract
     public function __construct(Store $store, $promiseData = [])
     {
         parent::__construct($store, $promiseData);
-        $this->promiseData[Store::PARENT_ID] = null;
-        $this->promiseData[Store::ON_FULFILLED] = null;
-        $this->promiseData[Store::ON_REJECTED] = null;
+        $this->data[Store::PARENT_ID] = null;
+        $this->data[Store::ON_FULFILLED] = null;
+        $this->data[Store::ON_REJECTED] = null;
     }
 
     protected function serializeResult($result)
@@ -68,7 +68,7 @@ abstract class DeterminedPromise extends PromiseAbstract
         if ($unwrap) {
             return new PromiseException('Do not try call wait(true)');
         }
-        $result = $this->unserializeResult($this->promiseData[Store::RESULT]);
+        $result = $this->unserializeResult($this->data[Store::RESULT]);
         if ($this->isId($result)) {
             $nextPromise = new Promise($this->store, $result);
             $result = $nextPromise->wait(false);
