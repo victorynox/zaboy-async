@@ -69,7 +69,7 @@ abstract class DeterminedPromise extends PromiseAbstract
             return new PromiseException('Do not try call wait(true)');
         }
         $result = $this->unserializeResult($this->promiseData[Store::RESULT]);
-        if (Promise::isId($result)) {
+        if ($this->isId($result)) {
             $nextPromise = new Promise($this->store, $result);
             $result = $nextPromise->wait(false);
         }

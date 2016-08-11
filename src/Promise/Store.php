@@ -4,6 +4,7 @@ namespace zaboy\async\Promise;
 
 use Zend\Db\TableGateway\TableGateway;
 use zaboy\rest\DataStore\Interfaces\ReadInterface;
+use zaboy\async\StoreAbstract;
 
 /**
  * Store for states of  promises
@@ -19,16 +20,16 @@ use zaboy\rest\DataStore\Interfaces\ReadInterface;
  * @category   async
  * @package    zaboy
  */
-class Store extends TableGateway
+class Store extends StoreAbstract
 {
 
     //PROMISE_ADAPTER_DATA_STORE
     //
     //'id' - unique id of promise: promise_id_123456789qwerty
-    const PROMISE_ID = ReadInterface::DEF_ID;
+    //const ID = ReadInterface::DEF_ID;
     const STATE = 'state';
     const RESULT = 'result';
-    const CREATION_TIME = 'creation_time';
+    //const CREATION_TIME = 'creation_time';
     //
     const PARENT_ID = 'parent_id';
     const ON_FULFILLED = 'on_fulfilled';

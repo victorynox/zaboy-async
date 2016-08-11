@@ -57,7 +57,7 @@ class Broker
         if (!isset($promiseId)) {
             throw new PromiseException('Can not run  "Broker::deletePromise(NULL)"');
         }
-        $number = $this->store->delete([Store::PROMISE_ID => $promiseId]);
+        $number = $this->store->delete([Store::ID => $promiseId]);
         return (bool) $number;
     }
 

@@ -68,7 +68,7 @@ class StoreFactory extends FactoryAbstract
     /** @var \Zend\Db\Adapter\Adapter $db */
     protected $db;
     protected $promiseTableData = [
-        Store::PROMISE_ID => [
+        Store::ID => [
             'field_type' => 'Varchar',
             'field_params' => [
                 'length' => 128,

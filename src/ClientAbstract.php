@@ -14,7 +14,7 @@ use zaboy\async\Promise\Exception\TimeIsOutException;
 use zaboy\async\Promise\Promise\PendingPromise;
 use zaboy\async\Promise\PromiseAbstract;
 use zaboy\async\ClientInterface;
-use zaboy\async\Store;
+use zaboy\async\StoreAbstract;
 use Zend\Db\Sql\Select;
 
 /**
@@ -23,12 +23,12 @@ use Zend\Db\Sql\Select;
  * @category   async
  * @package    zaboy
  */
-abstract class ClientAbstract implements ClientInterface
+abstract class ClientAbstract extends AsyncAbstract
 {
 
     /**
      *
-     * @var Store
+     * @var StoreAbstract
      */
     public $store;
 
@@ -39,38 +39,25 @@ abstract class ClientAbstract implements ClientInterface
     public $id;
 
     /**
-     * Creates ID for the entity.
-     *
-     * An algorithm of creation is common for the all entities except for prefix.
-     *
-     * For example for Promise it will be 'promise_', for Task - 'task_' etc.
-     *
-     * @return string
-     */
-    public function makeId()
-    {
-
-    }
-
-    public static function isId($param)
-    {
-        $array = [];
-        $regExp = '/(' . static::getPrefix() . '__[0-9]{10}_[0-9]{6}__[a-zA-Z0-9_]{23})/';
-        if (is_string($param) && preg_match_all($regExp, $param, $array)) {
-            return $array[0][0] == $param;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Returns an array created from data of entity.
+     * Returns an array created from stored in Store data of entity.
      *
      * @return array mixed
      */
-    public function getData()
+    protected function getStoredData($id = null)
     {
-
+        $storeClass = get_class($this->store);
+        $id = !$id ? $this->getId() : $id;
+        $where = [$storeClass::ID => $id];
+        $rowset = $this->store->select($where);
+        $data = $rowset->current();
+        $exceptionClass = $this::EXCEPTION_CLASS;
+        if (!isset($data)) {
+            throw new $exceptionClass(
+            "There is  not data in store  for promiseId: $id"
+            );
+        } else {
+            return $data->getArrayCopy();
+        }
     }
 
     /**
@@ -78,20 +65,7 @@ abstract class ClientAbstract implements ClientInterface
      *
      * @return string
      */
-    protected function getClass($id = null)
-    {
-
-    }
-
-    /**
-     * Returns the Prefix for Id
-     *
-     * @return string
-     */
-    protected static function getPrefix()
-    {
-        return strtolower(substr(__CLASS__, strlen(__NAMESPACE__) + 1));
-    }
+    abstract protected function getClass($id = null);
 
     /**
      * Returns the Entity ID

@@ -48,14 +48,14 @@ class FulfilledPromise extends DeterminedPromise
     public function resolve($value)
     {
         if ($value != $this->promiseData[Store::RESULT]) {
-            throw new PromiseException('Pomise already resolved.  Pomise: ' . $this->promiseData[Store::PROMISE_ID]);
+            throw new PromiseException('Pomise already resolved.  Pomise: ' . $this->promiseData[Store::ID]);
         }
         return $this->promiseData;
     }
 
     public function reject($reason)
     {
-        throw new PromiseException('Cannot reject a fulfilled promise.  Pomise: ' . $this->promiseData[Store::PROMISE_ID]);
+        throw new PromiseException('Cannot reject a fulfilled promise.  Pomise: ' . $this->promiseData[Store::ID]);
     }
 
     public function then(callable $onFulfilled = null, callable $onRejected = null)

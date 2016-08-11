@@ -19,7 +19,7 @@ use zaboy\rest\DataStore\Interfaces\ReadInterface;
  * @category   async
  * @package    zaboy
  */
-class Store extends TableGateway
+class StoreAbstract extends TableGateway
 {
 
     //PROMISE_ADAPTER_DATA_STORE

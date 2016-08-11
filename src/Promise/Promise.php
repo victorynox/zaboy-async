@@ -27,18 +27,20 @@ use Zend\Db\Sql\Select;
 class Promise extends ClientAbstract implements PromiseInterface
 {
 
-    public function __construct(Store $store, $promiseId = null)
+    const EXCEPTION_CLASS = '\zaboy\async\Promise\PromiseException';
+
+    public function __construct(Store $store, $id = null)
     {
-        if (!is_null($promiseId) && !static::isId($promiseId)) {
+        if (!is_null($id) && !$this->isId($id)) {
             throw new PromiseException('Wrong format $promiseId');
         }
         $this->store = $store;
-        if (!isset($promiseId)) {
+        if (!isset($id)) {
             $promise = new PendingPromise($store);
             $this->insertPromise($promise);
             $this->id = $promise->getId();
         } else {
-            $this->id = $promiseId;
+            $this->id = $id;
         }
     }
 
@@ -62,7 +64,7 @@ class Promise extends ClientAbstract implements PromiseInterface
 
     public function getState()
     {
-        $promiseData = $this->getStoredPromiseData();
+        $promiseData = $this->getStoredData();
         $state = $promiseData[Store::STATE];
         return $state;
     }
@@ -89,7 +91,7 @@ class Promise extends ClientAbstract implements PromiseInterface
     {
         if (!$unwrap) {
             $promiseId = $this->getId();
-            $promiseData = $this->getStoredPromiseData($promiseId);
+            $promiseData = $this->getStoredData($promiseId);
             $promiseClass = $this->getClass();
             $promise = new $promiseClass($this->store, $promiseData);
             return $promise->wait(false);
@@ -130,7 +132,7 @@ class Promise extends ClientAbstract implements PromiseInterface
 
     protected function runTransaction($methodName, $param1 = null, $params2 = null)
     {
-        $identifier = Store::PROMISE_ID;
+        $identifier = Store::ID;
         $db = $this->store->getAdapter();
         $queryStrPromise = 'SELECT ' . Select::SQL_STAR
                 . ' FROM ' . $db->platform->quoteIdentifier($this->store->getTable())
@@ -152,13 +154,13 @@ class Promise extends ClientAbstract implements PromiseInterface
             $promiseDataReturned = call_user_func([$promise, $methodName], $param1, $params2);
             if (!is_null($promiseDataReturned)) {
                 $errorMsg = "Can not store->update.";
-                $promiseId = $promiseDataReturned[Store::PROMISE_ID];
-                unset($promiseDataReturned[Store::PROMISE_ID]);
+                $promiseId = $promiseDataReturned[Store::ID];
+                unset($promiseDataReturned[Store::ID]);
                 //or update promise
-                $number = $this->store->update($promiseDataReturned, [Store::PROMISE_ID => $promiseId]);
+                $number = $this->store->update($promiseDataReturned, [Store::ID => $promiseId]);
                 if (!$number) {
                     //or create new if absent
-                    $promiseDataReturned[Store::PROMISE_ID] = $promiseId;
+                    $promiseDataReturned[Store::ID] = $promiseId;
                     $this->store->insert($promiseDataReturned);
                 }
             } else {
@@ -185,7 +187,7 @@ class Promise extends ClientAbstract implements PromiseInterface
 
     public function toArray()
     {
-        return $this->getStoredPromiseData();
+        return $this->getStoredData();
     }
 
     protected function resolveDependent($result, $isRejected)
@@ -194,7 +196,7 @@ class Promise extends ClientAbstract implements PromiseInterface
         $rowset = $this->store->select(array(Store::PARENT_ID => $this->id));
         $rowsetArray = $rowset->toArray();
         foreach ($rowsetArray as $dependentPromiseData) {
-            $dependentPromiseId = $dependentPromiseData[Store::PROMISE_ID];
+            $dependentPromiseId = $dependentPromiseData[Store::ID];
             $dependentPromise = new static($this->store, $dependentPromiseId);
             try {
                 if (!$isRejected) {
@@ -210,24 +212,9 @@ class Promise extends ClientAbstract implements PromiseInterface
         return;
     }
 
-    protected function getStoredPromiseData($promiseId = null)
-    {
-        $promiseId = !$promiseId ? $this->getId() : $promiseId;
-        $where = [Store::PROMISE_ID => $promiseId];
-        $rowset = $this->store->select($where);
-        $promiseData = $rowset->current();
-        if (!isset($promiseData)) {
-            throw new PromiseException(
-            "There is  not data in store  for promiseId: $promiseId"
-            );
-        } else {
-            return $promiseData->getArrayCopy();
-        }
-    }
-
     protected function getClass($promiseId = null)
     {
-        $promiseData = $this->getStoredPromiseData($promiseId);
+        $promiseData = $this->getStoredData($promiseId);
         switch (true) {
             case $promiseData[Store::STATE] === PromiseInterface::FULFILLED:
                 return '\zaboy\async\Promise\Promise\FulfilledPromise';
@@ -243,16 +230,6 @@ class Promise extends ClientAbstract implements PromiseInterface
     protected function log($info)
     {
         //var_dump($info);
-    }
-
-    /**
-     * Returns the Prefix for Id
-     *
-     * @return string
-     */
-    protected static function getPrefix()
-    {
-        return strtolower(substr(__CLASS__, strlen(__NAMESPACE__) + 1));
     }
 
 }

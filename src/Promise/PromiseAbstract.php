@@ -12,6 +12,7 @@ namespace zaboy\async\Promise;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\Store;
+use zaboy\async\EntityAbstract;
 
 /**
  * PromiseAbstract
@@ -19,11 +20,8 @@ use zaboy\async\Promise\Store;
  * @category   async
  * @package    zaboy
  */
-abstract class PromiseAbstract implements PromiseInterface
+abstract class PromiseAbstract extends EntityAbstract implements PromiseInterface
 {
-
-    const PROMISE_ID_PREFIX = 'promise';
-    const ID_SEPARATOR = '_';
 
     /**
      *
@@ -47,8 +45,8 @@ abstract class PromiseAbstract implements PromiseInterface
         $this->store = $store;
         $this->promiseData = $promiseData;
 
-        if (!isset($this->promiseData[Store::PROMISE_ID])) {
-            $this->promiseData[Store::PROMISE_ID] = $this->makeId();
+        if (!isset($this->promiseData[Store::ID])) {
+            $this->promiseData[Store::ID] = $this->makeId();
         }
         if (!isset($this->promiseData[Store::CREATION_TIME])) {
             $this->promiseData[Store::CREATION_TIME] = (int) (time() - date('Z'));
@@ -57,8 +55,8 @@ abstract class PromiseAbstract implements PromiseInterface
 
     public function getId()
     {
-        if (isset($this->promiseData[Store::PROMISE_ID])) {
-            return $this->promiseData[Store::PROMISE_ID];
+        if (isset($this->promiseData[Store::ID])) {
+            return $this->promiseData[Store::ID];
         } else {
             throw new PromiseException(
             "PomiseId is not set."
@@ -86,22 +84,6 @@ abstract class PromiseAbstract implements PromiseInterface
             "Pomise Data is not set."
             );
         }
-    }
-
-    protected function makeId()
-    {
-        list($microSec, $sec) = explode(" ", microtime());
-        $utcSec = $sec - date('Z');
-        $microSec6digits = substr((1 + round($microSec, 6)) * 1000 * 1000, 1);
-        $time = $utcSec . '.' . $microSec6digits; //Grivich UTC time in microsec
-        $idWithDot = uniqid(
-                self::PROMISE_ID_PREFIX . self::ID_SEPARATOR . self::ID_SEPARATOR
-                . $time . self::ID_SEPARATOR . self::ID_SEPARATOR
-                , true
-        );
-        $promiseId = str_replace('.', self::ID_SEPARATOR, $idWithDot);
-
-        return $promiseId;
     }
 
 }

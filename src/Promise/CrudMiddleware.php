@@ -18,6 +18,7 @@ use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Promise\Store;
 use zaboy\async\Promise\Promise;
 use zaboy\async\Promise\PromiseException;
+use zaboy\async\AsyncAbstract;
 
 /**
  * Resolve GET POST PUT DELETE request
@@ -25,7 +26,7 @@ use zaboy\async\Promise\PromiseException;
  * @category   rest
  * @package    zaboy
  */
-class CrudMiddleware implements MiddlewareInterface
+class CrudMiddleware extends AsyncAbstract implements MiddlewareInterface
 {
 
     /**
@@ -110,7 +111,7 @@ class CrudMiddleware implements MiddlewareInterface
     public function methodGetWithId(ServerRequestInterface $request, ResponseInterface $response)
     {
         $primaryId = $request->getAttribute('Primary-Key-Value');
-        if (Promise::isId($primaryId)) {
+        if ($this->isId($primaryId)) {
             $promise = new Promise($this->store, $primaryId);
             $promiseData = $promise->toArray();
             $this->request = $request->withAttribute('Response-Body', $promiseData);
@@ -131,7 +132,7 @@ class CrudMiddleware implements MiddlewareInterface
     public function methodPutWithId(ServerRequestInterface $request, ResponseInterface $response)
     {
         $primaryId = $request->getAttribute('Primary-Key-Value');
-        if (!Promise::isId($primaryId)) {
+        if (!$this->isId($primaryId)) {
             throw new PromiseException('There is not promise. PromiseId: ' . $primaryId);
         }
         $promise = new Promise($this->store, $primaryId);

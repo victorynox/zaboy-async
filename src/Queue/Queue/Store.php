@@ -18,7 +18,7 @@ class Store extends TableGateway
     //PROMISE_ADAPTER_DATA_STORE
     //
     //'id' - unique id of promise: promise_id_123456789qwerty
-    const PROMISE_ID = ReadInterface::DEF_ID;
+    const ID = ReadInterface::DEF_ID;
     const STATE = 'state';
     const RESULT = 'result';
     const CREATION_TIME = 'creation_time';

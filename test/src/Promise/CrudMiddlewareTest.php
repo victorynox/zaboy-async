@@ -53,7 +53,7 @@ class CrudMiddlewareTest extends \PHPUnit_Framework_TestCase
     {
 
         $promiseData = $this->object->create([]);
-        $promise = new Promise($this->store, $promiseData[Store::PROMISE_ID]);
+        $promise = new Promise($this->store, $promiseData[Store::ID]);
         $this->assertInstanceOf(
                 Promise::class, $promise
         );
@@ -70,7 +70,7 @@ class CrudMiddlewareTest extends \PHPUnit_Framework_TestCase
 
         $this->object->update($promiseData);
 
-        $promise = new Promise($this->store, $promiseData[Store::PROMISE_ID]);
+        $promise = new Promise($this->store, $promiseData[Store::ID]);
         $result = $promise->wait(false);
         $this->assertEquals(
                 'test_result_success_fulfill', $result
@@ -88,7 +88,7 @@ class CrudMiddlewareTest extends \PHPUnit_Framework_TestCase
 
         $this->object->update($promiseData);
 
-        $promise = new Promise($this->store, $promiseData[Store::PROMISE_ID]);
+        $promise = new Promise($this->store, $promiseData[Store::ID]);
         $result = $promise->wait(false);
         $this->assertInstanceOf(
                 'zaboy\async\Promise\Exception\RejectedException', $result
@@ -105,7 +105,7 @@ class CrudMiddlewareTest extends \PHPUnit_Framework_TestCase
         $promiseData[Store::RESULT] = 'test_result_success_fulfill';
         $this->object->update($promiseData);
 
-        $promise = new Promise($this->store, $promiseData[Store::PROMISE_ID]);
+        $promise = new Promise($this->store, $promiseData[Store::ID]);
         $result = $promise->wait(false);
         $this->assertEquals(
                 'test_result_success_fulfill', $result

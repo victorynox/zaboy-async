@@ -281,7 +281,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
                 'zaboy\async\Promise\Exception\ReasonPendingException', $this->object->wait(false)
         );
         $this->assertTrue(
-                Promise::isId($this->object->wait(false)->getMessage())
+                $result->isId($this->object->wait(false)->getMessage())
         );
     }
 
