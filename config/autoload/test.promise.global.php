@@ -4,7 +4,7 @@ use zaboy\async\Promise;
 use zaboy\rest\DataStore\Factory;
 
 global $testCase;
-
+//var_dump($testCase);
 return [
     'services' => [
         'abstract_factories' => [
@@ -28,7 +28,7 @@ return [
     'dataStore' => [
         'test_crud_client' => [
             Factory\HttpClientAbstractFactory::KEY_CLASS => zaboy\rest\DataStore\HttpClient::class,
-            Factory\HttpClientAbstractFactory::KEY_URL => 'http://zaboy-async.loc/api/rest/crud-promise/',
+            Factory\HttpClientAbstractFactory::KEY_URL => 'http://zaboy-async.loc/test/crud-promise/',
         ],
     ]
 ];

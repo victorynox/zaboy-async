@@ -28,9 +28,9 @@ class DependentPromise extends PendingPromise
      * @param Store $store
      * @throws PromiseException
      */
-    public function __construct(Store $store, $promiseData, $parentPromiseId = null, callable $onFulfilled = null, callable $onRejected = null)
+    public function __construct($promiseData, $parentPromiseId = null, callable $onFulfilled = null, callable $onRejected = null)
     {
-        parent::__construct($store, $promiseData);
+        parent::__construct($promiseData);
         $this->data[Store::PARENT_ID] = $parentPromiseId ? $parentPromiseId : $this->data[Store::PARENT_ID];
         $this->data[Store::ON_FULFILLED] = !isset($promiseData[Store::ON_FULFILLED]) ? $this->serializeCallback($onFulfilled) : $promiseData[Store::ON_FULFILLED];
         $this->data[Store::ON_REJECTED] = !isset($promiseData[Store::ON_REJECTED]) ? $this->serializeCallback($onRejected) : $promiseData[Store::ON_REJECTED];

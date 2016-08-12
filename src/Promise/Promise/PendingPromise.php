@@ -30,21 +30,21 @@ class PendingPromise extends PromiseAbstract
      * @param Store $store
      * @throws PromiseException
      */
-    public function __construct(Store $store, $promiseData = [])
+    public function __construct($promiseData = [])
     {
-        parent::__construct($store, $promiseData);
+        parent::__construct($promiseData);
         $this->data[Store::STATE] = PromiseInterface::PENDING;
     }
 
     public function resolve($value)
     {
-        $fulfilledPromise = new FulfilledPromise($this->store, $this->getData(), $value);
+        $fulfilledPromise = new FulfilledPromise($this->getData(), $value);
         return $fulfilledPromise->getData();
     }
 
     public function reject($reason)
     {
-        $rejectedPromise = new RejectedPromise($this->store, $this->getData(), $reason);
+        $rejectedPromise = new RejectedPromise($this->getData(), $reason);
         return $rejectedPromise->getData();
     }
 
@@ -55,9 +55,14 @@ class PendingPromise extends PromiseAbstract
 
     public function then(callable $onFulfilled = null, callable $onRejected = null)
     {
-        $dependentPromise = new DependentPromise($this->store, [], $this->getId(), $onFulfilled, $onRejected);
+        $dependentPromise = new DependentPromise([], $this->getId(), $onFulfilled, $onRejected);
         $dependentPromiseData = $dependentPromise->getData();
         return $dependentPromiseData;
+    }
+
+    public function getResult()
+    {
+        return $this;
     }
 
 }

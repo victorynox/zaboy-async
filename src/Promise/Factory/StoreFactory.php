@@ -134,7 +134,6 @@ class StoreFactory extends FactoryAbstract
                         $options[self::KEY_TABLE_NAME] :
                         self::TABLE_NAME)
         ;
-
         $this->db = $container->has('db') ? $container->get('db') : null;
         if (is_null($this->db)) {
             throw new PromiseException(

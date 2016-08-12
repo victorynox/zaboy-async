@@ -10,12 +10,7 @@
 namespace zaboy\async;
 
 use zaboy\async\Promise\PromiseException;
-use zaboy\async\Promise\Exception\TimeIsOutException;
-use zaboy\async\Promise\Promise\PendingPromise;
-use zaboy\async\Promise\PromiseAbstract;
-use zaboy\async\ClientInterface;
 use zaboy\async\StoreAbstract;
-use Zend\Db\Sql\Select;
 
 /**
  * Client
@@ -63,15 +58,20 @@ abstract class ClientAbstract extends AsyncAbstract
      *
      * @return array mixed
      */
-    protected function getStoredData($id = null)
+    protected function getStoredData($id = null, $lockRow = false)
     {
         $id = !$id ? $this->getId() : $id;
-        $data = $this->store->read($id);
+        $data = $lockRow ? $this->store->readAndLock($id) : $this->store->read($id);
         if (empty($data)) {
             throw new PromiseException(
             "There is  not data in store  for id: $id"
             );
         } else {
+            foreach ($data as $key => $value) {
+                if ($key !== StoreAbstract::ID && $this->isId($value)) {
+                    $data[$key] = new static($this->store, $value);
+                }
+            }
             return $data;
         }
     }
@@ -84,13 +84,13 @@ abstract class ClientAbstract extends AsyncAbstract
             $this->store->beginTransaction();
             //is row with this index exist?
             $errorMsg = "Can\'t readAndLock for $this->id";
-            $data = $this->store->readAndLock($this->id);
+            $data = $this->getStoredData($this->id, true);
             $errorMsg = "Can not execute $methodName. Pomise is not exist.";
             if (is_null($data)) {
                 throw new \Exception("Pomise is not exist in Store.");
             }
             $entityClass = $this->getClass();
-            $entity = new $entityClass($this->store, $data);
+            $entity = new $entityClass($data);
             $errorMsg = "Can not execute $methodName. Class: $entityClass";
             $dataReturned = call_user_func([$entity, $methodName], $param1, $params2);
             if (!is_null($dataReturned)) {

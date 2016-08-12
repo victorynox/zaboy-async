@@ -31,9 +31,9 @@ class FulfilledPromise extends DeterminedPromise
      * @param Store $store
      * @throws PromiseException
      */
-    public function __construct(Store $store, $promiseData = [], $result = null)
+    public function __construct($promiseData = [], $result = null)
     {
-        parent::__construct($store, $promiseData);
+        parent::__construct($promiseData);
         $this->data[Store::STATE] = PromiseInterface::FULFILLED;
         if (!isset($this->data[Store::RESULT]) && !is_null($result)) {
             $this->data[Store::RESULT] = $this->serializeResult($result);
@@ -60,7 +60,7 @@ class FulfilledPromise extends DeterminedPromise
 
     public function then(callable $onFulfilled = null, callable $onRejected = null)
     {
-        $dependentPromise = new DependentPromise($this->store, [], $this->getId(), $onFulfilled, $onRejected);
+        $dependentPromise = new DependentPromise([], $this->getId(), $onFulfilled, $onRejected);
         $result = $this->wait(false);
         $promiseData = $dependentPromise->resolve($result);
         return $promiseData;

@@ -67,7 +67,10 @@ class CrudMiddleware extends AsyncAbstract implements MiddlewareInterface
                     $response = $this->methodGetWithId($request, $response);
                     break;
                 case $httpMethod === 'GET' && !($isPrimaryKeyValue):
-                    throw new \zaboy\rest\RestException($httpMethod . ' method without Primary Key is not supported.');
+                    global $testCase;
+                    $this->request = $request->withAttribute('Response-Body', $this->store->table);
+                    break;
+                //throw new \zaboy\rest\RestException($httpMethod . ' method without Primary Key is not supported.');
                 case $httpMethod === 'PUT' && $isPrimaryKeyValue:
                     $response = $this->methodPutWithId($request, $response);
                     break;

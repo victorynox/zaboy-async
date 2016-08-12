@@ -27,19 +27,11 @@ abstract class PromiseAbstract extends EntityAbstract implements PromiseInterfac
 
     /**
      *
-     * @var Store
-     */
-    public $store;
-
-    /**
-     *
-     * @param Store $store
      * @throws PromiseException
      */
-    public function __construct(Store $store, $promiseData = [])
+    public function __construct($promiseData = [])
     {
         parent::__construct($promiseData);
-        $this->store = $store;
     }
 
     public function getState()
@@ -50,6 +42,15 @@ abstract class PromiseAbstract extends EntityAbstract implements PromiseInterfac
             throw new PromiseException(
             "Pomise State is not set."
             );
+        }
+    }
+
+    public function _wait()
+    {
+        if (isset($this->data[Store::RESULT])) {
+            return $this->data[Store::RESULT];
+        } else {
+            return null;
         }
     }
 

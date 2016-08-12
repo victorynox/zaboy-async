@@ -6,18 +6,23 @@ chdir(dirname(__DIR__));
 //test_res_http
 // Setup autoloading
 require 'vendor/autoload.php';
+
+if (substr($_SERVER['REQUEST_URI'], 1, 4) === 'test') {
+    global $testCase;
+    $testCase = 'table_for_test';
+}
+
 $container = include 'config/container.php';
 
 //use zaboy\async\Promise\Promise;
-//use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
+//use zaboy\async\Promise\Factory\StoreFactory;
 //use zaboy\async\Promise\PromiseException;
 //use zaboy\async\Json\JsonCoder;
-//
+////
 //function callback($value)
 //{
 //    return $value . ' after callbak';
 //}
-//
 //function callException($value)
 //{
 //    throw new \Exception('Exception ', 0, new \Exception('prev Exception'));
@@ -29,22 +34,22 @@ $container = include 'config/container.php';
 //    return $value->getMessage() . ' was resolved';
 //}
 //
-//$mySqlAdapterFactory = new MySqlAdapterFactory();
+//$mySqlAdapterFactory = new StoreFactory();
 //
 //$mySqlPromiseAdapter = $mySqlAdapterFactory->__invoke(
 //        $container
 //        , ''
-//        , [MySqlAdapterFactory::KEY_TABLE_NAME => 'test_mysqlpromisebroker']
+//        , [StoreFactory::KEY_TABLE_NAME => 'test_mysqlpromisebroker']
 //);
 //
 //
 //$result = new Promise($mySqlPromiseAdapter);
-//$promise1 = new Promise($mySqlPromiseAdapter);
-//$object = $promise1->then('callback');
-//$promise1->resolve($result);
-//$promise = $object->wait(FALSE);
+//$object = new Promise($mySqlPromiseAdapter);
+//$object->reject($result);
 //
-//var_dump($promise);
+//$r = $object->wait(FALSE);
+//
+//var_dump($r);
 //
 //exit();
 
@@ -70,19 +75,8 @@ $app = new MiddlewarePipeOptions(['env' => $env]); //'env' => 'develop' (error i
 
 $RestRqlFactory = new RestRqlFactory();
 $rest = $RestRqlFactory($container, '');
-$app->pipe('/api/rest', $rest);
 
-$app->pipe('/test', function (
-        ServerRequestInterface $request,
-        ResponseInterface $response,
-        callable $next = null
-        ) {
-    global $testCase;
-    $uri = $request->getUri();
-    var_dump($uri);
-    $testCase = '/table_for_test';
-    return $next($request, $response);
-});
+$app->pipe('/api/rest', $rest);
 $app->pipe('/test', $rest);
 
 $server = Server::createServer($app, $_SERVER, $_GET, $_POST, $_COOKIE, $_FILES

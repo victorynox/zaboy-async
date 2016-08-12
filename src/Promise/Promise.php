@@ -31,7 +31,7 @@ class Promise extends ClientAbstract implements PromiseInterface
 
     protected function makeEntity($data = null)
     {
-        $promise = new PendingPromise($this->store);
+        $promise = new PendingPromise();
         try {
             $data = $promise->getData();
             $rowsCount = $this->store->insert($data);
@@ -75,8 +75,9 @@ class Promise extends ClientAbstract implements PromiseInterface
             $id = $this->getId();
             $data = $this->getStoredData($id);
             $entityClass = $this->getClass();
-            $promise = new $entityClass($this->store, $data);
-            return $promise->wait(false);
+            $promise = new $entityClass($data);
+            $result = $promise->wait(false);
+            return $result;
         }
         $stepsNumber = $waitingTime / $waitingCheckInterval;
         $step = 0;

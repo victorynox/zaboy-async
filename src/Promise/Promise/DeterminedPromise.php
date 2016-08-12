@@ -31,9 +31,9 @@ abstract class DeterminedPromise extends PromiseAbstract
      * @param Store $store
      * @throws PromiseException
      */
-    public function __construct(Store $store, $promiseData = [])
+    public function __construct($promiseData = [])
     {
-        parent::__construct($store, $promiseData);
+        parent::__construct($promiseData);
         $this->data[Store::PARENT_ID] = null;
         $this->data[Store::ON_FULFILLED] = null;
         $this->data[Store::ON_REJECTED] = null;
@@ -42,7 +42,7 @@ abstract class DeterminedPromise extends PromiseAbstract
     protected function serializeResult($result)
     {
         if ($result instanceof PromiseInterface) {
-            $result = $result->getId();
+            return $result->getId();
         }
         try {
             $resultJson = JsonCoder::jsonSerialize($result);
@@ -56,6 +56,12 @@ abstract class DeterminedPromise extends PromiseAbstract
 
     protected function unserializeResult($resultJson)
     {
+        if ($resultJson instanceof PromiseInterface) {
+            return $resultJson;
+        }
+        if ($this->isId($resultJson)) {
+            return $resultJson;
+        }
         try {
             return JsonCoder::jsonUnserialize($resultJson);
         } catch (PromiseException $ex) {
@@ -69,11 +75,15 @@ abstract class DeterminedPromise extends PromiseAbstract
             return new PromiseException('Do not try call wait(true)');
         }
         $result = $this->unserializeResult($this->data[Store::RESULT]);
-        if ($this->isId($result)) {
-            $nextPromise = new Promise($this->store, $result);
-            $result = $nextPromise->wait(false);
+        if ($result instanceof Promise) {
+            $result = $result->wait(false);
         }
         return $result;
+    }
+
+    public function getResult()
+    {
+        return $this->unserializeResult($this->data[Store::RESULT]);
     }
 
 }

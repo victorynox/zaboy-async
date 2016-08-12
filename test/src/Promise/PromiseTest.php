@@ -16,8 +16,6 @@ use Zend\Db\Adapter\Adapter;
 class PromiseTest extends \PHPUnit_Framework_TestCase
 {
 
-    const TEST_TABLE_NAME = 'test_mysqlpromisebroker';
-
     /**
      * @var Store
      */
