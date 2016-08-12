@@ -14,7 +14,7 @@ if (substr($_SERVER['REQUEST_URI'], 1, 4) === 'test') {
 
 $container = include 'config/container.php';
 
-//use zaboy\async\Promise\Promise;
+//use zaboy\async\Promise\Client;
 //use zaboy\async\Promise\Factory\StoreFactory;
 //use zaboy\async\Promise\PromiseException;
 //use zaboy\async\Json\JsonCoder;
@@ -43,13 +43,16 @@ $container = include 'config/container.php';
 //);
 //
 //
-//$result = new Promise($mySqlPromiseAdapter);
-//$object = new Promise($mySqlPromiseAdapter);
-//$object->reject($result);
+//$result = new Client($mySqlPromiseAdapter);
+//$object = new Client($mySqlPromiseAdapter);
+//
+//$object->resolve($result);
+//$result->resolve('result');
 //
 //$r = $object->wait(FALSE);
 //
-//var_dump($r);
+//
+//var_dump($object->wait(FALSE));
 //
 //exit();
 

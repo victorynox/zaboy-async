@@ -16,7 +16,7 @@ use Zend\Diactoros\Response\JsonResponse;
 use Zend\Stratigility\MiddlewareInterface;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Promise\Store;
-use zaboy\async\Promise\Promise;
+use zaboy\async\Promise\Client;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\AsyncAbstract;
 
@@ -67,10 +67,7 @@ class CrudMiddleware extends AsyncAbstract implements MiddlewareInterface
                     $response = $this->methodGetWithId($request, $response);
                     break;
                 case $httpMethod === 'GET' && !($isPrimaryKeyValue):
-                    global $testCase;
-                    $this->request = $request->withAttribute('Response-Body', $this->store->table);
-                    break;
-                //throw new \zaboy\rest\RestException($httpMethod . ' method without Primary Key is not supported.');
+                    throw new \zaboy\rest\RestException($httpMethod . ' method without Primary Key is not supported.');
                 case $httpMethod === 'PUT' && $isPrimaryKeyValue:
                     $response = $this->methodPutWithId($request, $response);
                     break;
@@ -115,7 +112,7 @@ class CrudMiddleware extends AsyncAbstract implements MiddlewareInterface
     {
         $primaryId = $request->getAttribute('Primary-Key-Value');
         if ($this->isId($primaryId)) {
-            $promise = new Promise($this->store, $primaryId);
+            $promise = new Client($this->store, $primaryId);
             $promiseData = $promise->toArray();
             $this->request = $request->withAttribute('Response-Body', $promiseData);
             $response = $response->withStatus(200);
@@ -138,7 +135,7 @@ class CrudMiddleware extends AsyncAbstract implements MiddlewareInterface
         if (!$this->isId($primaryId)) {
             throw new PromiseException('There is not promise. PromiseId: ' . $primaryId);
         }
-        $promise = new Promise($this->store, $primaryId);
+        $promise = new Client($this->store, $primaryId);
         $promiseData = $request->getParsedBody();
         if (!isset($promiseData[Store::STATE])) {
             throw new PromiseException('There is not key STATE in Body. PromiseId: ' . $primaryId);
@@ -178,7 +175,7 @@ class CrudMiddleware extends AsyncAbstract implements MiddlewareInterface
      */
     public function methodPostWithoutId(ServerRequestInterface $request, ResponseInterface $response)
     {
-        $promise = new Promise($this->store);
+        $promise = new Client($this->store);
         $responseBody = $promise->toArray();
         $this->request = $request->withAttribute('Response-Body', $responseBody);
         $response = $response->withStatus(201);

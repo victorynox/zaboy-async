@@ -39,10 +39,7 @@ abstract class AsyncAbstract
      */
     protected function makeId()
     {
-        list($microSec, $sec) = explode(" ", microtime());
-        $utcSec = $sec - date('Z');
-        $microSec6digits = substr((1 + round($microSec, 6)) * 1000 * 1000, 1);
-        $time = $utcSec . '.' . $microSec6digits; //Grivich UTC time in microsec
+        $time = sprintf('%0.6f', (microtime(1) - date('Z')));
         $idWithDot = uniqid(
                 $this->getPrefix() . self::ID_SEPARATOR . self::ID_SEPARATOR
                 . $time . self::ID_SEPARATOR . self::ID_SEPARATOR

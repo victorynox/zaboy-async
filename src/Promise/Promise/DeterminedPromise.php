@@ -12,7 +12,7 @@ namespace zaboy\async\Promise\Promise;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Json\JsonCoder;
 use zaboy\async\Promise\PromiseException;
-use zaboy\async\Promise\Promise;
+use zaboy\async\Promise\Client;
 use zaboy\async\Promise\Store;
 use zaboy\async\Promise\Promise\PendingPromise;
 use zaboy\async\Promise\PromiseAbstract;
@@ -75,7 +75,7 @@ abstract class DeterminedPromise extends PromiseAbstract
             return new PromiseException('Do not try call wait(true)');
         }
         $result = $this->unserializeResult($this->data[Store::RESULT]);
-        if ($result instanceof Promise) {
+        if ($result instanceof Client) {
             $result = $result->wait(false);
         }
         return $result;

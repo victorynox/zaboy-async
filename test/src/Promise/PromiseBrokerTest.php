@@ -5,7 +5,7 @@ namespace zaboy\test\async\Promise;
 use zaboy\async\Promise\Factory\StoreFactory;
 use zaboy\async\Promise\Factory\BrokerFactory;
 use zaboy\async\Promise\Broker;
-use zaboy\async\Promise\Promise;
+use zaboy\async\Promise\Client;
 use Interop\Container\ContainerInterface;
 use zaboy\rest\TableGateway\TableManagerMysql;
 
@@ -49,11 +49,11 @@ class BrokerTest extends \PHPUnit_Framework_TestCase
         $tableManagerMysql->deleteTable($tableName);
     }
 
-    public function test__makePromise()
+    public function test__make()
     {
-        $promise = $this->object->makePromise();
+        $promise = $this->object->make();
         $this->assertInstanceOf(
-                Promise::class, $promise
+                Client::class, $promise
         );
     }
 
@@ -61,35 +61,35 @@ class BrokerTest extends \PHPUnit_Framework_TestCase
      *
      * @todo LifeTime test
      */
-    public function test__getPromise()
+    public function test__get()
     {
-        $promise = $this->object->makePromise();
+        $promise = $this->object->make();
         $id = $promise->getId();
-        $promise = $this->object->getPromise($id);
+        $promise = $this->object->get($id);
         $this->assertEquals(
                 $id, $promise->getId()
         );
         $this->assertInstanceOf(
-                Promise::class, $promise
+                Client::class, $promise
         );
-        $promise = $this->object->getPromise($id);
+        $promise = $this->object->get($id);
         $this->assertInstanceOf(
-                Promise::class, $promise
+                Client::class, $promise
         );
     }
 
-    public function test__deletePromise()
+    public function test__delete()
     {
-        $promise = $this->object->makePromise();
+        $promise = $this->object->make();
         $id = $promise->getId();
-        $result = $this->object->deletePromise($id);
+        $result = $this->object->delete($id);
         $this->assertTrue(
                 $result
         );
         $this->setExpectedException('\zaboy\async\Promise\PromiseException');
-        $promise = $this->object->getPromise($id)->getState();
+        $promise = $this->object->get($id)->getState();
         $this->assertFalse(
-                $this->object->deletePromise($id)
+                $this->object->delete($id)
         );
     }
 

@@ -15,7 +15,7 @@ use zaboy\async\Promise\Promise\DependentPromise;
 use GuzzleHttp\Promise\PromiseInterface;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\Store;
-use zaboy\async\Promise\Promise;
+use zaboy\async\Promise\Client;
 
 /**
  * FulfilledPromise

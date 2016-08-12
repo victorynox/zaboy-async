@@ -2,7 +2,7 @@
 
 namespace zaboy\test\async\Promise;
 
-use zaboy\async\Promise\Promise;
+use zaboy\async\Promise\Client;
 use zaboy\async\Promise\PromiseAbstract;
 use zaboy\async\Promise\Factory\Adapter\MySqlAdapterFactory;
 use Interop\Container\ContainerInterface;
@@ -75,7 +75,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__extractIdFromString()
     {
-        $this->object = new Promise($this->store);
+        $this->object = new Client($this->store);
         $string = ' jkiuhs iuhis pi siuiughf]l;m74jn &568ihj983438h^&%  ';
         $this->assertEquals(
                 [], $this->object->extractId($string)
@@ -96,7 +96,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__extractIdFromException()
     {
-        $this->object = new Promise($this->store);
+        $this->object = new Client($this->store);
         $exc1 = new \Exception('Promise: promise__1119864461_889811__579c843dd93ad1_08516192');
         $exc2 = new \Exception('promise__2229864461_889811__579c843dd93ad1_08516192  AND promise__3339864461_889811__579c843dd93ad1_08516192', 0, $exc1);
         $exc3 = new \Exception('promise__4449864461_889811__579c843dd93ad1_08516192 of the end', 0, $exc2);
@@ -112,11 +112,11 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testPromiseTest__makePromise()
+    public function testPromiseTest__make()
     {
-        $this->object = new Promise($this->store);
+        $this->object = new Client($this->store);
         $this->assertInstanceOf(
-                'zaboy\async\Promise\Promise', $this->object
+                'zaboy\async\Promise\Client', $this->object
         );
         $this->assertSame(
                 $this->object->getState(), PromiseInterface::PENDING
@@ -125,7 +125,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__resolve()
     {
-        $this->object = new Promise($this->store);
+        $this->object = new Client($this->store);
         $this->object->resolve(1);
         $this->assertSame(
                 $this->object->getState(), PromiseInterface::FULFILLED
@@ -137,7 +137,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__resolveWithObjectAsResult()
     {
-        $this->object = new Promise($this->store);
+        $this->object = new Client($this->store);
         $object = new \stdClass();
         $this->object->resolve($object);
         $this->assertEquals(
@@ -147,7 +147,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__reject()
     {
-        $this->object = new Promise($this->store);
+        $this->object = new Client($this->store);
         $this->object->reject('reason');
         $this->assertSame(
                 PromiseInterface::REJECTED, $this->object->getState()
@@ -165,7 +165,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__rejectWithObjectAsReason()
     {
-        $this->object = new Promise($this->store);
+        $this->object = new Client($this->store);
         $object = new \stdClass();
         $this->object->reject(new \stdClass());
         $this->assertSame(
@@ -186,14 +186,14 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__PendingWait()
     {
-        $this->object = new Promise($this->store);
+        $this->object = new Client($this->store);
         $this->setExpectedException('\zaboy\async\Promise\Exception\TimeIsOutException');
         $this->object->wait(true, 0);
     }
 
     public function testPromiseTest__RejectedWait()
     {
-        $this->object = new Promise($this->store);
+        $this->object = new Client($this->store);
         $this->object->reject('reason');
         $this->setExpectedException('\zaboy\async\Promise\Exception\RejectedException');
         $this->object->wait(true, 0);
@@ -201,8 +201,8 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__PendingAfterPendingWait()
     {
-        $this->object = new Promise($this->store);
-        $result = new Promise($this->store);
+        $this->object = new Client($this->store);
+        $result = new Client($this->store);
         $this->object->resolve($result);
         $this->setExpectedException('\zaboy\async\Promise\Exception\TimeIsOutException');
         $this->object->wait(true, 1);
@@ -210,8 +210,8 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__PendingAfterFulfilledWait()
     {
-        $this->object = new Promise($this->store);
-        $result = new Promise($this->store);
+        $this->object = new Client($this->store);
+        $result = new Client($this->store);
         $this->object->resolve($result);
         $result->resolve('result');
         $this->assertEquals(
@@ -224,8 +224,8 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__PendingAfterRejecteddWait()
     {
-        $this->object = new Promise($this->store);
-        $result = new Promise($this->store);
+        $this->object = new Client($this->store);
+        $result = new Client($this->store);
         $this->object->reject($result);
         $this->setExpectedException('\zaboy\async\Promise\Exception\ReasonPendingException');
         //ReasonPendingException
@@ -236,7 +236,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__PendingWaitUnwrapFalse()
     {
-        $this->object = new Promise($this->store);
+        $this->object = new Client($this->store);
         $this->assertEquals(
                 $this->object->wait(false)->getState(), PromiseInterface::PENDING
         );
@@ -244,7 +244,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__RejectedWaitUnwrapFalse()
     {
-        $this->object = new Promise($this->store);
+        $this->object = new Client($this->store);
         $this->object->reject('reason');
         $this->assertInstanceOf(
                 'zaboy\async\Promise\Exception\RejectedException', $this->object->wait(false)
@@ -253,8 +253,8 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__PendingAfterPendingWaitUnwrapFalse()
     {
-        $this->object = new Promise($this->store);
-        $result = new Promise($this->store);
+        $this->object = new Client($this->store);
+        $result = new Client($this->store);
         $this->object->resolve($result);
         $this->assertEquals(
                 $this->object->wait(false)->getState(), PromiseInterface::PENDING
@@ -263,8 +263,8 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__PendingAfterFulfilledWaitUnwrapFalse()
     {
-        $this->object = new Promise($this->store);
-        $result = new Promise($this->store);
+        $this->object = new Client($this->store);
+        $result = new Client($this->store);
         $this->object->resolve($result);
         $result->resolve('result');
         $this->assertEquals(
@@ -274,8 +274,8 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseTest__PendingAfterRejecteddWaitUnwrapFalse()
     {
-        $this->object = new Promise($this->store);
-        $result = new Promise($this->store);
+        $this->object = new Client($this->store);
+        $result = new Client($this->store);
         $this->object->reject($result);
         $this->assertInstanceOf(
                 'zaboy\async\Promise\Exception\ReasonPendingException', $this->object->wait(false)
@@ -289,7 +289,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__Then()
     {
-        $promise = new Promise($this->store);
+        $promise = new Client($this->store);
         $this->object = $promise->then([get_class($this), 'callback']);
         $this->assertInstanceOf(
                 '\zaboy\async\Promise\Promise\DependentPromise', $this->object->wait(false)
@@ -300,7 +300,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__ThenFulfilled()
     {
-        $promise = new Promise($this->store);
+        $promise = new Client($this->store);
         $this->object = $promise->then([get_class($this), 'callback']);
         $promise->resolve('result');
         $this->assertEquals(
@@ -310,7 +310,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__ThenThenFulfilled()
     {
-        $promise1 = new Promise($this->store);
+        $promise1 = new Client($this->store);
         $promise2 = $promise1->then();
         $this->object = $promise2->then([get_class($this), 'callback']);
         $promise1->resolve('result');
@@ -321,8 +321,8 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__ThenFulfilledByPromise()
     {
-        $result = new Promise($this->store);
-        $promise1 = new Promise($this->store);
+        $result = new Client($this->store);
+        $promise1 = new Client($this->store);
         $this->object = $promise1->then([get_class($this), 'callback']);
         $promise1->resolve($result);
         $promise = $this->object->wait(false);
@@ -345,7 +345,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__ThenFromFulfilled()
     {
-        $promise = new Promise($this->store);
+        $promise = new Client($this->store);
         $promise->resolve('result');
         $this->object = $promise->then([get_class($this), 'callback']);
         $this->assertEquals(
@@ -355,8 +355,8 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__ThenFromFulfilledByPromise()
     {
-        $result = new Promise($this->store);
-        $promise1 = new Promise($this->store);
+        $result = new Client($this->store);
+        $promise1 = new Client($this->store);
         $promise1->resolve($result);
         $this->object = $promise1->then([get_class($this), 'callback']);
         $this->assertEquals(
@@ -377,7 +377,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__ExceptionInOnFulfilled()
     {
-        $promise = new Promise($this->store);
+        $promise = new Client($this->store);
         $this->object = $promise->then([get_class($this), 'callException']);
         $promise->resolve('result');
         $this->assertInstanceOf(
@@ -389,7 +389,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__ThenRejected()
     {
-        $promise = new Promise($this->store);
+        $promise = new Client($this->store);
         $this->object = $promise->then(null, function ($reason) {
             return $reason->getMessage() . ' was resolved';
         });
@@ -401,7 +401,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__ThenThen_Resolved_onFulfilledException_onRejectedResolved()
     {
-        $promise1 = new Promise($this->store);
+        $promise1 = new Client($this->store);
         $promise2 = $promise1->then([get_class($this), 'callException'], null);
         $message = ' was resolved';
         $this->object = $promise2->then(null, function ($reason) use ($message) {
@@ -415,8 +415,8 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
 
     public function testPromiseThen__ThenRejectedByPromiseButResolved()
     {
-        $result = new Promise($this->store);
-        $promise1 = new Promise($this->store);
+        $result = new Client($this->store);
+        $promise1 = new Client($this->store);
         $this->object = $promise1->then(null, function ($reason) {
             return $reason->getMessage() . ' was resolved';
         });

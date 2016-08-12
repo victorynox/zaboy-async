@@ -11,7 +11,7 @@ p21
 <p id="p22">
 
 
-var p10 = new Promise(function(
+var p10 = new Client(function(
 resolve, 
 reject
 ) {

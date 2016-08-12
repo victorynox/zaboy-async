@@ -6,7 +6,7 @@ use zaboy\async\Promise\Factory\StoreFactory;
 use zaboy\async\Promise\Store;
 use Interop\Container\ContainerInterface;
 use zaboy\rest\DataStore\HttpClient;
-use zaboy\async\Promise\Promise;
+use zaboy\async\Promise\Client;
 use zaboy\rest\TableGateway\TableManagerMysql;
 
 /**
@@ -62,68 +62,68 @@ class CrudMiddlewareTest extends \PHPUnit_Framework_TestCase
     {
 
         $promiseData = $this->object->create([]);
-        $promise = new Promise($this->store, $promiseData[Store::ID]);
+        $promise = new Client($this->store, $promiseData[Store::ID]);
         $this->assertInstanceOf(
-                Promise::class, $promise
+                Client::class, $promise
         );
         $this->assertEquals(
-                Promise::PENDING, $promise->getState()
+                Client::PENDING, $promise->getState()
         );
     }
 
     public function test_resolvePromise()
     {
         $promiseData = $this->object->create([]);
-        $promiseData[Store::STATE] = Promise::FULFILLED;
+        $promiseData[Store::STATE] = Client::FULFILLED;
         $promiseData[Store::RESULT] = 'test_result_success_fulfill';
 
         $this->object->update($promiseData);
 
-        $promise = new Promise($this->store, $promiseData[Store::ID]);
+        $promise = new Client($this->store, $promiseData[Store::ID]);
         $result = $promise->wait(false);
         $this->assertEquals(
                 'test_result_success_fulfill', $result
         );
         $this->assertEquals(
-                Promise::FULFILLED, $promise->getState()
+                Client::FULFILLED, $promise->getState()
         );
     }
 
     public function test_rejectPromise()
     {
         $promiseData = $this->object->create([]);
-        $promiseData[Store::STATE] = Promise::REJECTED;
+        $promiseData[Store::STATE] = Client::REJECTED;
         $promiseData[Store::RESULT] = 'test_result_error_reject';
 
         $this->object->update($promiseData);
 
-        $promise = new Promise($this->store, $promiseData[Store::ID]);
+        $promise = new Client($this->store, $promiseData[Store::ID]);
         $result = $promise->wait(false);
         $this->assertInstanceOf(
                 'zaboy\async\Promise\Exception\RejectedException', $result
         );
         $this->assertEquals(
-                Promise::REJECTED, $promise->getState()
+                Client::REJECTED, $promise->getState()
         );
     }
 
     public function test_tryToChangeFulfilledPromise()
     {
         $promiseData = $this->object->create([]);
-        $promiseData[Store::STATE] = Promise::FULFILLED;
+        $promiseData[Store::STATE] = Client::FULFILLED;
         $promiseData[Store::RESULT] = 'test_result_success_fulfill';
         $this->object->update($promiseData);
 
-        $promise = new Promise($this->store, $promiseData[Store::ID]);
+        $promise = new Client($this->store, $promiseData[Store::ID]);
         $result = $promise->wait(false);
         $this->assertEquals(
                 'test_result_success_fulfill', $result
         );
         $this->assertEquals(
-                Promise::FULFILLED, $promise->getState()
+                Client::FULFILLED, $promise->getState()
         );
 
-        $promiseData[Store::STATE] = Promise::REJECTED;
+        $promiseData[Store::STATE] = Client::REJECTED;
         $this->setExpectedExceptionRegExp('\zaboy\rest\DataStore\DataStoreException');
         $this->object->update($promiseData);
     }

@@ -24,7 +24,7 @@ use Zend\Db\Sql\Select;
  * @category   async
  * @package    zaboy
  */
-class Promise extends ClientAbstract implements PromiseInterface
+class Client extends ClientAbstract implements PromiseInterface
 {
 
     const EXCEPTION_CLASS = '\zaboy\async\Promise\PromiseException';

@@ -2,11 +2,12 @@
 
 namespace zaboy\async\Promise;
 
-use zaboy\async\Promise\Promise;
+use zaboy\async\Promise\Client;
 use zaboy\async\Promise\Store;
+use zaboy\async\BrokerAbstract;
 use zaboy\async\Promise\PromiseException;
 
-class Broker
+class Broker extends BrokerAbstract
 {
 
     /**
@@ -22,43 +23,13 @@ class Broker
 
     /**
      *
-     * @var Store
-     */
-    protected $store;
-
-    /**
-     *
      *
      * @param Store $store
      */
     public function __construct(Store $store, $lifeTime = null)
     {
-        $this->store = $store;
+        parent::__construct($store);
         $this->setTimeLife($lifeTime);
-    }
-
-    public function makePromise()
-    {
-        $promise = new Promise($this->store);
-        return $promise;
-    }
-
-    public function getPromise($id)
-    {
-        if (!isset($id)) {
-            throw new PromiseException('Can not run  "Broker::getPromise(NULL)"');
-        }
-        $promise = new Promise($this->store, $id);
-        return $promise;
-    }
-
-    public function deletePromise($id)
-    {
-        if (!isset($id)) {
-            throw new PromiseException('Can not run  "Broker::deletePromise(NULL)"');
-        }
-        $number = $this->store->delete([Store::ID => $id]);
-        return (bool) $number;
     }
 
     protected function setTimeLife($lifeTime = null)
