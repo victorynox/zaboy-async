@@ -1,6 +1,6 @@
 <?php
 
-namespace zaboy\test\async\Promise\Factory;
+namespace zaboy\test\async\Message\Factory;
 
 use zaboy\test\async\StoreFactoryAbstract;
 
@@ -10,7 +10,7 @@ use zaboy\test\async\StoreFactoryAbstract;
 class StoreFactoryTest extends StoreFactoryAbstract
 {
 
-    const FACTORY_CLASS = 'zaboy\async\Promise\Factory\StoreFactory';
-    const STORE_CLASS = 'zaboy\async\Promise\Store';
+    const FACTORY_CLASS = 'zaboy\async\Message\Factory\StoreFactory';
+    const STORE_CLASS = 'zaboy\async\Message\Store';
 
 }

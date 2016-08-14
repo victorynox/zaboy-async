@@ -4,7 +4,6 @@ namespace zaboy\async;
 
 use zaboy\async\Promise\Client;
 use zaboy\async\Promise\Store;
-use zaboy\async\Promise\PromiseException;
 
 class BrokerAbstract
 {

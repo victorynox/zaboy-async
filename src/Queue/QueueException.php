@@ -7,15 +7,15 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-namespace zaboy\async\Promise;
+namespace zaboy\async\Queue;
 
 /**
- * Exception class for PromiseException
+ * Exception class for QueueException
  *
  * @category   async
  * @package    zaboy
  */
-class PromiseException extends \Exception
+class QueueException extends \Exception
 {
 
 }

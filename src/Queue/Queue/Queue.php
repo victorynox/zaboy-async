@@ -1,68 +1,53 @@
 <?php
 
+/**
+ * Zaboy lib (http://zaboy.org/lib/)
+ *
+ * @copyright  Zaboychenko Andrey
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ */
+
 namespace zaboy\async\Queue\Queue;
 
-use ReputationVIP\QueueClient\Adapter\AdapterInterface;
-use ReputationVIP\QueueClient\QueueClient;
-use zaboy\rest\DataStore\Interfaces\ReadInterface;
-use \zaboy\async\Queue\Queue\Store;
+use zaboy\async\Queue\Interfaces\QueueInterface;
+use zaboy\async\Queue\QueueException;
+use zaboy\async\Queue\Store;
+use zaboy\async\Queue\Queue\FulfilledQueue;
+use zaboy\async\Queue\Queue\RejectedQueue;
+use zaboy\async\EntityAbstract;
 
 /**
- *
- * <code>
- * $message = [
- *     'id' => '1_ManagedQueue11__576522deb5ad08'
- *     'Body' => mix
- *     'priority' => 'HIGH'
- *     'time-in-flight' => 1466245854
- * ]
- *  </code>
+ * Queue
  *
  * @category   async
  * @package    zaboy
  */
-class Queue
+class Queue extends EntityAbstract
 {
 
     /**
      *
-     * @var Store
+     * @param Store $store
+     * @throws QueueException
      */
-    public $store;
-
-    /**
-     *
-     * @var string
-     */
-    public $id;
-
-    /**
-     * @param AdapterInterface $adapter
-     */
-    public function __construct(Store $adapter)
+    public function __construct($data = [])
     {
-        parent::__construct($adapter);
+        parent::__construct($data);
+        $this->data[Store::NAME] = isset($this->data[Store::NAME]) ? $this->data[Store::NAME] : $this->makeName();
     }
 
-    /**
-     * Returns the adapter
-     *
-     * I have no idea why,
-     * but ReputationVIP\QueueClient\QueueClient
-     * have not got the method getAdapter().
-     * We fix it.
-     *
-     * @see \ReputationVIP\QueueClient\QueueClient
-     * @return \zaboy\async\Queue\Adapter\DataStoresAbstract
-     */
-    public function getAdapter()
+    public function setName($name)
     {
-        $reflection = new \ReflectionClass('\ReputationVIP\QueueClient\QueueClient');
-        $adapterProperty = $reflection->getProperty('adapter');
-        $adapterProperty->setAccessible(true);
-        $adapter = $adapterProperty->getValue($this);
-        $adapterProperty->setAccessible(false);
-        return $adapter;
+        if (!is_string($name)) {
+            throw new QueueException('$name must be string');
+        }
+        $this->data[Store::NAME] = (string) $name;
+        return $this->getData();
+    }
+
+    protected function makeName()
+    {
+        return md5($this->getId());
     }
 
 }

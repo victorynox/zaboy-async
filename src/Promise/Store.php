@@ -2,8 +2,6 @@
 
 namespace zaboy\async\Promise;
 
-use Zend\Db\TableGateway\TableGateway;
-use zaboy\rest\DataStore\Interfaces\ReadInterface;
 use zaboy\async\StoreAbstract;
 
 /**

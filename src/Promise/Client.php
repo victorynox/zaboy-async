@@ -12,11 +12,9 @@ namespace zaboy\async\Promise;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\Exception\TimeIsOutException;
 use zaboy\async\Promise\Promise\PendingPromise;
-use zaboy\async\Promise\PromiseAbstract;
 use zaboy\async\Promise\Interfaces\PromiseInterface;
 use zaboy\async\Promise\Store;
 use zaboy\async\ClientAbstract;
-use Zend\Db\Sql\Select;
 
 /**
  * Promise

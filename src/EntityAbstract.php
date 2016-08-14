@@ -9,7 +9,6 @@
 
 namespace zaboy\async;
 
-use zaboy\async\Promise\PromiseException;
 use zaboy\async\StoreAbstract;
 
 /**
@@ -30,7 +29,6 @@ abstract class EntityAbstract extends AsyncAbstract
     /**
      *
      * @param Store $store
-     * @throws PromiseException
      */
     public function __construct($data = [])
     {

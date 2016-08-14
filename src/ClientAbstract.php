@@ -80,14 +80,14 @@ abstract class ClientAbstract extends AsyncAbstract
     {
         $store = $this->store;
         try {
-            $errorMsg = "Can\'t start transaction for $methodName";
+            $errorMsg = "Can't start transaction for $methodName";
             $this->store->beginTransaction();
             //is row with this index exist?
-            $errorMsg = "Can\'t readAndLock for $this->id";
+            $errorMsg = "Can't readAndLock for $this->id";
             $data = $this->getStoredData($this->id, true);
-            $errorMsg = "Can not execute $methodName. Pomise is not exist.";
+            $errorMsg = "Can not execute $methodName. Entity is not exist.";
             if (is_null($data)) {
-                throw new \Exception("Pomise is not exist in Store.");
+                throw new \Exception("Entity is not exist in Store.");
             }
             $entityClass = $this->getClass();
             $entity = new $entityClass($data);
@@ -140,4 +140,10 @@ abstract class ClientAbstract extends AsyncAbstract
      */
 
     abstract public function toArray();
+
+    public function getStore()
+    {
+        return $this->store;
+    }
+
 }
