@@ -48,7 +48,7 @@ abstract class DeterminedPromise extends PromiseAbstract
             $resultJson = JsonCoder::jsonSerialize($result);
         } catch (PromiseException $ex) {
             $class = is_object($result) ? 'for object ' . get_class($result) : '';
-            throw new PromiseException("Can not serialize result " . $class, 0, $ex);
+            throw new PromiseException("Cannot serialize result " . $class, 0, $ex);
         }
 
         return $resultJson;
@@ -65,14 +65,14 @@ abstract class DeterminedPromise extends PromiseAbstract
         try {
             return JsonCoder::jsonUnserialize($resultJson);
         } catch (PromiseException $ex) {
-            throw new PromiseException("Can not unserialize string: " . $resultJson, 0, $ex);
+            throw new PromiseException("Cannot unserialize string: " . $resultJson, 0, $ex);
         }
     }
 
     public function wait($unwrap = true)
     {
         if ($unwrap) {
-            return new PromiseException('Do not try call wait(true)');
+            return new PromiseException('Do not try to call wait(true)');
         }
         $result = $this->unserializeResult($this->data[Store::RESULT]);
         if ($result instanceof Client) {

@@ -25,7 +25,7 @@ use zaboy\async\ClientAbstract;
 class Client extends ClientAbstract implements PromiseInterface
 {
 
-    const EXCEPTION_CLASS = '\zaboy\async\Promise\PromiseException';
+    const EXCEPTION_CLASS = PromiseException::class;
 
     protected function makeEntity($data = null)
     {
@@ -135,7 +135,7 @@ class Client extends ClientAbstract implements PromiseInterface
                     $dependentPromise->reject($result);
                 }
             } catch (\Exception $e) {
-                $exception = new PromiseException('Can not resolve dependent Pomise: ' . $dependentPromiseId, 0, $e);
+                $exception = new PromiseException('Cannot resolve dependent Promise: ' . $dependentPromiseId, 0, $e);
                 $this->log($exception);
             }
         }

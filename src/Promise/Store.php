@@ -27,8 +27,6 @@ class Store extends StoreAbstract
     //const ID = ReadInterface::DEF_ID;
     const STATE = 'state';
     const RESULT = 'result';
-    //const CREATION_TIME = 'creation_time';
-    //
     const PARENT_ID = 'parent_id';
     const ON_FULFILLED = 'on_fulfilled';
     const ON_REJECTED = 'on_rejected';

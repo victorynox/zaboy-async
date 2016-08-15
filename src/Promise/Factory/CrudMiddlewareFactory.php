@@ -14,7 +14,6 @@ use zaboy\rest\FactoryAbstract;
 use zaboy\async\Promise\CrudMiddleware;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\Store;
-use zaboy\async\Promise\Factory\StoreFactory;
 
 class CrudMiddlewareFactory extends FactoryAbstract
 {
@@ -29,7 +28,7 @@ class CrudMiddlewareFactory extends FactoryAbstract
             $crudMiddleware = new CrudMiddleware($store);
         } else {
             throw new PromiseException(
-            'Can\'t create StoreFactory as service with name: ' . StoreFactory::KEY
+                'Can\'t create StoreFactory as service with name: ' . StoreFactory::KEY
             );
         }
         return $crudMiddleware;

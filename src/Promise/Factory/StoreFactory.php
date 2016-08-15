@@ -137,7 +137,7 @@ class StoreFactory extends FactoryAbstract
         $this->db = $container->has('db') ? $container->get('db') : null;
         if (is_null($this->db)) {
             throw new PromiseException(
-            'Can\'t create db Adapter'
+                'Can\'t create a DB adapter'
             );
         }
         if ($container->has(TableManagerMysql::KEY_IN_CONFIG)) {

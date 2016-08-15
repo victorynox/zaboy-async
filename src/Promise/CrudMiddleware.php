@@ -48,6 +48,7 @@ class CrudMiddleware extends AsyncAbstract implements MiddlewareInterface
      */
     public function __construct(Store $store)
     {
+        parent::__construct();
         $this->store = $store;
     }
 
@@ -74,19 +75,19 @@ class CrudMiddleware extends AsyncAbstract implements MiddlewareInterface
                 case $httpMethod === 'PUT' && !($isPrimaryKeyValue):
                     throw new \zaboy\rest\RestException('PUT without Primary Key');
                 case $httpMethod === 'POST' && $isPrimaryKeyValue:
-                    throw new \zaboy\rest\RestException($httpMethod . ' мethod with Primary Key is not supported.');
+                    throw new \zaboy\rest\RestException($httpMethod . ' method with Primary Key is not supported.');
                 case $httpMethod === 'POST' && !($isPrimaryKeyValue):
                     $response = $this->methodPostWithoutId($request, $response);
                     break;
                 case $httpMethod === 'DELETE':
-                    throw new \zaboy\rest\RestException($httpMethod . ' мethod is not supported.');
+                    throw new \zaboy\rest\RestException($httpMethod . ' method is not supported.');
                 case $httpMethod === 'DELETE' && !($isPrimaryKeyValue):
-                    throw new \zaboy\rest\RestException($httpMethod . ' мethod is not supported.');
+                    throw new \zaboy\rest\RestException($httpMethod . ' method is not supported.');
                 case $httpMethod === "PATCH":
-                    throw new \zaboy\rest\RestException($httpMethod . ' мethod is not supported.');
+                    throw new \zaboy\rest\RestException($httpMethod . ' method is not supported.');
                 default:
                     throw new PromiseException(
-                    'Method must be GET, PUT, POST or DELETE. '
+                        'Method must be GET, PUT, POST or DELETE. '
                     . $request->getMethod() . ' given'
                     );
             }
@@ -106,7 +107,7 @@ class CrudMiddleware extends AsyncAbstract implements MiddlewareInterface
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
      * @return ResponseInterface
-     * @internal param callable|null $next
+     * @throws \zaboy\async\Promise\PromiseException
      */
     public function methodGetWithId(ServerRequestInterface $request, ResponseInterface $response)
     {
@@ -117,7 +118,7 @@ class CrudMiddleware extends AsyncAbstract implements MiddlewareInterface
             $this->request = $request->withAttribute('Response-Body', $promiseData);
             $response = $response->withStatus(200);
         } else {
-            throw new PromiseException('There is not promise. PromiseId: ' . $primaryId);
+            throw new PromiseException('There is no promise. PromiseId: ' . $primaryId);
         }
         return $response;
     }
@@ -133,15 +134,15 @@ class CrudMiddleware extends AsyncAbstract implements MiddlewareInterface
     {
         $primaryId = $request->getAttribute('Primary-Key-Value');
         if (!$this->isId($primaryId)) {
-            throw new PromiseException('There is not promise. PromiseId: ' . $primaryId);
+            throw new PromiseException('There is no promise. PromiseId: ' . $primaryId);
         }
         $promise = new Client($this->store, $primaryId);
         $promiseData = $request->getParsedBody();
         if (!isset($promiseData[Store::STATE])) {
-            throw new PromiseException('There is not key STATE in Body. PromiseId: ' . $primaryId);
+            throw new PromiseException('There is no key STATE in the Body. PromiseId: ' . $primaryId);
         }
         if (!isset($promiseData[Store::RESULT])) {
-            throw new PromiseException('There is not key RESULT in Body. PromiseId: ' . $primaryId);
+            throw new PromiseException('There is no key RESULT in the Body. PromiseId: ' . $primaryId);
         }
         switch ($promiseData[Store::STATE]) {
             case PromiseInterface::FULFILLED:
@@ -152,7 +153,7 @@ class CrudMiddleware extends AsyncAbstract implements MiddlewareInterface
                 $promise->reject($promiseData[Store::RESULT]);
                 break;
             default:
-                throw new PromiseException('STATE must be FULFILLED or REJECTED. PromiseId: ' . $primaryId);
+                throw new PromiseException('The STATE field must be FULFILLED or REJECTED. PromiseId: ' . $primaryId);
         }
 
         $responseBody = $promise->toArray();

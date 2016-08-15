@@ -54,7 +54,7 @@ class RejectedPromise extends DeterminedPromise
         if (!$this->isId($result) && !($result instanceof PromiseInterface)) {
             set_error_handler(function ($number, $string) {
                 throw new PromiseException(
-                "RejectedPromise. String: $string,  Number: $number", null, null
+                    "RejectedPromise. String: $string,  Number: $number", null, null
                 );
             });
             try {
@@ -62,7 +62,7 @@ class RejectedPromise extends DeterminedPromise
                 $result = new RejectedException(strval($result));
             } catch (\Exception $exc) {
                 //result can not be converted to string
-                $reason = 'Reason can not be converted to string.  Promise: ' . $this->data[Store::ID];
+                $reason = 'Reason cannot be converted to string.  Promise: ' . $this->data[Store::ID];
                 $result = new RejectedException($reason, 0, $exc);
             }
             restore_error_handler();
@@ -78,7 +78,7 @@ class RejectedPromise extends DeterminedPromise
     public function wait($unwrap = true)
     {
         if ($unwrap) {
-            return new PromiseException('Do not try call wait(true)');
+            return new PromiseException('Do not try to call wait(true)');
         }
         $result = $this->unserializeResult($this->data[Store::RESULT]);
 
@@ -101,7 +101,7 @@ class RejectedPromise extends DeterminedPromise
 
         set_error_handler(function ($number, $string) {
             throw new PromiseException(
-            "RejectedPromise. String: $string,  Number: $number", null, null
+                "RejectedPromise. String: $string,  Number: $number", null, null
             );
         });
         try {
@@ -109,7 +109,7 @@ class RejectedPromise extends DeterminedPromise
             return new RejectedException(strval($result));
         } catch (\Exception $exc) {
             //result can not be converted to string
-            $reason = 'Reason can not be converted to string.';
+            $reason = 'Reason cannot be converted to string.';
             return new RejectedException($reason, 0, $exc);
         }
         restore_error_handler();
@@ -118,16 +118,16 @@ class RejectedPromise extends DeterminedPromise
     public function resolve($value)
     {
         throw new PromiseException(
-        'Can not resolve. Pomise already rejected.  Pomise: ' .
-        $this->data[Store::ID], 0, $this->wait(false)
+            'Cannot resolve the Promise: it is already rejected.  Promise: ' .
+            $this->data[Store::ID], 0, $this->wait(false)
         );
     }
 
     public function reject($reason)
     {
         throw new PromiseException(
-        'Cannot reject a rejected promise.  Pomise: ' .
-        $this->data[Store::ID], 0, $this->wait(false)
+            'Cannot reject a rejected promise. Promise: ' .
+            $this->data[Store::ID], 0, $this->wait(false)
         );
     }
 
