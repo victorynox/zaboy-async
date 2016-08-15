@@ -48,6 +48,7 @@ class CrudMiddleware extends AsyncAbstract implements MiddlewareInterface
      */
     public function __construct(Store $store)
     {
+        parent::__construct();
         $this->store = $store;
     }
 
@@ -106,7 +107,7 @@ class CrudMiddleware extends AsyncAbstract implements MiddlewareInterface
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
      * @return ResponseInterface
-     * @internal param callable|null $next
+     * @throws \zaboy\async\Promise\PromiseException
      */
     public function methodGetWithId(ServerRequestInterface $request, ResponseInterface $response)
     {

@@ -10,8 +10,6 @@
 namespace zaboy\async\Promise;
 
 use zaboy\async\Promise\Interfaces\PromiseInterface;
-use zaboy\async\Promise\PromiseException;
-use zaboy\async\Promise\Store;
 use zaboy\async\EntityAbstract;
 
 /**
@@ -26,14 +24,10 @@ abstract class PromiseAbstract extends EntityAbstract implements PromiseInterfac
     const EXCEPTION_CLASS = PromiseException::class;
 
     /**
+     * {@inherit}
      *
-     * @throws PromiseException
+     * {@inherit}
      */
-    public function __construct($promiseData = [])
-    {
-        parent::__construct($promiseData);
-    }
-
     public function getState()
     {
         if (isset($this->data[Store::STATE])) {
@@ -45,6 +39,11 @@ abstract class PromiseAbstract extends EntityAbstract implements PromiseInterfac
         }
     }
 
+    /**
+     * Retruns the result of Promise
+     *
+     * @return mixed|null
+     */
     public function _wait()
     {
         if (isset($this->data[Store::RESULT])) {

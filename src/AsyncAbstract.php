@@ -19,12 +19,24 @@ abstract class AsyncAbstract
 {
 
     const EXCEPTION_CLASS = '\Exception';
+
     const ID_SEPARATOR = '_';
+
+    private $idPattern;
+
+    /**
+     * AsyncAbstract constructor.
+     */
+    public function __construct()
+    {
+        $this->idPattern = '/(' . $this->getPrefix() . '__[0-9]{10}_[0-9]{6}__[a-zA-Z0-9_]{23})/';
+    }
+
 
     /**
      * Creates ID for the entity.
      *
-     * An algorithm of creation is common for the all entities except for prefix.
+     * An algorithm of creation ID is common for the all entities except for prefix string.
      *
      * For example for Promise it will be 'promise_', for Task - 'task_' etc.
      *
@@ -44,14 +56,15 @@ abstract class AsyncAbstract
     }
 
     /**
-     * Checks string for tha match ID.
+     * Checks string for the match ID.
      *
-     * @return boolean
+     * @param string $param
+     * @return bool
      */
     public function isId($param)
     {
         $array = [];
-        $regExp = '/(' . $this->getPrefix() . '__[0-9]{10}_[0-9]{6}__[a-zA-Z0-9_]{23})/';
+        $regExp = $this->idPattern;
         if (is_string($param) && preg_match_all($regExp, $param, $array)) {
             return $array[0][0] == $param;
         } else {
@@ -69,6 +82,13 @@ abstract class AsyncAbstract
         return strtolower(explode('\\', get_class($this))[2]);
     }
 
+    /**
+     *
+     *
+     * @param $stringOrException
+     * @param array $idArray
+     * @return array
+     */
     public function extractId($stringOrException, $idArray = [])
     {
         if (is_null($stringOrException)) {
@@ -80,7 +100,7 @@ abstract class AsyncAbstract
             return $idArray;
         }
         $array = [];
-        if (preg_match_all('/(' . $this->getPrefix() . '__[0-9]{10}_[0-9]{6}__[a-zA-Z0-9_]{23})/', $stringOrException, $array)) {
+        if (preg_match_all($this->idPattern, $stringOrException, $array)) {
             return array_merge(array_reverse($array[0]), $idArray);
         } else {
             return [];

@@ -9,8 +9,6 @@
 
 namespace zaboy\async;
 
-use zaboy\async\Promise\PromiseException;
-use zaboy\async\StoreAbstract;
 
 /**
  * Client
@@ -22,24 +20,30 @@ abstract class ClientAbstract extends AsyncAbstract
 {
 
     /**
-     *
      * @var StoreAbstract
      */
     protected $store;
 
     /**
-     *
      * @var string
      */
     protected $id;
 
+    /**
+     * ClientAbstract constructor.
+     *
+     * @param StoreAbstract $store
+     * @param array|null $data
+     */
     public function __construct(StoreAbstract $store, $data = null)
     {
+        parent::__construct();
+
         $this->store = $store;
 
         if (!is_array($data) && !empty($data) && !$this->isId($data)) {
             $exceptionClass = $this::EXCEPTION_CLASS;
-            throw new $exceptionClass('Wrong format $data');
+            throw new $exceptionClass('Wrong format of specified data');
         }
         if ($this->isId($data)) {
             $this->id = $data;
@@ -51,11 +55,19 @@ abstract class ClientAbstract extends AsyncAbstract
         }
     }
 
+    /**
+     * Makes an Entity with specified data or a new Entity
+     *
+     * @param array|null $data
+     * @return EntityAbstract
+     */
     abstract protected function makeEntity($data = null);
 
     /**
-     * Returns an array created from stored in Store data of entity.
+     * Returns an array created from data of entity stored in the Store .
      *
+     * @param string|null $id
+     * @param bool $lockRow
      * @return array mixed
      */
     protected function getStoredData($id = null, $lockRow = false)
@@ -63,8 +75,9 @@ abstract class ClientAbstract extends AsyncAbstract
         $id = !$id ? $this->getId() : $id;
         $data = $lockRow ? $this->store->readAndLock($id) : $this->store->read($id);
         if (empty($data)) {
-            throw new PromiseException(
-            "There is  not data in store  for id: $id"
+            $exceptionClass = $this::EXCEPTION_CLASS;
+            throw new $exceptionClass(
+                "There is no data in the store for id: $id"
             );
         } else {
             foreach ($data as $key => $value) {
@@ -76,45 +89,58 @@ abstract class ClientAbstract extends AsyncAbstract
         }
     }
 
+    /**
+     * Runs method od Entity with name $methodName and writes down result into the Store.
+     *
+     * If you don't wont to save result in the Store the method $methodName must return null.
+     *
+     * The method $methodName can receive not greater then two mixed parameters: $param1 and $param2.
+     *
+     * @param $methodName
+     * @param mixed|null $param1
+     * @param mixed|null $params2
+     * @return string
+     * @throws $this::EXCEPTION_CLASS
+     */
     protected function runTransaction($methodName, $param1 = null, $params2 = null)
     {
-        $store = $this->store;
         try {
-            $errorMsg = "Can't start transaction for $methodName";
+            $errorMsg = "Can't start transaction for the method \"$methodName\"";
             $this->store->beginTransaction();
             //is row with this index exist?
-            $errorMsg = "Can't readAndLock for $this->id";
+            $errorMsg = "Can't execute the method \"readAndLock\" for $this->id";
             $data = $this->getStoredData($this->id, true);
-            $errorMsg = "Can not execute $methodName. Entity is not exist.";
+            $errorMsg = "Cannot execute the method \"$methodName\". Entity does not exist.";
             if (is_null($data)) {
-                throw new \Exception("Entity is not exist in Store.");
+                throw new \Exception("Entity does not exist in the Store.");
             }
             $entityClass = $this->getClass();
             $entity = new $entityClass($data);
-            $errorMsg = "Can not execute $methodName. Class: $entityClass";
+            $errorMsg = "Cannot execute the method \"$methodName\". Class: $entityClass";
             $dataReturned = call_user_func([$entity, $methodName], $param1, $params2);
             if (!is_null($dataReturned)) {
-                $errorMsg = "Can not store->update.";
+                $errorMsg = "Cannot execute the method \"store->update\".";
                 $id = $dataReturned[StoreAbstract::ID];
                 unset($dataReturned[StoreAbstract::ID]);
                 //or update
                 $number = $this->store->update($dataReturned, [StoreAbstract::ID => $id]);
                 if (!$number) {
-                    //or create new if absent
+                    //or create a new one if absent
                     $dataReturned[StoreAbstract::ID] = $id;
                     $this->store->insert($dataReturned);
                 }
             } else {
                 $dataReturned = $data;
+                $id = $this->id;
             }
 
             $this->store->commit();
+            return $id;
         } catch (\Exception $e) {
             $this->store->rollback();
             $exceptionClass = $this::EXCEPTION_CLASS;
             throw new $exceptionClass($errorMsg . ' Id: ' . $this->id, 0, $e);
         }
-        return $id;
     }
 
     /**
@@ -136,14 +162,17 @@ abstract class ClientAbstract extends AsyncAbstract
 
     /*
      * Returns the Entity as array with unserialized properties
-     *
      */
-
     abstract public function toArray();
 
+
+    /**
+     * Returns the Store.
+     *
+     * @return StoreAbstract
+     */
     public function getStore()
     {
         return $this->store;
     }
-
 }

@@ -9,8 +9,6 @@
 
 namespace zaboy\async;
 
-use zaboy\async\StoreAbstract;
-
 /**
  * EntityAbstract
  *
@@ -21,17 +19,18 @@ abstract class EntityAbstract extends AsyncAbstract
 {
 
     /**
-     *
      * @var array
      */
     public $data;
 
     /**
+     * EntityAbstract constructor.
      *
-     * @param Store $store
+     * @param array $data
      */
     public function __construct($data = [])
     {
+        parent::__construct();
         $this->data = $data;
 
         if (!isset($this->data[StoreAbstract::ID])) {
@@ -43,6 +42,11 @@ abstract class EntityAbstract extends AsyncAbstract
         }
     }
 
+    /**
+     * Returns the ID of Entity
+     *
+     * @return mixed
+     */
     public function getId()
     {
 
@@ -51,11 +55,16 @@ abstract class EntityAbstract extends AsyncAbstract
         } else {
             $exceptionClass = $this::EXCEPTION_CLASS;
             throw new $exceptionClass(
-            "id is not set."
+                "ID is not set."
             );
         }
     }
 
+    /**
+     * Returns the raw data of Entity
+     *
+     * @return array
+     */
     public function getData()
     {
         if (isset($this->data)) {
@@ -63,7 +72,7 @@ abstract class EntityAbstract extends AsyncAbstract
         } else {
             $exceptionClass = $this::EXCEPTION_CLASS;
             throw new $exceptionClass(
-            "Data is not set."
+                "Data is not set."
             );
         }
     }
