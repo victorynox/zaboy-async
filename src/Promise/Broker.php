@@ -17,7 +17,7 @@ class Broker extends BrokerAbstract
 
     /**
      *
-     * @var int max time Promise in Store  (in sec)
+     * @var int max life time of Promise in the Store  (in sec)
      */
     protected $lifeTime;
 

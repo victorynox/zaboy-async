@@ -23,7 +23,7 @@ use zaboy\async\EntityAbstract;
 abstract class PromiseAbstract extends EntityAbstract implements PromiseInterface
 {
 
-    const EXCEPTION_CLASS = '\zaboy\async\Promise\PromiseException';
+    const EXCEPTION_CLASS = PromiseException::class;
 
     /**
      *
@@ -40,7 +40,7 @@ abstract class PromiseAbstract extends EntityAbstract implements PromiseInterfac
             return $this->data[Store::STATE];
         } else {
             throw new PromiseException(
-            "Pomise State is not set."
+                "Promise State is not set."
             );
         }
     }

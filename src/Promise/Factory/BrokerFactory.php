@@ -13,7 +13,6 @@ use Interop\Container\ContainerInterface;
 use zaboy\rest\FactoryAbstract;
 use zaboy\async\Promise\Broker;
 use zaboy\async\Promise\Store;
-use zaboy\async\Promise\Factory\StoreFactory;
 use zaboy\async\Promise\Exception;
 
 /**
@@ -27,6 +26,7 @@ use zaboy\async\Promise\Exception;
  *      'factories' => [
  *          'Broker' => 'zaboy\async\Promise\Factory\BrokerFactory'
  *      ],
+ * ],
  * '#Promise Broker' => [
  *      #Life Time => 600
  * ]
@@ -48,8 +48,11 @@ class BrokerFactory extends FactoryAbstract
     /**
      * Create and return an instance of the Promise Broker.
      *
-     * @param  Interop\Container\ContainerInterface $container
-     * @return zaboy\async\Promise\Broker
+     * @param ContainerInterface $container
+     * @param $requestedName
+     * @param array $options
+     * @return Broker
+     * @throws \Exception
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
@@ -61,8 +64,8 @@ class BrokerFactory extends FactoryAbstract
 
         // $tableName by default
         if (!$container->has(StoreFactory::KEY)) {
-            throw new Exception(
-            'Can\'t create Store for Promise witout StoreFactory'
+            throw new \Exception(
+                'Can\'t create Store for Promise without StoreFactory'
             );
         }
         /* @var $store Store */

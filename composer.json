@@ -7,6 +7,7 @@
     "support": {
     },
     "require": {
+        "php": "^5.5||^7",
         "avz-cmf/zaboy-rest": "^3.5.0",
         "guzzlehttp/promises": "^1.0.0",
         "reputation-vip/queue-client": "1.0.2",
