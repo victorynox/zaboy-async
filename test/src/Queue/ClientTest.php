@@ -7,6 +7,12 @@ use Interop\Container\ContainerInterface;
 use zaboy\rest\TableGateway\TableManagerMysql;
 use zaboy\async\Queue\Store;
 use zaboy\async\Queue\Factory\StoreFactory;
+use zaboy\async\Message\Message\Message;
+use zaboy\async\Message\Store as MessageStore;
+use zaboy\async\Promise\Store as PromiseStore;
+use zaboy\async\ClientAbstract;
+use zaboy\async\Queue\Interfaces\ClientInterface;
+use zaboy\async\Message\Client as MessageClient;
 
 class ClientTest extends \PHPUnit_Framework_TestCase
 {
@@ -39,7 +45,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         global $testCase;
         $testCase = 'table_for_test';
-        $this->tableName = StoreFactory::TABLE_NAME . '_test';
 
         $this->container = include './config/container.php';
         $this->store = $this->container->get(StoreFactory::KEY);
@@ -53,7 +58,8 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $adapter = $this->container->get('db');
         $tableManagerMysql = new TableManagerMysql($adapter);
-        $tableManagerMysql->deleteTable($this->tableName);
+        $tableManagerMysql->deleteTable($this->store->getTable());
+        $tableManagerMysql->deleteTable($this->store->getMessagesStore()->getTable());
     }
 
     /* ---------------------------------------------------------------------------------- */
@@ -119,15 +125,118 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function test_QueueTest__setName()
+    public function test_QueueTest__rename()
     {
         $this->object = new Client($this->store);
         $this->assertInstanceOf(
                 'zaboy\async\Queue\Client', $this->object
         );
-        $this->object->setName('new_queue_name');
+        $this->object->rename('new_queue_name');
         $this->assertEquals(
                 'new_queue_name', $this->object->getName()
+        );
+    }
+
+    public function test_QueueTest__addMessage()
+    {
+        $this->object = new Client($this->store);
+        $message = $this->object->addMessage('body');
+        $messageId = $message->getId();
+        $this->assertInstanceOf(
+                'zaboy\async\Message\Client', $message
+        );
+        $this->assertTrue(
+                $message->isId($messageId)
+        );
+        $this->assertEquals(
+                'body', $message->getBody()
+        );
+        $this->assertEquals(
+                1, $this->object->getNumberMessages()
+        );
+    }
+
+    public function test_QueueTest__deleteMessage()
+    {
+        $this->object = new Client($this->store);
+        $message = $this->object->addMessage('body');
+        $messageId = $message->getId();
+        $this->assertEquals(
+                1, $this->object->getNumberMessages()
+        );
+        $promise = $message->getPromise();
+        $this->assertEquals(
+                $promise::PENDING, $promise->getState()
+        );
+        $this->object->deleteMessage($messageId);
+        $this->assertEquals(
+                0, $this->object->getNumberMessages()
+        );
+    }
+
+    public function test_QueueTest__pullMessage()
+    {
+        $this->object = new Client($this->store);
+        $message = $this->object->addMessage('body');
+        $messageId = $message->getId();
+        $this->assertEquals(
+                1, $this->object->getNumberMessages()
+        );
+        $body = $this->object->pullMessage();
+        $this->assertEquals(
+                0, $this->object->getNumberMessages()
+        );
+        $this->assertEquals(
+                'body', $body
+        );
+        $promise = $message->getPromise();
+        $this->assertEquals(
+                $promise::PENDING, $promise->getState()
+        );
+    }
+
+    public function test_QueueTest__pullMessagePriority()
+    {
+        $this->object = new Client($this->store);
+        $message1 = $this->object->addMessage('2', Message::LOW);
+        $message2 = $this->object->addMessage('1', Message::NORM);
+        $message2 = $this->object->addMessage('3', Message::LOW);
+
+        $body = $this->object->pullMessage();
+        $this->assertEquals(
+                1, $body
+        );
+        $body = $this->object->pullMessage();
+        $this->assertEquals(
+                2, $body
+        );
+        $body = $this->object->pullMessage();
+        $this->assertEquals(
+                3, $body
+        );
+    }
+
+    public function test_QueueTest__pullMessagePullPriority()
+    {
+        $this->object = new Client($this->store);
+        $message1 = $this->object->addMessage('3', Message::HIGH);
+        $message2 = $this->object->addMessage('1', Message::NORM);
+        $message2 = $this->object->addMessage('2', Message::LOW);
+
+        $body = $this->object->pullMessage(Message::NORM);
+        $this->assertEquals(
+                1, $body
+        );
+        $body = $this->object->pullMessage(Message::LOW);
+        $this->assertEquals(
+                2, $body
+        );
+        $this->assertNull(
+                $this->object->pullMessage(Message::LOW)
+        );
+        $body = $this->object->pullMessage(Message::HIGH);
+        $this->assertEquals(
+                3, $body
         );
     }
 

@@ -15,6 +15,7 @@ use zaboy\rest\TableGateway\TableManagerMysql;
 use zaboy\async\Queue\QueueException;
 use zaboy\async\Queue\Store;
 use zaboy\async\Message;
+use zaboy\async\Promise;
 
 /**
  * Creates if can and returns an instance of class Store for Queue
@@ -84,6 +85,12 @@ class StoreFactory extends FactoryAbstract
                 'nullable' => false
             ]
         ],
+        Store::LOCKED => [
+            'field_type' => 'Boolean',
+            'field_params' => [
+                'nullable' => false
+            ]
+        ],
     ];
 
     /**
@@ -123,10 +130,17 @@ class StoreFactory extends FactoryAbstract
                 $container->get(Message\Factory\StoreFactory::KEY) : null;
         if (is_null($messagesStore)) {
             throw new QueueException(
-            'Can\'t create $messages Store'
+            'Can\'t create Messages Store'
             );
         }
-        return new Store($this->tableName, $this->db, $messagesStore);
+        $promisesStore = $container->has(Promise\Factory\StoreFactory::KEY) ?
+                $container->get(Promise\Factory\StoreFactory::KEY) : null;
+        if (is_null($promisesStore)) {
+            throw new QueueException(
+            'Can\'t create Promises Store'
+            );
+        }
+        return new Store($this->tableName, $this->db, $messagesStore, $promisesStore);
     }
 
 }

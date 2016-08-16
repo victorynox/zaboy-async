@@ -17,6 +17,7 @@ namespace zaboy\async\Message\Interfaces;
  */
 interface ClientInterface
 {
+
     //public function setInFly($inFly); //in_fly
-    //public function getBody();
+    public function getBody();
 }

@@ -62,7 +62,8 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $adapter = $this->container->get('db');
         $tableManagerMysql = new TableManagerMysql($adapter);
-        $tableManagerMysql->deleteTable($this->tableName);
+        $tableManagerMysql->deleteTable($this->object->getStore()->getTable());
+        $tableManagerMysql->deleteTable($this->object->getQueue()->getStore()->getTable());
     }
 
     /* ---------------------------------------------------------------------------------- */
@@ -106,14 +107,25 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-//    public function test_MessageTest__make()
-//    {
-//        $this->object = new Client($this->queueClient);
-//        $this->assertInstanceOf(
-//                'zaboy\async\Message\Client', $this->object
-//        );
-//        $this->assertEquals(
-//                md5($this->object->getId()), $this->object->getName()
-//        );
-//    }
+    public function test_MessageTest__make()
+    {
+        $this->object = new Client($this->queueClient, [Store::MESSAGE_BODY => 'body']);
+        $this->assertInstanceOf(
+                'zaboy\async\Message\Client', $this->object
+        );
+        $this->assertTrue(
+                $this->object->isId($this->object->getId())
+        );
+        $this->assertEquals(
+                'body', $this->object->getBody()
+        );
+        $this->assertEquals(
+                1, $this->object->getStore()->count([Store::QUEUE_ID => $this->queueClient->getId()])
+        );
+        $this->object->remove();
+        $this->assertEquals(
+                0, $this->queueClient->getNumberMessages()
+        );
+    }
+
 }

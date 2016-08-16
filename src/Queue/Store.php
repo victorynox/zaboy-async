@@ -4,6 +4,7 @@ namespace zaboy\async\Queue;
 
 use zaboy\async\StoreAbstract;
 use zaboy\async\Message;
+use zaboy\async\Promise;
 use Zend\Db\Adapter\AdapterInterface;
 
 /**
@@ -23,9 +24,11 @@ class Store extends StoreAbstract
     //'id' - unique id of promise: promise_id_123456789qwerty
     //const ID = ReadInterface::DEF_ID;
     //const NAME = 'name' - table name
+    //const LOCKED = 'locked'
     //const CREATION_TIME = 'creation_time';
     //
     const NAME = 'name';
+    const LOCKED = 'locked';
 
     /**
      *
@@ -33,15 +36,27 @@ class Store extends StoreAbstract
      */
     protected $messagesStore;
 
-    public function __construct($table, AdapterInterface $adapter, Message\Store $messagesStore)
+    /**
+     *
+     * @var Promise\Store
+     */
+    protected $promisesStore;
+
+    public function __construct($table, AdapterInterface $adapter, Message\Store $messagesStore, Promise\Store $promisesStore)
     {
         parent::__construct($table, $adapter);
         $this->messagesStore = $messagesStore;
+        $this->promisesStore = $promisesStore;
     }
 
     public function getMessagesStore()
     {
         return $this->messagesStore;
+    }
+
+    public function getPromisesStore()
+    {
+        return $this->promisesStore;
     }
 
 }

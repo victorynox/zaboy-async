@@ -70,7 +70,7 @@ class StoreFactory extends FactoryAbstract
                 'nullable' => false
             ]
         ],
-        Store::QUEUE_NAME => [
+        Store::QUEUE_ID => [
             'field_type' => 'Varchar',
             'field_params' => [
                 'length' => 128,
@@ -88,6 +88,13 @@ class StoreFactory extends FactoryAbstract
             'field_type' => 'Integer',
             'field_params' => [
                 'nullable' => false
+            ]
+        ],
+        Store::PROMISE => [
+            'field_type' => 'Varchar',
+            'field_params' => [
+                'length' => 128,
+                'nullable' => true
             ]
         ],
         Store::TIME_IN_FLIGHT => [

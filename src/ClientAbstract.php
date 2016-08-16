@@ -9,6 +9,7 @@
 
 namespace zaboy\async;
 
+use zaboy\async\StoreAbstract;
 
 /**
  * Client
@@ -77,7 +78,7 @@ abstract class ClientAbstract extends AsyncAbstract
         if (empty($data)) {
             $exceptionClass = $this::EXCEPTION_CLASS;
             throw new $exceptionClass(
-                "There is no data in the store for id: $id"
+            "There is no data in the store for id: $id"
             );
         } else {
             foreach ($data as $key => $value) {
@@ -87,6 +88,27 @@ abstract class ClientAbstract extends AsyncAbstract
             }
             return $data;
         }
+    }
+
+    protected function getEntity($lockRow = false)
+    {
+        $data = $this->getStoredData(null, $lockRow);
+        $entityClass = $this->getClass();
+        $entity = new $entityClass($data);
+        return $entity;
+    }
+
+    public function remove($id = null)
+    {
+        $id = !$id ? $this->getId() : $id;
+        if (!$this->isId($id)) {
+            $exceptionClass = $this::EXCEPTION_CLASS;
+            throw new $exceptionClass(
+            "There is not correct id: $id"
+            );
+        }
+        $count = $this->store->delete([StoreAbstract::ID => $id]);
+        return $count;
     }
 
     /**
@@ -163,8 +185,8 @@ abstract class ClientAbstract extends AsyncAbstract
     /*
      * Returns the Entity as array with unserialized properties
      */
-    abstract public function toArray();
 
+    abstract public function toArray();
 
     /**
      * Returns the Store.
@@ -175,4 +197,5 @@ abstract class ClientAbstract extends AsyncAbstract
     {
         return $this->store;
     }
+
 }

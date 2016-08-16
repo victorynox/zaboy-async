@@ -19,6 +19,8 @@ use zaboy\async\ClientAbstract;
 use zaboy\async\Message\Interfaces\ClientInterface;
 use Zend\Db\Sql\Select;
 use zaboy\async\Queue;
+use zaboy\async\Promise\Store as PromiseStore;
+use zaboy\async\Promise\Client as PromiseClient;
 
 /**
  * Message
@@ -31,14 +33,29 @@ class Client extends ClientAbstract implements ClientInterface
 
     /**
      *
-     * @var Message\Store;
+     * @var PromiseStore;
      */
-    protected $messagesStore;
+    protected $promisesStore;
+
+    /**
+     *
+     * @var Queue\Client
+     */
+    protected $queue;
 
     public function __construct(Queue\Client $queue, $data)
     {
         $store = $queue->getStore()->getMessagesStore();
+        $this->promisesStore = $queue->getStore()->getPromisesStore();
+        $promise = new PromiseClient($this->promisesStore);
+        $data = is_null($data) ?
+                [Store::QUEUE_ID => $queue->getId(), Store::PROMISE => $promise->getId()] :
+                is_array($data) ?
+                        array_merge($data, [Store::QUEUE_ID => $queue->getId(), Store::PROMISE => $promise->getId()]) :
+                        $data;
+
         parent::__construct($store, $data);
+        $this->queue = $queue;
     }
 
     protected function makeEntity($data = null)
@@ -69,6 +86,21 @@ class Client extends ClientAbstract implements ClientInterface
     public function toArray()
     {
         return $this->getStoredData();
+    }
+
+    public function getQueue()
+    {
+        return $this->queue;
+    }
+
+    public function getBody()
+    {
+        return $this->getEntity()->getBody();
+    }
+
+    public function getPromise()
+    {
+        return new PromiseClient($this->promisesStore, $this->getStoredData()[Store::PROMISE]);
     }
 
 }

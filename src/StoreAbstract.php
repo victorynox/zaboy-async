@@ -5,6 +5,7 @@ namespace zaboy\async;
 use Zend\Db\TableGateway\TableGateway;
 use zaboy\rest\DataStore\Interfaces\ReadInterface;
 use Zend\Db\Sql\Select;
+use Zend\Db\Sql;
 
 /**
  * Store
@@ -80,6 +81,19 @@ class StoreAbstract extends TableGateway
     public function update($data, $where = null)
     {
         return parent::update($data, $where);
+    }
+
+    public function count($where = [])
+    {
+        $db = $this->getAdapter();
+        $sql = new Sql\Sql($db);
+        $select = $sql->select()
+                ->from($this->getTable())
+                ->columns(array('count' => new Sql\Expression('COUNT(*)')))
+                ->where($where);
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $rowset = $statement->execute();
+        return $rowset->current()['count'];
     }
 
 }

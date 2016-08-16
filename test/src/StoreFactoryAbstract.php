@@ -93,7 +93,7 @@ abstract class StoreFactoryAbstract extends \PHPUnit_Framework_TestCase
         $this->tableManagerMysql = $this->container->get(TableManagerMysql::KEY_IN_CONFIG);
 
         // if tables is absent
-        $this->tableName = 'promises_test_construct_param';
+        $this->tableName = 'table_test_construct_param';
         $this->tableManagerMysql->deleteTable($this->tableName);
 
         $this->assertFalse(

@@ -23,7 +23,7 @@ interface ClientInterface
      *
      * @return bool
      */
-    public function isEmpty($priority = null);
+    public function isEmpty();
 
     /**
      * @param string $priority
@@ -49,4 +49,17 @@ interface ClientInterface
      *
      */
     public function pullMessage($priority = null);
+
+    /**
+     *
+     * @param type $body
+     * @param type $priority
+     */
+    public function addMessage($body, $priority = null);
+
+    /**
+     *
+     * @param string $messageId
+     */
+    public function deleteMessage($messageId);
 }

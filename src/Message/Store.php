@@ -13,9 +13,10 @@ use zaboy\async\StoreAbstract;
 class Store extends StoreAbstract
 {
 
-    const QUEUE_NAME = 'queue_name';
+    const QUEUE_ID = 'queue_id';
     const MESSAGE_BODY = 'message_body';
     const PRIORITY = 'priority';
+    const PROMISE = 'promise';
     const TIME_IN_FLIGHT = 'time_in_flight';
 
 }

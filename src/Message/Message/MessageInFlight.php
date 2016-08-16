@@ -22,28 +22,8 @@ use zaboy\async\EntityAbstract;
  * @category   async
  * @package    zaboy
  */
-class Message extends EntityAbstract
+class MessageInFlight extends Message
 {
-
-    //message priority levels
-    const HIGH = 1;
-    const NORM = 0; //default
-    const LOW = -1;
-
-    /**
-     *
-     * @param Store $data
-     */
-    public function __construct($data = [])
-    {
-        $data[Store::PRIORITY] = isset($data[Store::PRIORITY]) ? $data[Store::PRIORITY] : self::NORM;
-        parent::__construct($data);
-    }
-
-    public function getBody()
-    {
-        return $this->getData()[Store::MESSAGE_BODY];
-    }
 
     /**
      *
@@ -51,8 +31,7 @@ class Message extends EntityAbstract
      */
     public function pullMessage()
     {
-        $this->data[Store::TIME_IN_FLIGHT] = (int) (time() - date('Z'));
-        return $this->getData();
+        throw new MessageException('Message is alredy pulled');
     }
 
 }
