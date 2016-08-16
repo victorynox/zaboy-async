@@ -60,6 +60,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $tableManagerMysql = new TableManagerMysql($adapter);
         $tableManagerMysql->deleteTable($this->store->getTable());
         $tableManagerMysql->deleteTable($this->store->getMessagesStore()->getTable());
+        $tableManagerMysql->deleteTable($this->store->getPromisesStore()->getTable());
     }
 
     /* ---------------------------------------------------------------------------------- */
@@ -178,7 +179,10 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $this->object = new Client($this->store);
         $message = $this->object->addMessage('body');
-        $messageId = $message->getId();
+        $promise = $message->getPromise();
+        $resolvedBodyPromise = $promise->then(function ($body) {
+            return $body . ' resolved';
+        });
         $this->assertEquals(
                 1, $this->object->getNumberMessages()
         );
@@ -189,9 +193,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(
                 'body', $body
         );
-        $promise = $message->getPromise();
+
         $this->assertEquals(
-                $promise::PENDING, $promise->getState()
+                'body resolved', $resolvedBodyPromise->wait(true)
         );
     }
 
