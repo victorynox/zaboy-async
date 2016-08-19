@@ -10,21 +10,9 @@
 namespace zaboy\async\Callback;
 
 use zaboy\async\Callback\CallbackException;
-use zaboy\async\Message\Exception\TimeIsOutException;
-use zaboy\async\Message\Message\PendingMessage;
-use zaboy\async\Message\Message\Message;
-use zaboy\async\Message\Interfaces\MessageInterface;
-use zaboy\async\Message\Store;
-use zaboy\async\ClientAbstract;
-use zaboy\async\Message\Interfaces\ClientInterface;
-use Zend\Db\Sql\Select;
-use zaboy\async\Queue;
-use zaboy\async\Promise\Store as PromiseStore;
-use zaboy\async\Promise\Client as PromiseClient;
-use Zend\ServiceManager\FactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
 use Interop\Container\ContainerInterface;
 use Opis\Closure\SerializableClosure;
+use zaboy\async\Callback\Interfaces\ServicesInitableInterface;
 
 /**
  * Message
@@ -59,7 +47,7 @@ class Callback
                 return call_user_func($this->callback, $value);
             } catch (\Exception $exc) {
                 throw new CallbackException(
-                'Cannot execute Callback', 0, $exc
+                'Cannot execute Callback. Reason: ' . $exc->getMessage(), 0, $exc
                 );
             }
         } else {
@@ -69,7 +57,7 @@ class Callback
         }
     }
 
-    protected function getContaner()
+    static protected function getContaner()
     {
         if (isset(static::$contaner)) {
             return static::$contaner;
@@ -96,7 +84,31 @@ class Callback
 
     public function __wakeup()
     {
+        if ($this->callback instanceof ServicesInitableInterface) {
 
+            $servicesList = $this->callback->getServicesList();
+            $services = $this->getServices($servicesList);
+            $this->callback->setServices($services);
+        }
+    }
+
+    protected function getServices($servicesList)
+    {
+        $services = [];
+        foreach ($servicesList as $propertyName => $serviceName) {
+            if (is_array($serviceName)) {
+                $services[$propertyName] = $this->getServices($serviceName);
+            } else {
+                $services[$propertyName] = $this->getContaner()->get($serviceName);
+            }
+        }
+        return $services;
+    }
+
+    public static function __callStatic($serviceName, $arguments)
+    {
+        $callback = static::getContaner()->get($serviceName);
+        return $callback($arguments[0]);
     }
 
 }

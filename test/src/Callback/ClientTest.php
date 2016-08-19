@@ -3,15 +3,11 @@
 namespace zaboy\test\async\Callback;
 
 use Interop\Container\ContainerInterface;
-use zaboy\rest\TableGateway\TableManagerMysql;
-use zaboy\async\Message\Store;
 use zaboy\async\Message\Client;
-use zaboy\async\Message\Factory\StoreFactory;
-use zaboy\async\Queue\Store as QueueStore;
-use zaboy\async\Queue\Client as QueueClient;
-use zaboy\async\Queue\Factory\StoreFactory as QueueStoreFactory;
 use zaboy\async\Callback\Callback;
 use zaboy\test\async\Callback\Example\JustCallable;
+use zaboy\test\async\Callback\Example\CallableWithDb;
+use zaboy\test\async\Callback\Example\CallableWithObjectWitb;
 
 class CallbackTest extends \PHPUnit_Framework_TestCase
 {
@@ -123,6 +119,61 @@ class CallbackTest extends \PHPUnit_Framework_TestCase
         $this->object = unserialize(serialize(new Callback($callable)));
         $this->assertEquals(
                 'Hello CallbackTest__Invoke', call_user_func($this->object, 'CallbackTest__Invoke')
+        );
+    }
+
+    public function test_befaroSerialize__InvokeForServicesInitableInterface()
+    {
+        $callable = new CallableWithDb($this->container->get('db'));
+        $this->object = new Callback($callable);
+        $this->assertEquals(
+                'Platform name MySQL', call_user_func($this->object, '')
+        );
+    }
+
+    public function test_afetrSerialize__InvokeForServicesInitableInterface()
+    {
+        $callable = new CallableWithDb($this->container->get('db'));
+        $this->object = new Callback($callable);
+        $this->object = unserialize(serialize(new Callback($callable)));
+
+        $this->assertEquals(
+                'Platform name MySQL', call_user_func($this->object, '')
+        );
+    }
+
+    public function test_befaroSerialize__InvokeForServicesContanedObjectInitableInterface()
+    {
+        $callable = new CallableWithObjectWitb($this->container->get('db'));
+        $this->object = new Callback($callable);
+        $this->assertEquals(
+                'Platform name MySQL', call_user_func($this->object, '')
+        );
+    }
+
+    public function test_afetrSerialize__InvokeForServicesContanedObjectInitableInterface()
+    {
+        $callable = new CallableWithObjectWitb($this->container->get('db'));
+        $this->object = new Callback($callable);
+        $this->object = unserialize(serialize(new Callback($callable)));
+        $this->assertEquals(
+                'Platform name MySQL', call_user_func($this->object, '')
+        );
+    }
+
+    public function test_befaroSerialize__InvokeCallableServiceAsStatic()
+    {
+        $this->object = [Callback::class, 'CallableService'];
+        $this->assertEquals(
+                'CallableService resolve resalt', call_user_func($this->object, 'resalt')
+        );
+    }
+
+    public function test_afetrSerialize__InvokeCallableServiceAsStatic()
+    {
+        $this->object = unserialize(serialize([Callback::class, 'CallableService']));
+        $this->assertEquals(
+                'CallableService resolve resalt', call_user_func($this->object, 'resalt')
         );
     }
 
