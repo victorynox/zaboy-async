@@ -174,7 +174,7 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
                 $this->object->wait(false)->getPrevious()
         );
         $this->assertStringStartsWith(
-                'Reason can not be converted to string.', $this->object->wait(false)->getMessage()
+                'Reason cannot be converted to string.', $this->object->wait(false)->getMessage()
         );
     }
 
