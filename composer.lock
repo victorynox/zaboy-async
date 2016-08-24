@@ -4,21 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "05ddb17028c0d954568c6c62e2d58d41",
-    "content-hash": "1e048b9ecc4972b9d5f44c363ea82ebc",
+    "hash": "4ecd7285b923c4a3f133cdc2d3221732",
+    "content-hash": "44fe837e4f07d4952a026c9729ee560e",
     "packages": [
         {
             "name": "avz-cmf/zaboy-rest",
-            "version": "3.8.7",
+            "version": "3.8.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/avz-cmf/zaboy-rest.git",
-                "reference": "07ab27b5385d10a232da5a3a9aa6ff3faaedaab0"
+                "reference": "bb7022ed725f02083379033c57692925bd583487"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/avz-cmf/zaboy-rest/zipball/07ab27b5385d10a232da5a3a9aa6ff3faaedaab0",
-                "reference": "07ab27b5385d10a232da5a3a9aa6ff3faaedaab0",
+                "url": "https://api.github.com/repos/avz-cmf/zaboy-rest/zipball/bb7022ed725f02083379033c57692925bd583487",
+                "reference": "bb7022ed725f02083379033c57692925bd583487",
                 "shasum": ""
             },
             "require": {
@@ -56,20 +56,20 @@
                 "php",
                 "rest"
             ],
-            "time": "2016-07-22 07:37:55"
+            "time": "2016-08-24 09:58:46"
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.18.38",
+            "version": "3.19.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "979470feb19af8b5cd2f7a455407618416cdfadc"
+                "reference": "3cb90413129da42c9d3289d542bee0ae1049892c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/979470feb19af8b5cd2f7a455407618416cdfadc",
-                "reference": "979470feb19af8b5cd2f7a455407618416cdfadc",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/3cb90413129da42c9d3289d542bee0ae1049892c",
+                "reference": "3cb90413129da42c9d3289d542bee0ae1049892c",
                 "shasum": ""
             },
             "require": {
@@ -136,7 +136,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2016-08-09 18:09:34"
+            "time": "2016-08-23 20:58:48"
         },
         {
             "name": "container-interop/container-interop",
@@ -432,16 +432,16 @@
         },
         {
             "name": "opis/closure",
-            "version": "2.2.0",
+            "version": "2.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opis/closure.git",
-                "reference": "8633065db6b7b22dbdac4431513cbb1ea5b7e2b0"
+                "reference": "3835169b1033c19bd683ceec3745f60bdc5987ec"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opis/closure/zipball/8633065db6b7b22dbdac4431513cbb1ea5b7e2b0",
-                "reference": "8633065db6b7b22dbdac4431513cbb1ea5b7e2b0",
+                "url": "https://api.github.com/repos/opis/closure/zipball/3835169b1033c19bd683ceec3745f60bdc5987ec",
+                "reference": "3835169b1033c19bd683ceec3745f60bdc5987ec",
                 "shasum": ""
             },
             "require": {
@@ -482,7 +482,7 @@
                 "serialization",
                 "serialize"
             ],
-            "time": "2016-07-26 07:24:41"
+            "time": "2016-08-20 19:48:49"
         },
         {
             "name": "psr/http-message",
@@ -1416,6 +1416,8 @@
     "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "php": "^5.5||^7"
+    },
     "platform-dev": []
 }

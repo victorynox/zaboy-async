@@ -8,9 +8,18 @@ use zaboy\async\Callback\Callback;
 use zaboy\test\async\Callback\Example\JustCallable;
 use zaboy\test\async\Callback\Example\CallableWithDb;
 use zaboy\test\async\Callback\Example\CallableWithObjectWitb;
+use zaboy\async\Promise\Client as PromiseClient;
+use zaboy\async\Promise\Store as PromiseStore;
+use zaboy\async\Promise\Factory\StoreFactory;
 
 class CallbackTest extends \PHPUnit_Framework_TestCase
 {
+
+    /**
+     *
+     * @var PromiseStore
+     */
+    protected $promiseStore;
 
     /**
      * @var Client
@@ -32,6 +41,9 @@ class CallbackTest extends \PHPUnit_Framework_TestCase
         $testCase = 'table_for_test';
 
         $this->container = include './config/container.php';
+
+        $this->promiseStore = $this->container->get(StoreFactory::KEY);
+
         Callback::setContaner($this->container);
     }
 

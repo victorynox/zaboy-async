@@ -54,7 +54,7 @@ class RejectedPromise extends DeterminedPromise
         if (!$this->isId($result) && !($result instanceof PromiseInterface)) {
             set_error_handler(function ($number, $string) {
                 throw new PromiseException(
-                    "RejectedPromise. String: $string,  Number: $number", null, null
+                "RejectedPromise. String: $string,  Number: $number", null, null
                 );
             });
             try {
@@ -101,7 +101,7 @@ class RejectedPromise extends DeterminedPromise
 
         set_error_handler(function ($number, $string) {
             throw new PromiseException(
-                "RejectedPromise. String: $string,  Number: $number", null, null
+            "RejectedPromise. String: $string,  Number: $number", null, null
             );
         });
         try {
@@ -118,16 +118,16 @@ class RejectedPromise extends DeterminedPromise
     public function resolve($value)
     {
         throw new PromiseException(
-            'Cannot resolve the Promise: it is already rejected.  Promise: ' .
-            $this->data[Store::ID], 0, $this->wait(false)
+        'Cannot resolve the Promise: it is already rejected.  Promise: ' .
+        $this->data[Store::ID], 0, $this->wait(false)
         );
     }
 
     public function reject($reason)
     {
         throw new PromiseException(
-            'Cannot reject a rejected promise. Promise: ' .
-            $this->data[Store::ID], 0, $this->wait(false)
+        'Cannot reject a rejected promise. Promise: ' .
+        $this->data[Store::ID], 0, $this->wait(false)
         );
     }
 

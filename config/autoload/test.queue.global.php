@@ -4,7 +4,7 @@ use zaboy\async\Queue;
 use zaboy\rest\DataStore\Factory;
 
 global $testCase;
-//var_dump($testCase);
+
 return [
     'services' => [
         'abstract_factories' => [

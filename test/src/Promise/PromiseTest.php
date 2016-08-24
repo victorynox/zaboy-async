@@ -170,8 +170,9 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(
                 'zaboy\async\Promise\Exception\RejectedException', $this->object->wait(false)
         );
-        $this->assertNull(
-                $this->object->wait(false)->getPrevious()
+        $this->assertStringStartsWith(
+                'RejectedPromise. String: Object of class stdClass could not be converted to string'
+                , $this->object->wait(false)->getPrevious()->getMessage()
         );
         $this->assertStringStartsWith(
                 'Reason cannot be converted to string.', $this->object->wait(false)->getMessage()

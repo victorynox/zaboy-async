@@ -170,287 +170,261 @@ class PromiseTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(
                 'zaboy\async\Promise\Exception\RejectedException', $this->object->wait(false)
         );
-        $this->assertNull(
-                $this->object->wait(false)->getPrevious()
+        $this->assertStringStartsWith(
+                'RejectedPromise. String: Object of class stdClass could not be converted to string'
+                , $this->object->wait(false)->getPrevious()->getMessage()
         );
         $this->assertStringStartsWith(
-        'Reason cannot be converted to string.', $this->object->wait(false)->getMessage()
-                );
-                }
+                'Reason cannot be converted to string.', $this->object->wait(false)->getMessage()
+        );
+    }
 
-                /*                 * ************* Wait() with $unwrap = true ******************************* */ public function testPromiseTest__PendingWait()
-        {
+    /*     * ************* Wait() with $unwrap = true ******************************* */
 
+    public function testPromiseTest__PendingWait()
+    {
         $this->object = new Client($this->store);
         $this->setExpectedException('\zaboy\async\Promise\Exception\TimeIsOutException');
-                $this->object->wait(true, 0);
-                }
+        $this->object->wait(true, 0);
+    }
 
-                public function testPromiseTest__RejectedWait ()
-        {
-
+    public function testPromiseTest__RejectedWait()
+    {
         $this->object = new Client($this->store);
         $this->object->reject('reason');
-                $this->setExpectedException('\zaboy\async\Promise\Exception\RejectedException');
-                $this->object->wait(true, 0);
-                }
+        $this->setExpectedException('\zaboy\async\Promise\Exception\RejectedException');
+        $this->object->wait(true, 0);
+    }
 
-                public function testPromiseTest__PendingAfterPendingWait ()
-
-        {
+    public function testPromiseTest__PendingAfterPendingWait()
+    {
         $this->object = new Client($this->store);
         $result = new Client($this->store);
-                $this->object->resolve($result);
-                $this->setExpectedException('\zaboy\async\Promise\Exception\TimeIsOutException');
-                $this->object->wait(true, 1);
-                }
+        $this->object->resolve($result);
+        $this->setExpectedException('\zaboy\async\Promise\Exception\TimeIsOutException');
+        $this->object->wait(true, 1);
+    }
 
-                public function testPromiseTest__PendingAfterFulfilledWait ()
-
-        {
+    public function testPromiseTest__PendingAfterFulfilledWait()
+    {
         $this->object = new Client($this->store);
         $result = new Client($this->store);
-                $this->object->resolve($result);
-                $result->resolve('result');
+        $this->object->resolve($result);
+        $result->resolve('result');
         $this->assertEquals(
                 $this->object->wait(), 'result'
         );
-                $this->assertEquals( $this->object->getState(), PromiseInterface::FULFILLED
-                );
-                }
+        $this->assertEquals(
+                $this->object->getState(), PromiseInterface::FULFILLED
+        );
+    }
 
-                public function testPromiseTest__PendingAfterRejecteddWait()
-
-        {
+    public function testPromiseTest__PendingAfterRejecteddWait()
+    {
         $this->object = new Client($this->store);
         $result = new Client($this->store);
-                $this->object->reject($result);
-                $this->setExpectedException('\zaboy\async\Promise\Exception\ReasonPendingException');
-                //ReasonPendingException
-                $this->object->wait(true, 0);
-        }
+        $this->object->reject($result);
+        $this->setExpectedException('\zaboy\async\Promise\Exception\ReasonPendingException');
+        //ReasonPendingException
+        $this->object->wait(true, 0);
+    }
 
-        /*         * ************* Wait() with $unwrap = false ******************************* */ public function testPromiseTest__PendingWaitUnwrapFalse()
+    /*     * ************* Wait() with $unwrap = false ******************************* */
 
-        {
+    public function testPromiseTest__PendingWaitUnwrapFalse()
+    {
         $this->object = new Client($this->store);
         $this->assertEquals(
                 $this->object->wait(false)->getState(), PromiseInterface::PENDING
-                );
-                        }
+        );
+    }
 
-                public function testPromiseTest__RejectedWaitUnwrapFalse()
-
-        {
+    public function testPromiseTest__RejectedWaitUnwrapFalse()
+    {
         $this->object = new Client($this->store);
         $this->object->reject('reason');
-                $this->assertInstanceOf(
+        $this->assertInstanceOf(
                 'zaboy\async\Promise\Exception\RejectedException', $this->object->wait(false)
-                );
-                }
+        );
+    }
 
-                public function testPromiseTest__PendingAfterPendingWaitUnwrapFalse
-
-()
-        {
+    public function testPromiseTest__PendingAfterPendingWaitUnwrapFalse()
+    {
         $this->object = new Client($this->store);
         $result = new Client($this->store);
-                $this->object->resolve($result);
-                $this->assertEquals(
+        $this->object->resolve($result);
+        $this->assertEquals(
                 $this->object->wait(false)->getState(), PromiseInterface::PENDING
-                );
-                        }
+        );
+    }
 
-                public function
-
-        testPromiseTest__PendingAfterFulfilledWaitUnwrapFalse()
-        {
+    public function testPromiseTest__PendingAfterFulfilledWaitUnwrapFalse()
+    {
         $this->object = new Client($this->store);
         $result = new Client($this->store);
-                $this->object->resolve($result);
-                $result->resolve('result');
+        $this->object->resolve($result);
+        $result->resolve('result');
         $this->assertEquals(
                 $this->object->wait(false), 'result'
-                );
-                }
+        );
+    }
 
-                public function testPromiseTest__PendingAfterRejecteddWaitUnwrapFalse
-
-()
-        {
+    public function testPromiseTest__PendingAfterRejecteddWaitUnwrapFalse()
+    {
         $this->object = new Client($this->store);
         $result = new Client($this->store);
-                $this->object->reject($result);
-                $this->assertInstanceOf(
+        $this->object->reject($result);
+        $this->assertInstanceOf(
                 'zaboy\async\Promise\Exception\ReasonPendingException', $this->object->wait(false)
-                );
-                $this-> assertTrue(
-                        $result->isId($this->object->wait(false)->getMessage())
-                );
-                }
+        );
+        $this->assertTrue(
+                $result->isId($this->object->wait(false)->getMessage())
+        );
+    }
 
-                        /*                                 * ************* Then()  ******************************* */
+    /*     * ************* Then()  ******************************* */
 
-        public function testPromiseThen__Then()
-        {
-
+    public function testPromiseThen__Then()
+    {
         $promise = new Client($this->store);
         $this->object = $promise->then([get_class($this), 'callback']);
-                $this->assertInstanceOf(
+        $this->assertInstanceOf(
                 '\zaboy\async\Promise\Promise\DependentPromise', $this->object->wait(false)
-                );
-                }
+        );
+    }
 
-                /*                 * ************* Then() Fulfilled  ******************************* */
+    /*     * ************* Then() Fulfilled  ******************************* */
 
-                public function testPromiseThen__ThenFulfilled()
-                {
-                $promise = new Client($this->store);
-                $this->object = $promise->then([ get_class
-
-($this), 'callback']);
+    public function testPromiseThen__ThenFulfilled()
+    {
+        $promise = new Client($this->store);
+        $this->object = $promise->then([get_class($this), 'callback']);
         $promise->resolve('result');
-                $this->assertEquals(
+        $this->assertEquals(
                 'result after callbak', $this->object->wait(false)
-                );
-                }
+        );
+    }
 
-                public function testPromiseThen__ThenThenFulfilled()
-                {
-                $promise1 = new Client($this->store);
-                $promise2 = $promise1->then();
-                $this->object = $promise2->then([ get_class(
-
-        $this), 'callback']);
+    public function testPromiseThen__ThenThenFulfilled()
+    {
+        $promise1 = new Client($this->store);
+        $promise2 = $promise1->then();
+        $this->object = $promise2->then([get_class($this), 'callback']);
         $promise1->resolve('result');
-                $this->assertEquals(
+        $this->assertEquals(
                 'result after callbak', $this->object->wait(false)
-                );
-                }
+        );
+    }
 
-                public function testPromiseThen__ThenFulfilledByPromise()
-                {
-                $result = new Client($this->store);
-                $promise1 = new Client($this->store);
-                $this->object = $promise1->then([ get_class(
-
-        $this), 'callback']);
+    public function testPromiseThen__ThenFulfilledByPromise()
+    {
+        $result = new Client($this->store);
+        $promise1 = new Client($this->store);
+        $this->object = $promise1->then([get_class($this), 'callback']);
         $promise1->resolve($result);
-                $promise = $this->object->wait(false);
+        $promise = $this->object->wait(false);
 
-                $this->assertEquals(
+        $this->assertEquals(
                 $this->object->getId(), $promise->getId()
-                );
-                $this->assertEquals(
-                PromiseInterface::PENDING, $this->object->getState()
-                );
-
-                $result->resolve('result');
-                $this->assertEquals(
-                'result after callbak', $this->object->wait(false)
-                );
-                $this->assertEquals(
-                PromiseInterface::FULFILLED, $this->object->getState()
-                );
-                }
-
-                public function testPromiseThen__ThenFromFulfilled()
-                {
-                $promise = new Client($this->store);
-                $promise->resolve('result');
-                $this->object = $promise->then([ get_class($this ), 'callback'] )
-
-;
+        );
         $this->assertEquals(
-        'result after callbak', $this->object->wait(false)
-                );
-                }
-
-                public function testPromiseThen__ThenFromFulfilledByPromise()
-                {
-                $result = new Client($this->store);
-                $promise1 = new Client($this->store);
-                $promise1->resolve($result);
-                $this->object = $promise1->then([ get_class
-
-($this), 'callback']);
-        $this->assertEquals(
-        $this->object->getId(), $this->object->wait(false)->getId()
-                );
-                $this->assertEquals(
                 PromiseInterface::PENDING, $this->object->getState()
-                );
+        );
 
-                $result->resolve('result');
-                $this->assertEquals(
+        $result->resolve('result');
+        $this->assertEquals(
                 'result after callbak', $this->object->wait(false)
-                );
-                $this->assertEquals(
+        );
+        $this->assertEquals(
                 PromiseInterface::FULFILLED, $this->object->getState()
-                );
-                }
+        );
+    }
 
-                public function testPromiseThen__ExceptionInOnFulfilled()
-                {
-                $promise = new Client($this->store);
-                $this->object = $promise->then([ get_class ( $this), 'callException'
-
-]);
+    public function testPromiseThen__ThenFromFulfilled()
+    {
+        $promise = new Client($this->store);
         $promise->resolve('result');
-                $this->assertInstanceOf(
-                '\Exception', $this->object->wait(false)
-                );
-                }
+        $this->object = $promise->then([get_class($this), 'callback']);
+        $this->assertEquals(
+                'result after callbak', $this->object->wait(false)
+        );
+    }
 
-                /*                 * ************* Then() Rejected  ******************************* */
+    public function testPromiseThen__ThenFromFulfilledByPromise()
+    {
+        $result = new Client($this->store);
+        $promise1 = new Client($this->store);
+        $promise1->resolve($result);
+        $this->object = $promise1->then([get_class($this), 'callback']);
+        $this->assertEquals(
+                $this->object->getId(), $this->object->wait(false)->getId()
+        );
+        $this->assertEquals(
+                PromiseInterface::PENDING, $this->object->getState()
+        );
 
-                public function testPromiseThen__ThenRejected()
-                {
-                $promise = new Client($this->store);
-                $this->object = $promise->then(null, function($reason) {
-                return $reason->getMessage() . ' was resolved';
-                });
-                $promise->reject('Error');
-                $this->assertEquals(
-                'Error was resolved', $this->object->wait(false)
-                );
-                }
-
-                public function testPromiseThen__ThenThen_Resolved_onFulfilledException_onRejectedResolved()
-                {
-                $promise1 = new Client($this->store);
-                $promise2 = $promise1->then([ get_class(
-
-        $this), 'callException'], null);
-        $message = ' was resolved';
-        $this->object =  $promise2->then
-
-(null, function($reason) use($message) {
-        return $reason->getMessage() . $message;
-                });
-                $promise1->resolve('result');
-                $this->assertStringEndsWith(
-                ' was resolved', $this->object->wait(false)
-                );
-                }
-
-                public function testPromiseThen__ThenRejectedByPromiseButResolved()
-                {
-                $result = new Client($this->store);
-                $promise1 = new Client($this->store);
-                $this->object = $promise1->then(null, function($reason) {
-                return $reason->getMessage() . ' was resolved';
-                });
-                $promise1->reject($result);
-
-                $this->assertEquals(
-                $result->getId() . ' was resolved', $this->object->wait(false)
-                );
-                $this->assertEquals(
+        $result->resolve('result');
+        $this->assertEquals(
+                'result after callbak', $this->object->wait(false)
+        );
+        $this->assertEquals(
                 PromiseInterface::FULFILLED, $this->object->getState()
-                );
-                }
+        );
+    }
 
-                }
+    public function testPromiseThen__ExceptionInOnFulfilled()
+    {
+        $promise = new Client($this->store);
+        $this->object = $promise->then([get_class($this), 'callException']);
+        $promise->resolve('result');
+        $this->assertInstanceOf(
+                '\Exception', $this->object->wait(false)
+        );
+    }
 
+    /*     * ************* Then() Rejected  ******************************* */
 
+    public function testPromiseThen__ThenRejected()
+    {
+        $promise = new Client($this->store);
+        $this->object = $promise->then(null, function ($reason) {
+            return $reason->getMessage() . ' was resolved';
+        });
+        $promise->reject('Error');
+        $this->assertEquals(
+                'Error was resolved', $this->object->wait(false)
+        );
+    }
+
+    public function testPromiseThen__ThenThen_Resolved_onFulfilledException_onRejectedResolved()
+    {
+        $promise1 = new Client($this->store);
+        $promise2 = $promise1->then([get_class($this), 'callException'], null);
+        $message = ' was resolved';
+        $this->object = $promise2->then(null, function ($reason) use ($message) {
+            return $reason->getMessage() . $message;
+        });
+        $promise1->resolve('result');
+        $this->assertStringEndsWith(
+                ' was resolved', $this->object->wait(false)
+        );
+    }
+
+    public function testPromiseThen__ThenRejectedByPromiseButResolved()
+    {
+        $result = new Client($this->store);
+        $promise1 = new Client($this->store);
+        $this->object = $promise1->then(null, function ($reason) {
+            return $reason->getMessage() . ' was resolved';
+        });
+        $promise1->reject($result);
+
+        $this->assertEquals(
+                $result->getId() . ' was resolved', $this->object->wait(false)
+        );
+        $this->assertEquals(
+                PromiseInterface::FULFILLED, $this->object->getState()
+        );
+    }
+
+}

@@ -16,7 +16,7 @@ use zaboy\async\Callback\Interfaces\ServicesInitableInterface;
 use zaboy\async\Promise\Client as PromiseClient;
 
 /**
- * Callback
+ * Message
  *
  * @category   async
  * @package    zaboy
@@ -41,20 +41,33 @@ class Callback
         $this->callback = $callback;
     }
 
-    public function __invoke($value)
+    public function __invoke($value, PromiseClient $promise = null)
     {
         if (is_callable($this->callback, true)) {
             try {
-                return call_user_func($this->callback, $value);
+                $result = call_user_func($this->callback, $value);
             } catch (\Exception $exc) {
-                throw new CallbackException(
-                'Cannot execute Callback. Reason: ' . $exc->getMessage(), 0, $exc
+                $callbackException = new CallbackException(
+                        'Cannot execute Callback. Reason: ' . $exc->getMessage(), 0, $exc
                 );
             }
         } else {
-            throw new CallbackException(
-            'There was not correct instance callable in Callback'
+            $callbackException = new CallbackException(
+                    'There was not correct instance callable in Callback'
             );
+        }
+        if (is_null($promise)) {
+            if (isset($result)) {
+                return $result;
+            } else {
+                throw $callbackException;
+            }
+        } else {
+            if (isset($result)) {
+                $promise->resolve($result);
+            } else {
+                $promise->reject($callbackException);
+            }
         }
     }
 
