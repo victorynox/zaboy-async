@@ -10,10 +10,10 @@
 namespace zaboy\async\Promise\Factory;
 
 use Interop\Container\ContainerInterface;
-use zaboy\rest\FactoryAbstract;
-use zaboy\rest\TableGateway\TableManagerMysql;
 use zaboy\async\Promise\PromiseException;
 use zaboy\async\Promise\Store;
+use zaboy\rest\FactoryAbstract;
+use zaboy\rest\TableGateway\TableManagerMysql;
 
 /**
  * Creates if can and returns an instance of class Store - Adapter for Promis
@@ -83,7 +83,7 @@ class StoreFactory extends FactoryAbstract
             ]
         ],
         Store::RESULT => [
-            'field_type' => 'Varchar',
+            'field_type' => 'Text',
             'field_params' => [
                 'length' => 65535,
                 'nullable' => true
@@ -129,11 +129,10 @@ class StoreFactory extends FactoryAbstract
         $config = $container->get('config');
 
         $this->tableName = isset($config[self::KEY][self::KEY_TABLE_NAME]) ?
-                $config[self::KEY][self::KEY_TABLE_NAME] :
-                (isset($options[self::KEY_TABLE_NAME]) ?
-                        $options[self::KEY_TABLE_NAME] :
-                        self::TABLE_NAME)
-        ;
+            $config[self::KEY][self::KEY_TABLE_NAME] :
+            (isset($options[self::KEY_TABLE_NAME]) ?
+                $options[self::KEY_TABLE_NAME] :
+                self::TABLE_NAME);
         $this->db = $container->has('db') ? $container->get('db') : null;
         if (is_null($this->db)) {
             throw new PromiseException(
@@ -143,14 +142,17 @@ class StoreFactory extends FactoryAbstract
         if ($container->has(TableManagerMysql::KEY_IN_CONFIG)) {
             $tableManager = $container->get(TableManagerMysql::KEY_IN_CONFIG);
         } else {
+
             $tableManager = new TableManagerMysql($this->db);
         }
-
-        $hasPromiseStoreTable = $tableManager->hasTable($this->tableName);
-        if (!$hasPromiseStoreTable) {
-            $tableManager->rewriteTable($this->tableName, $this->promiseTableData);
+        try {
+            $hasPromiseStoreTable = $tableManager->hasTable($this->tableName);
+            if (!$hasPromiseStoreTable) {
+                $tableManager->rewriteTable($this->tableName, $this->promiseTableData);
+            }
+        } catch (\Exception $e) {
+            throw new PromiseException("Can't create table " . $this->tableName . "\n" . $e->getMessage(), 0);
         }
-
         return new Store($this->tableName, $this->db);
     }
 

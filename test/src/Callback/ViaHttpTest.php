@@ -56,6 +56,9 @@ class ViaHttpTest extends \PHPUnit_Framework_TestCase
         $callable = new JustCallable();
         $callback = new AsyncCallback([$callable, 'callReturnPromise'], $this->object); //[$callable, 'callReturnPromise']
         $promise = call_user_func($callback, 'paramForCall');
+
+        //что бы асинхронный промайс успел выполнится
+        usleep(40000);
         $this->assertEquals(
                 "fulfilled", $promise->getState()
         );

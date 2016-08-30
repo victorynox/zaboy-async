@@ -28,7 +28,7 @@ return [
     'dataStore' => [
         'test_crud_client' => [
             Factory\HttpClientAbstractFactory::KEY_CLASS => zaboy\rest\DataStore\HttpClient::class,
-            Factory\HttpClientAbstractFactory::KEY_URL => 'http://zaboy-async.loc/test/crud-promise/',
+            Factory\HttpClientAbstractFactory::KEY_URL => 'http://localhost:8989/test/crud-promise/',
         ],
     ]
 ];

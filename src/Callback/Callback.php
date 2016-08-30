@@ -109,6 +109,8 @@ class Callback
     public static function __callStatic($serviceName, $arguments)
     {
         $callable = static::getContaner()->get($serviceName);
+
+        /** @var Callback $callback */
         $callback = new static($callable);
         $value = $arguments[0];
         $promise = isset($arguments[1]) ? $arguments[1] : null;

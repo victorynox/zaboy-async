@@ -28,7 +28,7 @@ use zaboy\async\Json\JsonCoder;
 class ViaHttp implements InterrupterInterface
 {
 
-    const DEFAULT_URL = 'http://zaboy-async.loc/test/callback-interrupter';
+    const DEFAULT_URL = 'http://localhost:8989/test/callback-interrupter';
 
     //const DEFAULT_URL = 'http://zaboy-async.loc/api/rest/callback-interrupter';
 

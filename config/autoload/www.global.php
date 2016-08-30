@@ -11,7 +11,7 @@ return [
     'dataStore' => [
         'HttpClientQueue' => [
             'class' => 'zaboy\rest\DataStore\HttpClient',
-            'url' => 'http://zaboy-async.loc/api/queue/testMysqlQueue',
+            'url' => 'http://localhost:8989/api/queue/testMysqlQueue',
             'options' => ['timeout' => 30]
         ],
         'test_ClientDataStore' => [

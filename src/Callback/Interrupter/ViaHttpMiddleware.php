@@ -12,14 +12,12 @@ namespace zaboy\async\Callback\Interrupter;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use zaboy\async\AsyncAbstract;
+use zaboy\async\Callback\CallbackException;
+use zaboy\async\Promise\Client;
+use zaboy\async\Promise\Store;
 use Zend\Diactoros\Response\JsonResponse;
 use Zend\Stratigility\MiddlewareInterface;
-use zaboy\async\Promise\Interfaces\PromiseInterface;
-use zaboy\async\Promise\Store;
-use zaboy\async\Promise\Client;
-use zaboy\async\Callback\CallbackException;
-use zaboy\async\AsyncAbstract;
-use zaboy\async\Callback\Callback;
 
 /**
  * Resolve GET POST PUT DELETE request
@@ -70,12 +68,12 @@ class ViaHttpMiddleware extends AsyncAbstract implements MiddlewareInterface
             } catch (PromiseException $ex) {
                 return new JsonResponse([
                     $ex->getMessage()
-                        ], 500);
+                ], 500);
             }
         } else {
             throw new CallbackException(
-            'Method must be GET, PUT, POST or DELETE. '
-            . $request->getMethod() . ' given'
+                'Method must be GET, PUT, POST or DELETE. '
+                . $request->getMethod() . ' given'
             );
         }
 
@@ -102,9 +100,14 @@ class ViaHttpMiddleware extends AsyncAbstract implements MiddlewareInterface
         $body = $request->getBody();
 
         $data = unserialize(base64_decode($body));
+        $promiseId = null;
+        $callback = null;
+        $value = null;
 
         extract($data); // $promiseId $callback $value
         $promise = new Client($this->store, $promiseId);
+
+        /** @var callable $callback */
         $callback($value, $promise);
         $response = $response->withStatus(201);
         $insertedPrimaryKeyValue = $promiseId;
